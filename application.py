@@ -2,7 +2,6 @@ from flask import Flask, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 
-# from working directory
 from db import create_connection
 
 # Configure application
@@ -27,3 +26,6 @@ Session(app)
 
 # Configure database connection
 conn = create_connection("/home/jopi/Desktop/cs50/final_project/local.db")
+
+# Start App
+import controller
