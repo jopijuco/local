@@ -1,8 +1,6 @@
-from flask import Flask, request, session
+from flask import Flask
 from flask_session import Session
 from tempfile import mkdtemp
-
-from db import create_connection
 
 # Configure application
 app = Flask(__name__)
@@ -23,9 +21,6 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
-# Configure database connection
-conn = create_connection("/home/jopi/Desktop/cs50/final_project/local.db")
 
 # Start App
 import controller
