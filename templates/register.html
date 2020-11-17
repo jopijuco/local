@@ -4,10 +4,14 @@
         <title>local: register</title>
     </head>
     <body>
-        <form action="/register">
-            <input type="text" name="username" placeholder="username">
-            <input type="text" name="password" placeholder="password">
-            <button type="submit">Register</button>
+        <form action="{{ url_for('register') }}" method="POST">
+            <label>Email:</label>
+            <input type="email" name="email" placeholder="email">
+            <label>Password:</label>
+            <input type="password" name="password" placeholder="password">
+            <label>Confirm Password:</label>
+            <input type="password" name="password2" placeholder="confirm password">
+            <input type="submit" value="Register">
         </form>
     </body>
 </html>
