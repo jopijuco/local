@@ -77,7 +77,7 @@ def store():
         mobile = request.form.get("mobile")
         phone = request.form.get("phone")
         fiscal_number = request.form.get("fiscal_number")
-        db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, mobile=mobile, phone=phone, id=session["user_id"])
+        db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
         
     business = Business(session["user_id"], '', '', '', '', '')
     for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
