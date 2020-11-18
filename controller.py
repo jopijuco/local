@@ -1,9 +1,7 @@
-from application import app
-from constants import *
-from flask import render_template, request, session, url_for
-from sqlite3 import connect
 from sqlite3.dbapi2 import Error
-from cs50 import SQL
+from application import app, db
+from constants import *
+from flask import render_template, request, session
 from utils import login_required
 from werkzeug.utils import redirect
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -29,13 +27,20 @@ def register():
 
     if request.method == POST:
         email = request.form.get("email")
-        username = email[0:email.find("@")]
-        hash_pass = generate_password_hash(request.form.get("password"), "sha256")
+        username = email[:email.find("@")]
 
-        with connect(DEV_DB) as conn:
-            cur = conn.cursor()
-            cur.execute("INSERT TABLE user_customers (username, email, hash_pass) VALUES (?, ?, ?)",
-                        username, email, hash_pass)
+        check_user = db.execute("SELECT * FROM user_customers WHERE username = :username OR email = :email",
+                                    username=username,
+                                    email=email)
+
+        if len(check_user) >= 1:
+            return "USER ALREADY EXISTS"
+        
+        password = request.form.get("password")
+        user = db.execute("INSERT INTO user_customers (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+                            username=username,
+                            email=email,
+                            hash_pass=generate_password_hash(password, "sha256"))
         
         return redirect(LOGIN)
 
@@ -45,19 +50,20 @@ def register():
 @app.route("/login", methods=[GET, POST])
 def login():
 
-    if request.method == POST:
-        username = request.form.get("username")
-        password = generate_password_hash(request.form.get("password"))
+    #session.clear()
 
-        with connect(DEV_DB) as conn:
-            cur = conn.cursor()
-            
-            user = cur.execute("SELECT * FROM user_customers WHERE username = ? AND password = ?",
-                            username, password)
-            
-            if len(user) is 1:
-                return redirect(USER)
-            return "INVALID CREDENTIALS"
+    if request.method == POST:
+        try:    
+            user = db.execute("SELECT * FROM user_customers WHERE username = :username",
+                                username=request.form.get("username"))
+        except Error as e:
+            return e.args
+
+        if len(user) != 1 or not check_password_hash(user[0]["hash_pass"], request.form.get("password")):
+            return "FAILED LOGIN"
+
+        session["user_id"] = user[0]["id"]
+        return redirect(USER)
 
     return render_template(LOGIN_PAGE)
 
@@ -67,7 +73,7 @@ def login():
 def user():
     if request.method == POST:
         return "TODO"
-    return render_template(USER_PAGE, user="LOOOL")
+    return render_template(USER_PAGE)
 
 @app.route("/store", methods=[GET, POST])
 #@login_required

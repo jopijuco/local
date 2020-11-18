@@ -19,4 +19,3 @@ HISTORY_PAGE = "history.html"
 # Redirect
 LOGIN = "login"
 USER = "user"
-
