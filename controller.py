@@ -7,7 +7,7 @@ from cs50 import SQL
 from utils import login_required
 from werkzeug.utils import redirect
 from werkzeug.security import check_password_hash, generate_password_hash
-from model import *
+from model.business import *
 
 
 # Configure CS50 Library to use SQLite database
@@ -76,34 +76,17 @@ def store():
         description = request.form.get("description")
         mobile = request.form.get("mobile")
         phone = request.form.get("phone")
-        db.execute("UPDATE business SET name=:newName, description=:newDescription , mobile=:newMobile , phone=:newPhone  WHERE id= :id", newName=name, newDescription=description, newMobile=mobile, newPhone=phone, id=session["user_id"])
-        #addresses  data
-        #assuming that a business have an entry in address table (could be create automatically when registered)
-        for row in db.execute("SELECT address_id FROM business WHERE id = :id", id=session["user_id"]):
-            address_id = row["address_id"]
-        number = request.form.get("number")
-        street = request.form.get("street")
-        zipcode = request.form.get("zipcode")
-        city = request.form.get("city")
-        region = request.form.get("region")
-        country = request.form.get("country")
-        db.execute("UPDATE addresses SET number=:number, street=:street, zip_code=:zipcode , city=:city , region=:region, country=:country  WHERE id= :address_id", number=number, street=street, zipcode=zipcode, city=city, region=region, country=country, address_id=address_id)
-
-    store = Business(session["user_id"], '', '', '', '', '', '', '', '', '', '', '', '')
-    for row in db.execute("SELECT * FROM business b LEFT JOIN addresses a ON (a.id = b.address_id) WHERE b.id = :id", id=session["user_id"]):
-        store.name = row["name"]
-        store.description = row["description"]
-        store.address_number = row["number"]
-        store.address_street = row["street"]
-        store.address_zip_code = row["zip_code"]
-        store.address_city = row["city"]
-        store.address_region = row["region"]
-        store.address_country = row["country"]
-        store.phone = row["phone"]
-        store.mobile = row["mobile"]
-        #store.email = ""
-        store.picture = ""
-    return render_template(STORE_PAGE, store = store)
+        fiscal_number = request.form.get("fiscal_number")
+        db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, mobile=mobile, phone=phone, id=session["user_id"])
+        
+    business = Business(session["user_id"], '', '', '', '', '')
+    for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
+        business.name = row["name"]
+        business.description = row["description"]
+        business.fiscal_number = row["fiscal_number"]
+        business.phone = row["phone"]
+        business.mobile = row["mobile"]
+    return render_template(STORE_PAGE, business =  business)
 
 @app.route("/product", methods=[GET, POST])
 #@login_required
