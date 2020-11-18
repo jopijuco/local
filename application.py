@@ -1,3 +1,5 @@
+from constants import *
+from cs50 import SQL
 from flask import Flask
 from flask_session import Session
 from tempfile import mkdtemp
@@ -21,6 +23,9 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+# Connect to database
+db = SQL.Connect("sqlite:///database/{DB_DEV}")
 
 # Start App
 import controller
