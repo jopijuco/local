@@ -1,6 +1,6 @@
 from application import app
 from constants import *
-from flask import render_template, request, session
+from flask import render_template, request, session, url_for
 from sqlite3 import connect
 from sqlite3.dbapi2 import Error
 from cs50 import SQL
@@ -8,6 +8,8 @@ from utils import login_required
 from werkzeug.utils import redirect
 from werkzeug.security import check_password_hash, generate_password_hash
 from model.business import *
+from model.store import *
+import os
 
 
 # Configure CS50 Library to use SQLite database
@@ -71,14 +73,23 @@ def user():
 #@login_required
 def store():
     if request.method == POST:
-       #business data
-        name = request.form.get("name")
-        description = request.form.get("description")
-        mobile = request.form.get("mobile")
-        phone = request.form.get("phone")
-        fiscal_number = request.form.get("fiscal_number")
-        db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
-        
+        if request.form['submit_button'] == 'submit business':
+            name = request.form.get("name")
+            description = request.form.get("description")
+            mobile = request.form.get("mobile")
+            phone = request.form.get("phone")
+            fiscal_number = request.form.get("fiscal_number")
+            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
+        elif request.form['submit_button'] == 'submit store':
+            if request.files:
+                image = request.files["image"]
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
+                print("image saved")
+                front_pic=image.filename
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE business_id= :id", front_pic = front_pic, id=session["user_id"])
+                #return redirect(request.url)
+
+
     business = Business(session["user_id"], '', '', '', '', '')
     for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
         business.name = row["name"]
@@ -86,7 +97,15 @@ def store():
         business.fiscal_number = row["fiscal_number"]
         business.phone = row["phone"]
         business.mobile = row["mobile"]
-    return render_template(STORE_PAGE, business =  business)
+    #only one store is retrieve for the moment
+    store = Store('','')
+    for row in db.execute("SELECT * FROM stores WHERE business_id = :id", id=session["user_id"]):
+        store.id = row["id"]
+        if (row["front_pic"] != ""):
+            store.front_pic = row["front_pic"]
+        else:
+            store.front_pic = "noimgavailable.jpg"
+    return render_template(STORE_PAGE, business =  business, store = store)
 
 @app.route("/product", methods=[GET, POST])
 #@login_required
