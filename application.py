@@ -25,7 +25,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Connect to database
-db = SQL.Connect("sqlite:///database/{DB_DEV}")
+db = SQL(f"sqlite:///database/{DEV_DB}")
 
 # Start App
 import controller
