@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+          <h1 class="card-title">{{ business.name }}</h1>
+          <form action="/store" method="post">
+            <div class="form-group">
+                <label for="name">Business name</label>
+                <input type="text" class="form-control" id="name" name="name" value = "{{ business.name }}">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ business.description }}</textarea>
+            </div>
+            <div class="form-group">
+              <label for="fiscal_number">Fiscal number</label>
+              <input type="text" class="form-control" id="fiscal_number" name="fiscal_number" value = "{{ business.fiscal_number }}">
+            </div>
+            <div class="form-row ">
+              <div class="form-group col-md-6">
+                <label for="phone">Phone</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="{{ business.phone }}">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="mobile">Mobile</label>
+                <input type="mobile" class="form-control" id="mobile" name="mobile" value="{{ business.mobile }}">
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" type="submit">Edit</button>
+          </form>
+        </div>
+      </div>
+{% endblock %}

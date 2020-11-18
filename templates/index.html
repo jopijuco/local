@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>local: your products</title>
-    </head>
-    <body>
-        <div>
-            <form action="{{ url_for('login') }}">
-                <button type="submit">Login</button>
-            </form>
-        </div>
-        <div>
-            <form action="{{ url_for('register')}}">
-                <button type="submit">Register</button>
-            </form>
-        </div>
-    </body>
-</html>
+{% extends "layout.html" %}
+{% block style %}
+    table{
+        text-align: left;
+    }
+    .total{
+        font-weight:bold;
+    }
+{% endblock %}
+{% block title %}
+    local: your products
+{% endblock %}
+
+{% block main %}
+
+    <div>
+       <h1>Welcome {{ name}} !</h1>
+    </div>
+
+{% endblock %}
