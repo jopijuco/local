@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+          <h1 class="card-title">{{ store.name }}</h1>
+          <form action="/store" method="post">
+            <div class="form-group">
+                <label for="name">Store's name</label>
+                <input type="text" class="form-control" id="name" name="name" value = "{{ store.name }}">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ store.description }}</textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <label for="number">Number</label>
+                <input type="text" class="form-control" id="number" name="number" value="{{ store.address_number }}">
+              </div>
+              <div class="form-group col-md-9">
+                <label for="street">Street</label>
+                <input type="text" class="form-control" id="street" name="street" value="{{ store.address_street }}">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-8">
+                <label for="city">City</label>
+                <input type="text" class="form-control" id="city" name="city" value="{{ store.address_city }}">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="zipcode">Zip code</label>
+                <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ store.zipcode }}">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="country">Country</label>
+                <select id="country"  name="country" class="form-control">
+                  <option selected>Choose...</option>
+                  <option>...</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="region">Region</label>
+                <select id="region"  name="region" class="form-control">
+                  <option selected>Choose...</option>
+                  <option>...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row ">
+              <div class="form-group col-md-6">
+                <label for="phone">Phone</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="{{ store.phone }}">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="mobile">Mobile</label>
+                <input type="mobile" class="form-control" id="mobile" name="mobile" value="{{ store.mobile }}">
+              </div>
+            </div>
+            <!-- <div class="form-group">
+              <label for="phone">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ store.email }}">
+            </div> -->
+            <button class="btn btn-primary" type="submit">Edit</button>
+          </form>
+        </div>
+      </div>
+{% endblock %}
