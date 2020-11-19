@@ -1,4 +1,6 @@
 from sqlite3.dbapi2 import Error
+
+from flask.helpers import url_for
 from application import app, db
 from constants import *
 from flask import render_template, request, session
@@ -10,16 +12,9 @@ from model.store import *
 import os
 
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///database/local_dev.db")
-
 @app.route("/")
 def index():
-    session["user_id"] = 1
-    name= ""
-    for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
-        name = row["name"]
-    return render_template(INDEX_PAGE, name = name)
+    return render_template(INDEX_PAGE)
 
 
 @app.route("/register", methods=[GET, POST])
@@ -29,7 +24,7 @@ def register():
         email = request.form.get("email")
         username = email[:email.find("@")]
 
-        check_user = db.execute("SELECT * FROM user_customers WHERE username = :username OR email = :email",
+        check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
                                     username=username,
                                     email=email)
 
@@ -37,7 +32,7 @@ def register():
             return "USER ALREADY EXISTS"
         
         password = request.form.get("password")
-        user = db.execute("INSERT INTO user_customers (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+        user = db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
                             username=username,
                             email=email,
                             hash_pass=generate_password_hash(password, "sha256"))
@@ -54,26 +49,28 @@ def login():
 
     if request.method == POST:
         try:    
-            user = db.execute("SELECT * FROM user_customers WHERE username = :username",
+            user = db.execute("SELECT * FROM user_businesses WHERE username = :username",
                                 username=request.form.get("username"))
         except Error as e:
             return e.args
 
-        if len(user) != 1 or not check_password_hash(user[0]["hash_pass"], request.form.get("password")):
+        # password validation commented to allow to debug with "test users"
+        # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
+        if len(user) != 1:
             return "FAILED LOGIN"
 
         session["user_id"] = user[0]["id"]
-        return redirect(USER)
+        return redirect(url_for("business", messages=user[0]["username"]))
 
     return render_template(LOGIN_PAGE)
 
 
-@app.route("/user", methods=[GET, POST])
+@app.route("/<business>", methods=[GET, POST])
 #@login_required
-def user():
+def business(business):
     if request.method == POST:
         return "TODO"
-    return render_template(USER_PAGE)
+    return render_template(USER_PAGE, name=business)
 
 @app.route("/store", methods=[GET, POST])
 #@login_required
@@ -85,14 +82,21 @@ def store():
             mobile = request.form.get("mobile")
             phone = request.form.get("phone")
             fiscal_number = request.form.get("fiscal_number")
-            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
+            
+            db.execute("UPDATE business SET name = :name, fiscal_number = :fiscal_number, description = :description, mobile = :mobile, phone = :phone WHERE id = :id",
+                        name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone,
+                        id=session["user_id"])
+        
         elif request.form['submit_button'] == 'submit store':
             if request.files:
                 image = request.files["image"]
                 image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
                 print("image saved")
                 front_pic=image.filename
-                db.execute("UPDATE stores SET front_pic=:front_pic WHERE business_id= :id", front_pic = front_pic, id=session["user_id"])
+                
+                db.execute("UPDATE stores SET front_pic = :front_pic WHERE business_id = :id",
+                            front_pic=front_pic, id=session["user_id"])
+                
                 #return redirect(request.url)
 
 
