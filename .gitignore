@@ -1,2 +1,12 @@
 # flask cache
 __pycache__
+
+# exe files
+*.exe
+
+# directories
+env/Lib/
+env/Scripts/
+
+# python env
+.cfg
