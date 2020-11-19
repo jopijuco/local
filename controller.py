@@ -37,15 +37,13 @@ def register():
                             email=email,
                             hash_pass=generate_password_hash(password, "sha256"))
         
-        return redirect(LOGIN)
+        return redirect(url_for(LOGIN))
 
     return render_template(REGISTER_PAGE)
 
 
 @app.route("/login", methods=[GET, POST])
 def login():
-
-    #session.clear()
 
     if request.method == POST:
         try:    
@@ -59,18 +57,17 @@ def login():
         if len(user) != 1:
             return "FAILED LOGIN"
 
-        session["user_id"] = user[0]["id"]
-        return redirect(url_for("business", messages=user[0]["username"]))
+        session["user_id"] = user[0]["id"]        
+        return redirect(url_for("area", username=user[0]["username"]))
 
     return render_template(LOGIN_PAGE)
 
 
-@app.route("/<business>", methods=[GET, POST])
-#@login_required
-def business(business):
-    if request.method == POST:
-        return "TODO"
-    return render_template(USER_PAGE, name=business)
+@app.route("/area/<username>")
+@login_required
+def area(username):
+    return render_template("area.html", username=username)
+
 
 @app.route("/store", methods=[GET, POST])
 #@login_required
@@ -115,7 +112,9 @@ def store():
             store.front_pic = row["front_pic"]
         else:
             store.front_pic = "noimgavailable.jpg"
-    return render_template(STORE_PAGE, business =  business, store = store)
+
+    return render_template(STORE_PAGE, business=business, store=store)
+
 
 @app.route("/product", methods=[GET, POST])
 #@login_required
@@ -124,12 +123,14 @@ def product():
         return "TODO"
     return render_template(PRODUCT_PAGE, product="product name")
 
+
 @app.route("/order", methods=[GET, POST])
 #@login_required
 def order():
     if request.method == POST:
         return "TODO"
     return render_template(ORDER_PAGE)
+
 
 @app.route("/history", methods=[GET, POST])
 #@login_required
@@ -138,9 +139,10 @@ def history():
         return "TODO"
     return render_template(HISTORY_PAGE)
 
-@app.route("/logut")
+
+@app.route("/")
 @login_required
 def logout():
 
     session.clear()
-    return redirect()
+    return redirect(url_for(INDEX))
