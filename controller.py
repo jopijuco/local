@@ -91,7 +91,6 @@ def store():
             if request.files["image_"+store_id]:
                 image = request.files["image_"+store_id]
                 image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
-                #print("image saved")
                 front_pic=image.filename
                 db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = front_pic, id=store_id)
             #store's address update
@@ -111,13 +110,11 @@ def store():
         business.phone = row["phone"]
         business.mobile = row["mobile"]
     
-    for row in db.execute("SELECT * FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id = :id", id=session["user_id"]):
+    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id = :id", id=session["user_id"]):
         if (row["front_pic"] is None or row["front_pic"] == ""):
             front_pic = "noimgavailable.jpg"
-            print ("noimgavailable.")
         else:
             front_pic = row["front_pic"]
-            print ("on a une valeur en BD")
         store = Store(row["id"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         business.add_store(store)
     
