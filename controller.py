@@ -80,6 +80,11 @@ def store():
             phone = request.form.get("phone")
             fiscal_number = request.form.get("fiscal_number")
             db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
+        elif request.form['submit_button'] == 'add_store':
+            for row in db.execute("SELECT MAX(id) as max_id FROM addresses"):
+                new_address_id = row["max_id"]+1
+            db.execute("INSERT INTO addresses (id, street, number, zip_code, city, region, country) VALUES (:id, '', '', '', '', '', '')", id=new_address_id)
+            db.execute("INSERT INTO stores (business_id, address_id)  VALUES (:id, :address_id)", id=session["user_id"], address_id=new_address_id)
         else:
             store_id = request.form['submit_button']
             #store's image update

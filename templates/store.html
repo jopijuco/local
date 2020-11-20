@@ -88,15 +88,14 @@
               </div>
             </div>
           </div>
-
         </div>
-
-
-
         <button class="btn btn-primary" type="submit" name="submit_button" value="{{ store.id }}">Edit store info</button>
       </div>
       {%endfor%} 
 
+      <div class="col-md-12">
+        <button class="btn btn-secondary col-md-12" type="submit" name="submit_button" value="add_store">Add a new store</button>
+      </div>
     </form>
     </div>
 {% endblock %}
