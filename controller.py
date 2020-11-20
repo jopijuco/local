@@ -1,3 +1,4 @@
+import re
 from sqlite3.dbapi2 import Error
 
 from flask.helpers import url_for
@@ -42,26 +43,31 @@ def register():
     return render_template(REGISTER_PAGE)
 
 
-@app.route("/login", methods=[GET, POST])
+@app.route("/login/customer", methods=[GET, POST])
+@app.route("/login/business", methods=[GET, POST])
 def login():
-
+    arg = request.path[request.path.rfind("/")+1:]
+    
     if request.method == POST:
         session.clear()
-        try:    
+
+        if arg == BUSINESS:
             user = db.execute("SELECT * FROM user_businesses WHERE username = :username",
                                 username=request.form.get("username"))
-        except Error as e:
-            return e.args
-
+        else:
+            user = db.execute("SELECT * FROM user_customer WHERE username = :username",
+                                username=request.form.get("username"))
         # password validation commented to allow to debug with "test users"
         # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
         if len(user) != 1:
             return "FAILED LOGIN"
 
-        session["user_id"] = user[0]["id"]      
+        session["user_id"] = user[0]["id"]     
         return redirect(url_for("area", username=user[0]["username"]))
-
-    return render_template(LOGIN_PAGE)
+    
+    if arg == BUSINESS:
+        return render_template(LOGIN_PAGE, user=arg)
+    return render_template(LOGIN_PAGE, user=CUSTOMER)
 
 
 @app.route("/area/<username>")

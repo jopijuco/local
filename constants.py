@@ -21,3 +21,7 @@ LOGIN = "login"
 USER = "user"
 INDEX = "index"
 STORE = "store"
+
+# Users
+BUSINESS = "business"
+CUSTOMER = "customer"
