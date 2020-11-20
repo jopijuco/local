@@ -9,6 +9,7 @@ from werkzeug.utils import redirect
 from werkzeug.security import check_password_hash, generate_password_hash
 from model.business import *
 from model.store import *
+from model.product import *
 import os
 
 
@@ -132,7 +133,12 @@ def product():
 @app.route("/single_product/<product_id>", methods=[GET, POST])
 @login_required
 def single_product(product_id):
-    return render_template(SINGLE_PRODUCT_PAGE, product_id=product_id)
+    if request.method == POST:
+        return "TODO"
+    product = Product(product_id, '', '', '', '', '')
+    #if product_id == 'new':
+        #product.description = ""
+    return render_template(SINGLE_PRODUCT_PAGE, product=product)
 
 @app.route("/order", methods=[GET, POST])
 @login_required

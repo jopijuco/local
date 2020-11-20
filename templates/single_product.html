@@ -5,14 +5,34 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Single Product page</h1>
-    <p>product id {{ product_id }}</p>
-
-    <form action="/product" method="post" enctype="multipart/form-data">
-    {% if product_id  == 'new' %}
-        <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
-    {% else %}
-        <button class="btn btn-primary" type="submit" name="submit" value="edit">Edit</button>
-    {% endif %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Single product page {{ product.id }}</h1>
+        </div>
+        <form action="/product_single" method="post" enctype="multipart/form-data">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value = "{{ product.name }}">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ product.description }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="price" name="price" value = "{{ product.price }}">
+                    <div class="input-group-append">
+                        <span class="input-group-text">€</span>
+                    </div>
+                </div>
+            </div>
+            {% if product.id  == 'new' %}
+                <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
+            {% else %}
+                <button class="btn btn-primary" type="submit" name="submit" value="edit">Edit</button>
+            {% endif %}
+        </div>
     </form>
 {% endblock %}
