@@ -5,4 +5,8 @@ class Business:
         self.description = description
         self.phone = phone
         self.mobile = mobile
-        self.fiscla_number = fiscal_number
+        self.fiscal_number = fiscal_number
+        self.stores = []
+
+    def add_store(self, store):
+        self.stores.append(store)

@@ -64,7 +64,7 @@ def login():
 
 
 @app.route("/area/<username>")
-@login_required
+#@login_required
 def area(username):
     return render_template("area.html", username=username)
 
@@ -79,23 +79,15 @@ def store():
             mobile = request.form.get("mobile")
             phone = request.form.get("phone")
             fiscal_number = request.form.get("fiscal_number")
-            
-            db.execute("UPDATE business SET name = :name, fiscal_number = :fiscal_number, description = :description, mobile = :mobile, phone = :phone WHERE id = :id",
-                        name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone,
-                        id=session["user_id"])
-        
-        elif request.form['submit_button'] == 'submit store':
+            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
+        else:
+            store_id = request.form['submit_button']
             if request.files:
-                image = request.files["image"]
+                image = request.files["image_"+store_id]
                 image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
                 print("image saved")
                 front_pic=image.filename
-                
-                db.execute("UPDATE stores SET front_pic = :front_pic WHERE business_id = :id",
-                            front_pic=front_pic, id=session["user_id"])
-                
-                #return redirect(request.url)
-
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = front_pic, id=store_id)
 
     business = Business(session["user_id"], '', '', '', '', '')
     for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
@@ -104,17 +96,18 @@ def store():
         business.fiscal_number = row["fiscal_number"]
         business.phone = row["phone"]
         business.mobile = row["mobile"]
-    #only one store is retrieve for the moment
-    store = Store('','')
-    for row in db.execute("SELECT * FROM stores WHERE business_id = :id", id=session["user_id"]):
-        store.id = row["id"]
-        if (row["front_pic"] != ""):
-            store.front_pic = row["front_pic"]
+    
+    for row in db.execute("SELECT * FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id = :id", id=session["user_id"]):
+        if (row["front_pic"] is None or row["front_pic"] == ""):
+            front_pic = "noimgavailable.jpg"
+            print ("noimgavailable.")
         else:
-            store.front_pic = "noimgavailable.jpg"
-
-    return render_template(STORE_PAGE, business=business, store=store)
-
+            front_pic = row["front_pic"]
+            print ("on a une valeur en BD")
+        store = Store(row["id"],front_pic,'','')
+        business.add_store(store)
+    
+    return render_template(STORE_PAGE, business =  business)
 
 @app.route("/product", methods=[GET, POST])
 #@login_required
@@ -141,7 +134,7 @@ def history():
 
 
 @app.route("/")
-@login_required
+#@login_required
 def logout():
 
     session.clear()
