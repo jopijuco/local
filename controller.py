@@ -82,12 +82,21 @@ def store():
             db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
         else:
             store_id = request.form['submit_button']
-            if request.files:
+            #store's image update
+            if request.files["image_"+store_id]:
                 image = request.files["image_"+store_id]
                 image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
-                print("image saved")
+                #print("image saved")
                 front_pic=image.filename
                 db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = front_pic, id=store_id)
+            #store's address update
+            number = request.form.get("number_"+store_id)
+            street = request.form.get("street_"+store_id)
+            zip_code = request.form.get("zip_code_"+store_id)
+            region = request.form.get("region_"+store_id)
+            city = request.form.get("city_"+store_id)
+            country = request.form.get("country_"+store_id)
+            db.execute("UPDATE addresses SET number=:number, street=:street, zip_code=:zip_code, city=:city, region=:region, country=:country WHERE id= (SELECT address_id FROM stores WHERE id=:id)", number = number, street = street, zip_code = zip_code, city = city, region = region, country = country, id=store_id)
 
     business = Business(session["user_id"], '', '', '', '', '')
     for row in db.execute("SELECT * FROM business WHERE id = :id", id=session["user_id"]):
