@@ -1,8 +1,8 @@
-from flask import Flask, request, session
+from constants import *
+from cs50 import SQL
+from flask import Flask
 from flask_session import Session
 from tempfile import mkdtemp
-
-from db import create_connection
 
 # Configure application
 app = Flask(__name__)
@@ -22,10 +22,11 @@ def after_request(response):
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["IMAGE_UPLOADS"] = "static"
 Session(app)
 
-# Configure database connection
-conn = create_connection("/home/jopi/Desktop/cs50/final_project/local.db")
+# Connect to database
+db = SQL(f"sqlite:///database/{DEV_DB}")
 
 # Start App
 import controller
