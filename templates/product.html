@@ -14,10 +14,9 @@
     <li>filter the product by store (and category later, if possible)</li>
     <li>order the product by price</li>
 
-    
-    <a class="nav-link" href="{{ url_for('single_product', product_id=1)}}">link to the single product page : product 1</a>
-    <a class="nav-link" href="{{ url_for('single_product', product_id=2)}}">link to the single product page : product 2</a>
-    <a class="nav-link" href="{{ url_for('single_product', product_id=3)}}">link to the single product page : product 3</a>
+    {%for product in products%}
+        <a class="nav-link" href="{{ url_for('single_product', product_id=product.id)}}">link to the single product page : {{ product.name }}</a>
+    {%endfor%} 
 
     <form action="/product" method="post" enctype="multipart/form-data">
         <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
