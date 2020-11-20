@@ -32,10 +32,10 @@ def register():
             return "USER ALREADY EXISTS"
         
         password = request.form.get("password")
-        user = db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
-                            username=username,
-                            email=email,
-                            hash_pass=generate_password_hash(password, "sha256"))
+        db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+                    username=username,
+                    email=email,
+                    hash_pass=generate_password_hash(password, "sha256"))
         
         return redirect(url_for(LOGIN))
 
@@ -46,6 +46,7 @@ def register():
 def login():
 
     if request.method == POST:
+        session.clear()
         try:    
             user = db.execute("SELECT * FROM user_businesses WHERE username = :username",
                                 username=request.form.get("username"))
@@ -57,7 +58,7 @@ def login():
         if len(user) != 1:
             return "FAILED LOGIN"
 
-        session["user_id"] = user[0]["id"]        
+        session["user_id"] = user[0]["id"]      
         return redirect(url_for("area", username=user[0]["username"]))
 
     return render_template(LOGIN_PAGE)
@@ -70,7 +71,7 @@ def area(username):
 
 
 @app.route("/store", methods=[GET, POST])
-#@login_required
+@login_required
 def store():
     if request.method == POST:
         if request.form['submit_button'] == 'submit business':
@@ -121,7 +122,7 @@ def store():
     return render_template(STORE_PAGE, business =  business)
 
 @app.route("/product", methods=[GET, POST])
-#@login_required
+@login_required
 def product():
     if request.method == POST:
         return "TODO"
@@ -129,7 +130,7 @@ def product():
 
 
 @app.route("/order", methods=[GET, POST])
-#@login_required
+@login_required
 def order():
     if request.method == POST:
         return "TODO"
@@ -137,16 +138,14 @@ def order():
 
 
 @app.route("/history", methods=[GET, POST])
-#@login_required
+@login_required
 def history():
     if request.method == POST:
         return "TODO"
     return render_template(HISTORY_PAGE)
 
-
-@app.route("/")
-#@login_required
+@app.route("/logout")
+@login_required
 def logout():
-
     session.clear()
     return redirect(url_for(INDEX))
