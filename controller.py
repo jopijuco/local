@@ -37,18 +37,27 @@ def register():
             check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
                                         username=username,
                                         email=email)
+            if len(check_user) >= 1:
+                return "USER ALREADY EXISTS"
+        
+            password = request.form.get("password")
+            db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+                        username=username,
+                        email=email,
+                        hash_pass=generate_password_hash(password, "sha256"))
         else:
-            check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
+            check_user = db.executef("SELECT * FROM user_customers WHERE username = :username OR email = :email",
                                         username=username,
                                         email=email)
-        if len(check_user) >= 1:
-            return "USER ALREADY EXISTS"
+            if len(check_user) >= 1:
+                return "USER ALREADY EXISTS"
         
-        password = request.form.get("password")
-        db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
-                    username=username,
-                    email=email,
-                    hash_pass=generate_password_hash(password, "sha256"))
+            password = request.form.get("password")
+            db.execute("INSERT INTO user_customers (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+                        username=username,
+                        email=email,
+                        hash_pass=generate_password_hash(password, "sha256"))
+
         return redirect(url_for(LOGIN))
     return render_template(REGISTER_PAGE)
 
@@ -65,7 +74,7 @@ def login():
             user = db.execute("SELECT * FROM user_businesses WHERE username = :username",
                                 username=request.form.get("username"))
         else:
-            user = db.execute("SELECT * FROM user_customer WHERE username = :username",
+            user = db.execute("SELECT * FROM user_customers WHERE username = :username",
                                 username=request.form.get("username"))
         # password validation commented to allow to debug with "test users"
         # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
