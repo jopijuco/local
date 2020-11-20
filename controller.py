@@ -125,15 +125,14 @@ def store():
 @login_required
 def product():
     if request.method == POST:
-        return "TODO"
-        #if request.form['link'] == 'link':
-            #return redirect(url_for("product", product_id=1))
+        if request.form['submit'] == 'add':
+            return redirect(url_for("single_product", product_id = 'new'))
     return render_template(PRODUCT_PAGE, product="product name")
 
 @app.route("/single_product/<product_id>", methods=[GET, POST])
 @login_required
 def single_product(product_id):
-    return render_template(SINGLE_PRODUCT_PAGE, id=product_id)
+    return render_template(SINGLE_PRODUCT_PAGE, product_id=product_id)
 
 @app.route("/order", methods=[GET, POST])
 @login_required

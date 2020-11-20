@@ -5,13 +5,21 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Product page (TO DO)</h1>
+    <h1>Product page</h1>
     <p>sellers must be able to managed their products</p>
+    <ul>TO DO</ul>
+    <li>display all the products in a card</li>
+    <li>from each product card, add a link to the single product page</li>
+    <li>add a button "add a new product" that create a new product (in DB) and redirect the seller to the single product page</li>
+    <li>filter the product by store (and category later, if possible)</li>
+    <li>order the product by price</li>
+
+    
     <a class="nav-link" href="{{ url_for('single_product', product_id=1)}}">link to the single product page : product 1</a>
     <a class="nav-link" href="{{ url_for('single_product', product_id=2)}}">link to the single product page : product 2</a>
     <a class="nav-link" href="{{ url_for('single_product', product_id=3)}}">link to the single product page : product 3</a>
 
     <form action="/product" method="post" enctype="multipart/form-data">
-        <button class="btn btn-primary" type="submit" name="submit" value="add">lAdd a new product</button>
+        <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
     </form>
 {% endblock %}

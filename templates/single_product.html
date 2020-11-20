@@ -5,6 +5,14 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Single Product page (TO DO)</h1>
-    <p>product id {{ id }}</p>
+    <h1>Single Product page</h1>
+    <p>product id {{ product_id }}</p>
+
+    <form action="/product" method="post" enctype="multipart/form-data">
+    {% if product_id  == 'new' %}
+        <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
+    {% else %}
+        <button class="btn btn-primary" type="submit" name="submit" value="edit">Edit</button>
+    {% endif %}
+    </form>
 {% endblock %}
