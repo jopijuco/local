@@ -135,19 +135,30 @@ def product():
 @login_required
 def single_product(product_id):
     if request.method == POST:
+        print("post")
+        id = request.form.get("product_id")
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
+        #to do : discount, tag and img
         discount = ""
         total = ""
         tag_id = ""
         img_id = ""
-        business_id = request.form.get("name")
         if request.form['submit'] == 'add':
-            db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=business_id)
+            print("add a product")
+            product_id = db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id)", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=session["business_id"])
+        else:
+            db.execute("UPDATE products SET name=:name, description=:description,price=:price WHERE id=:id", name=name, description=description, price=price, id=product_id)
+    
     product = Product(product_id, '', '', '', '', '')
-    #if product_id == 'new':
-        #product.description = ""
+    if product_id != 'new':
+        print("recherche du produit")
+        for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
+            product.name = row["name"]
+            product.description = row["description"]
+            product.price = row["price"]
+            print(product.name)
     return render_template(SINGLE_PRODUCT_PAGE, product=product)
 
 @app.route("/order", methods=[GET, POST])
