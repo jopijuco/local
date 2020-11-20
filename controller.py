@@ -17,18 +17,30 @@ import os
 def index():
     return render_template(INDEX_PAGE)
 
+@app.route(f"/{CUSTOMER}")
+@app.route(f"/{BUSINESS}")
+def user_type():
+    arg = request.path[request.path.find("/")+1:]
+    return render_template(USERTYPE_PAGE, user=arg)
 
-@app.route("/register", methods=[GET, POST])
+
+@app.route(f"/{CUSTOMER}/register", methods=[GET, POST])
+@app.route(f"/{BUSINESS}/register", methods=[GET, POST])
 def register():
+    arg = request.path[request.path.find("/")+1:request.path.rfind("/")]
 
     if request.method == POST:
         email = request.form.get("email")
         username = email[:email.find("@")]
 
-        check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
-                                    username=username,
-                                    email=email)
-
+        if arg == BUSINESS:
+            check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
+                                        username=username,
+                                        email=email)
+        else:
+            check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
+                                        username=username,
+                                        email=email)
         if len(check_user) >= 1:
             return "USER ALREADY EXISTS"
         
@@ -37,16 +49,14 @@ def register():
                     username=username,
                     email=email,
                     hash_pass=generate_password_hash(password, "sha256"))
-        
         return redirect(url_for(LOGIN))
-
     return render_template(REGISTER_PAGE)
 
 
-@app.route("/login/customer", methods=[GET, POST])
-@app.route("/login/business", methods=[GET, POST])
+@app.route(f"/{CUSTOMER}/login", methods=[GET, POST])
+@app.route(f"/{BUSINESS}/login", methods=[GET, POST])
 def login():
-    arg = request.path[request.path.rfind("/")+1:]
+    arg = request.path[request.path.find("/")+1:request.path.rfind("/")]
     
     if request.method == POST:
         session.clear()
@@ -64,10 +74,8 @@ def login():
 
         session["user_id"] = user[0]["id"]     
         return redirect(url_for("area", username=user[0]["username"]))
-    
-    if arg == BUSINESS:
-        return render_template(LOGIN_PAGE, user=arg)
-    return render_template(LOGIN_PAGE, user=CUSTOMER)
+
+    return render_template(LOGIN_PAGE, user=arg)
 
 
 @app.route("/area/<username>")

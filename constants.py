@@ -15,6 +15,7 @@ STORE_PAGE = "store.html"
 PRODUCT_PAGE = "product.html"
 ORDER_PAGE = "order.html"
 HISTORY_PAGE = "history.html"
+USERTYPE_PAGE = "user_type.html"
 
 # Redirect
 LOGIN = "login"

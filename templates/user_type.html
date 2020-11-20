@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Customer
+{% endblock %}
+
+{% block main %}
+    {% if user == "business" %}
+        <h2>Hello dear business</h2>
+        <a href="business/login"><button class="btn btn-primary">Log in</button></a>
+        <a href="business/register"><button class="btn btn-primary">Register</button></a>
+    {% else %}
+        <h2>Hello customer !</h2>
+        <a href="customer/login"><button class="btn btn-primary">Log in</button></a>
+        <a href="customer/register"><button class="btn btn-primary">Register</button></a>
+    {% endif %}
+{% endblock %}
