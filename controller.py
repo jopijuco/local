@@ -104,7 +104,7 @@ def store():
         else:
             front_pic = row["front_pic"]
             print ("on a une valeur en BD")
-        store = Store(row["id"],front_pic,'','')
+        store = Store(row["id"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         business.add_store(store)
     
     return render_template(STORE_PAGE, business =  business)
