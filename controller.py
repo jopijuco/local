@@ -153,7 +153,17 @@ def product():
             return redirect(url_for("single_product", product_id = 'new'))
     products = []
     for row in db.execute("SELECT * FROM products WHERE business_id = :id", id=session["business_id"]):
-        product = Product(row["id"], row["name"], row["name"], '', '', '', '')
+        id = row["id"]
+        name = row["name"]
+        description = row["description"]
+        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
+        print(imgs)
+        if len(imgs) >= 1:
+            print("img found")
+            main_img = imgs[0]["file"] 
+        else:
+            main_img  = "noimgavailable.jpg"
+        product = Product(id, name, description, '', '', '', main_img)
         products.append(product)
     return render_template(PRODUCT_PAGE, products=products)
 
