@@ -14,11 +14,20 @@
     <li>filter the product by store (and category later, if possible)</li>
     <li>order the product by price</li>
 
-    {%for product in products%}
-        <a class="nav-link" href="{{ url_for('single_product', product_id=product.id)}}">link to the single product page : {{ product.name }}</a>
-    {%endfor%} 
+{%for product in products%}
+    <div class="card" style="width: 18rem;">
+        <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img"/>
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">{{ product.description }}</p>
+            <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+        </div>
+    </div>
+{%endfor%} 
 
-    <form action="/product" method="post" enctype="multipart/form-data">
-        <button class="btn btn-primary" type="submit" name="submit" value="add">Add a new product</button>
-    </form>
+    <div class="col-md-12">
+        <form action="/product" method="post" enctype="multipart/form-data">
+            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="add">Add a new product</button>
+        </form>
+    </div>
 {% endblock %}

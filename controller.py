@@ -108,9 +108,7 @@ def store():
             fiscal_number = request.form.get("fiscal_number")
             db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["business_id"])
         elif request.form['submit_button'] == 'add_store':
-            for row in db.execute("SELECT MAX(id) as max_id FROM addresses"):
-                new_address_id = row["max_id"]+1
-            db.execute("INSERT INTO addresses (id, street, number, zip_code, city, region, country) VALUES (:id, '', '', '', '', '', '')", id=new_address_id)
+            new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
             db.execute("INSERT INTO stores (business_id, address_id)  VALUES (:id, :address_id)", id=session["business_id"], address_id=new_address_id)
         else:
             store_id = request.form['submit_button']
@@ -153,7 +151,12 @@ def product():
     if request.method == POST:
         if request.form['submit'] == 'add':
             return redirect(url_for("single_product", product_id = 'new'))
-    return render_template(PRODUCT_PAGE, product="product name")
+    products = []
+    for row in db.execute("SELECT * FROM products WHERE business_id = :id", id=session["business_id"]):
+        product = Product(row["id"], row["name"], row["name"], '', '', '', '')
+        products.append(product)
+    return render_template(PRODUCT_PAGE, products=products)
+
 
 @app.route("/single_product/<product_id>", methods=[GET, POST])
 @login_required
