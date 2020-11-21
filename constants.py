@@ -27,3 +27,6 @@ STORE = "store"
 # Users
 BUSINESS = "business"
 CUSTOMER = "customer"
+
+# Default values
+IMG_DEFAULT = "noimgavailable.jpg"

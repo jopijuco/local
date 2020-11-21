@@ -137,7 +137,7 @@ def store():
     
     for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id = :id", id=session["business_id"]):
         if (row["front_pic"] is None or row["front_pic"] == ""):
-            front_pic = "noimgavailable.jpg"
+            front_pic = IMG_DEFAULT
         else:
             front_pic = row["front_pic"]
         store = Store(row["id"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
@@ -162,7 +162,7 @@ def product():
             print("img found")
             main_img = imgs[0]["file"] 
         else:
-            main_img  = "noimgavailable.jpg"
+            main_img  = IMG_DEFAULT
         product = Product(id, name, description, '', '', '', main_img)
         products.append(product)
     return render_template(PRODUCT_PAGE, products=products)
