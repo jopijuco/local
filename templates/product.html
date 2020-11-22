@@ -8,22 +8,27 @@
     <h1>Product page</h1>
     <p>sellers must be able to managed their products</p>
     <ul>TO DO</ul>
-    <li>display all the products in a card</li>
-    <li>from each product card, add a link to the single product page</li>
-    <li>add a button "add a new product" that create a new product (in DB) and redirect the seller to the single product page</li>
+    <li>resize img thumbnail</li>
+    <li>responsive grid</li>
+    <li>display price and promo</li>
     <li>filter the product by store (and category later, if possible)</li>
     <li>order the product by price</li>
 
-{%for product in products%}
-    <div class="card" style="width: 18rem;">
-        <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img"/>
-        <div class="card-body">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="card-text">{{ product.description }}</p>
-            <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+   
+    <div class="row">
+    {%for product in products%}
+    <div class="col-md-4 py-3">
+        <div class="card">
+            <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img"/>
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description }}</p>
+                <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+            </div>
         </div>
     </div>
-{%endfor%} 
+    {%endfor%} 
+    </div>
 
     <div class="col-md-12">
         <form action="/product" method="post" enctype="multipart/form-data">

@@ -188,14 +188,13 @@ def single_product(product_id):
         else:
             db.execute("UPDATE products SET name=:name, description=:description,price=:price WHERE id=:id", name=name, description=description, price=price, id=product_id)
     
-    product = Product(product_id, '', '', '', '', '')
+    product = Product(product_id, '', '', '', '', '', '')
     if product_id != 'new':
-        print("recherche du produit")
         for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
             product.name = row["name"]
             product.description = row["description"]
             product.price = row["price"]
-            print(product.name)
+            product.main_img  = IMG_DEFAULT
     return render_template(SINGLE_PRODUCT_PAGE, product=product)
 
 @app.route("/order", methods=[GET, POST])
