@@ -156,6 +156,7 @@ def product():
         id = row["id"]
         name = row["name"]
         description = row["description"]
+        price = row["price"]
         imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
         print(imgs)
         if len(imgs) >= 1:
@@ -163,7 +164,7 @@ def product():
             main_img = imgs[0]["file"] 
         else:
             main_img  = IMG_DEFAULT
-        product = Product(id, name, description, '', '', '', main_img)
+        product = Product(id, name, description, price, '', '', main_img)
         products.append(product)
     return render_template(PRODUCT_PAGE, products=products)
 

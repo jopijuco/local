@@ -10,7 +10,7 @@
     <ul>TO DO</ul>
     <li>resize img thumbnail</li>
     <li>responsive grid</li>
-    <li>display price and promo</li>
+    <li>display promo</li>
     <li>filter the product by store (and category later, if possible)</li>
     <li>order the product by price</li>
 
@@ -19,8 +19,9 @@
     {%for product in products%}
     <div class="col-md-4 py-3">
         <div class="card">
-            <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img"/>
+            <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img-top"/>
             <div class="card-body">
+                <span class="badge badge-warning">{{ product.price }}€</span>
                 <h5 class="card-title">{{ product.name }}</h5>
                 <p class="card-text">{{ product.description }}</p>
                 <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
