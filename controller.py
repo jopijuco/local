@@ -8,6 +8,7 @@ from flask import render_template, request, session
 from utils import login_required
 from werkzeug.utils import redirect
 from werkzeug.security import check_password_hash, generate_password_hash
+from PIL import Image, ImageOps
 from model.business import *
 from model.store import *
 from model.product import *
@@ -115,9 +116,15 @@ def store():
             #store's image update
             if request.files["image_"+store_id]:
                 image = request.files["image_"+store_id]
-                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
-                front_pic=image.filename
-                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = front_pic, id=store_id)
+                extension = image.filename.split('.')[1]
+                image_name="store_front_pic_"+store_id+"."+extension
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = image_name, id=store_id)
+                #create the square thumbnail
+                img = Image.open("static/"+image_name)
+                img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
+                destname = 'static/thumbnail_'+image_name
+                img_thumbnail .save(destname)
             #store's address update
             number = request.form.get("number_"+store_id)
             street = request.form.get("street_"+store_id)
