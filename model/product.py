@@ -7,3 +7,7 @@ class Product:
         self.discount = discount
         self.total = total
         self.main_img = main_img
+        self.images = []
+
+    def add_image(self, image):
+        self.images.append(image)
