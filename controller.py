@@ -165,7 +165,6 @@ def product():
         description = row["description"]
         price = row["price"]
         imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
-        print(imgs)
         if len(imgs) >= 1:
             print("img found")
             main_img = imgs[0]["file"] 
@@ -180,21 +179,33 @@ def product():
 @login_required
 def single_product(product_id):
     if request.method == POST:
-        print("post")
         id = request.form.get("product_id")
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
-        #to do : discount, tag and img
+        #to do : discount, tag 
         discount = ""
         total = ""
         tag_id = ""
         img_id = ""
-        if request.form['submit'] == 'add':
-            print("add a product")
+        if request.form['submit'] == 'add_product':
             product_id = db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id)", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=session["business_id"])
-        else:
+        elif request.form['submit'] == 'add_product':
             db.execute("UPDATE products SET name=:name, description=:description,price=:price WHERE id=:id", name=name, description=description, price=price, id=product_id)
+        elif request.form['submit'] == 'add_img':
+            #product images
+            if request.files["new_image"]:
+                image = request.files["new_image"]
+                extension = image.filename.split('.')[1]
+                image_name="product_"+product_id+"."+extension
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                new_img_id = db.execute("INSERT INTO imgs(file) VALUES (:image_name)", image_name=image_name)
+                db.execute("INSERT INTO product_img(product_id, img_id) VALUES (:product_id, :new_img_id)", product_id=product_id, new_img_id=new_img_id)
+                #create the square thumbnail
+                img = Image.open("static/"+image_name)
+                img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
+                destname = 'static/thumbnail_'+image_name
+                img_thumbnail .save(destname)
     
     product = Product(product_id, '', '', '', '', '', '')
     if product_id != 'new':
@@ -202,8 +213,12 @@ def single_product(product_id):
             product.name = row["name"]
             product.description = row["description"]
             product.price = row["price"]
-            product.main_img  = IMG_DEFAULT
-    return render_template(SINGLE_PRODUCT_PAGE, product=product)
+        #retrieve all product's images
+        hasimg = False
+        for row in db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
+            product.add_image(row["file"])
+            hasimg = True
+    return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg)
 
 @app.route("/order", methods=[GET, POST])
 @login_required
