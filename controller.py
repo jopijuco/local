@@ -166,8 +166,7 @@ def product():
         price = row["price"]
         imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
         if len(imgs) >= 1:
-            print("img found")
-            main_img = imgs[0]["file"] 
+            main_img = "thumbnail_"+imgs[0]["file"] 
         else:
             main_img  = IMG_DEFAULT
         product = Product(id, name, description, price, '', '', main_img)
@@ -196,8 +195,12 @@ def single_product(product_id):
             #product images
             if request.files["new_image"]:
                 image = request.files["new_image"]
+                #create the new image name
                 extension = image.filename.split('.')[1]
-                image_name="product_"+product_id+"."+extension
+                nb_picture = db.execute("SELECT COUNT(DISTINCT img_id) as nb FROM product_img WHERE product_id = :product_id", product_id=product_id)
+                pic_number = nb_picture[0]["nb"]+1
+                image_name="product_"+product_id+"_pic_"+str(pic_number)+"."+extension
+                #save the new image and insert it in the DB
                 image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
                 new_img_id = db.execute("INSERT INTO imgs(file) VALUES (:image_name)", image_name=image_name)
                 db.execute("INSERT INTO product_img(product_id, img_id) VALUES (:product_id, :new_img_id)", product_id=product_id, new_img_id=new_img_id)
