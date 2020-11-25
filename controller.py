@@ -209,7 +209,22 @@ def single_product(product_id):
                 img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
                 destname = 'static/thumbnail_'+image_name
                 img_thumbnail .save(destname)
-    
+        else:
+            img_id = request.form['submit']
+            image = request.files["image_"+img_id]
+            new_extension = image.filename.split('.')[1]
+            old_img = db.execute("SELECT file FROM imgs i WHERE id = :img_id", img_id=img_id)
+            #replace old by new img (keep the same name but extension could be different)
+            image_name=old_img[0]["file"].split('.')[0]+"."+new_extension       
+            image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+            old_extension = old_img[0]["file"].split('.')[1]
+            if old_extension != new_extension:
+                db.execute("UPDATE imgs SET file=:file WHERE id= :id", file = image_name, id=img_id)
+            #create the square thumbnail
+            img = Image.open("static/"+image_name)
+            img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
+            destname = 'static/thumbnail_'+image_name
+            img_thumbnail .save(destname)
     product = Product(product_id, '', '', '', '', '', '')
     if product_id != 'new':
         for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
@@ -219,8 +234,8 @@ def single_product(product_id):
         #retrieve all product's images
         hasimg = False
         maximg = False
-        for row in db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
-            product.add_image(row["file"])
+        for row in db.execute("SELECT id, file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
+            product.add_image([row["id"], row["file"]])
             hasimg = True
         if len(product.images) == MAX_IMG_PRODUCT:
             maximg = True
