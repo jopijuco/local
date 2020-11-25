@@ -5,6 +5,35 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Product page (TO DO)</h1>
+    <h1>Product page</h1>
     <p>sellers must be able to managed their products</p>
+    <ul>TO DO</ul>
+    <li>resize img thumbnail</li>
+    <li>responsive grid</li>
+    <li>display promo</li>
+    <li>filter the product by store (and category later, if possible)</li>
+    <li>order the product by price</li>
+
+   
+    <div class="row">
+    {%for product in products%}
+    <div class="col-md-4 py-3">
+        <div class="card">
+            <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img-top"/>
+            <div class="card-body">
+                <span class="badge badge-warning">{{ product.price }}€</span>
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description }}</p>
+                <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+    {%endfor%} 
+    </div>
+
+    <div class="col-md-12">
+        <form action="/product" method="post" enctype="multipart/form-data">
+            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="add">Add a new product</button>
+        </form>
+    </div>
 {% endblock %}

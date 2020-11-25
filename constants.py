@@ -13,6 +13,7 @@ REGISTER_PAGE = "register.html"
 USER_PAGE = "user.html"
 STORE_PAGE = "store.html"
 PRODUCT_PAGE = "product.html"
+SINGLE_PRODUCT_PAGE = "single_product.html"
 ORDER_PAGE = "order.html"
 HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
@@ -26,3 +27,8 @@ STORE = "store"
 # Users
 BUSINESS = "business"
 CUSTOMER = "customer"
+
+# Default values
+IMG_DEFAULT = "noimgavailable.jpg"
+IMG_THUMBNAIL_SIZE = 400
+MAX_IMG_PRODUCT = 4
