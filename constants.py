@@ -31,3 +31,4 @@ CUSTOMER = "customer"
 # Default values
 IMG_DEFAULT = "noimgavailable.jpg"
 IMG_THUMBNAIL_SIZE = 400
+MAX_IMG_PRODUCT = 4

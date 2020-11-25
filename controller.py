@@ -218,10 +218,13 @@ def single_product(product_id):
             product.price = row["price"]
         #retrieve all product's images
         hasimg = False
+        maximg = False
         for row in db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
             product.add_image(row["file"])
             hasimg = True
-    return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg)
+        if len(product.images) == MAX_IMG_PRODUCT:
+            maximg = True
+    return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg, maximg = maximg)
 
 @app.route("/order", methods=[GET, POST])
 @login_required
