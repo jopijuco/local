@@ -229,7 +229,9 @@ def single_product(product_id):
             product.price = row["price"]
         #retrieve all product's images
         for row in db.execute("SELECT id, file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
-            product.add_image([row["id"], row["file"]])
+            pic = Picture(row["id"],row["file"],'')
+            pic.name_thumbnail() 
+            product.add_image(pic)
             hasimg = True
         if len(product.images) == MAX_IMG_PRODUCT:
             maximg = True
