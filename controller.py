@@ -12,6 +12,7 @@ from PIL import Image, ImageOps
 from model.business import *
 from model.store import *
 from model.product import *
+from model.picture import *
 import os
 
 
@@ -115,16 +116,12 @@ def store():
             store_id = request.form['submit_button']
             #store's image update
             if request.files["image_"+store_id]:
-                image = request.files["image_"+store_id]
-                extension = image.filename.split('.')[1]
+                file = request.files["image_"+store_id]
+                extension = file.filename.split('.')[1]
                 image_name="store_front_pic_"+store_id+"."+extension
-                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                file.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
                 db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = image_name, id=store_id)
-                #create the square thumbnail
-                img = Image.open("static/"+image_name)
-                img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-                destname = 'static/thumbnail_'+image_name
-                img_thumbnail .save(destname)
+                Picture('',image_name,'').create_thumbnail()
             #store's address update
             number = request.form.get("number_"+store_id)
             street = request.form.get("street_"+store_id)
@@ -168,10 +165,11 @@ def product():
         price = row["price"]
         imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
         if len(imgs) >= 1:
-            main_img = "thumbnail_"+imgs[0]["file"] 
+            main_img = Picture('', imgs[0]["file"],'')
+            main_img.name_thumbnail() 
         else:
-            main_img  = IMG_DEFAULT
-        product = Product(id, name, description, price, '', '', main_img)
+            main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        product = Product(id, name, description, price, '', '', main_img.thumbnail)
         products.append(product)
     return render_template(PRODUCT_PAGE, products=products, hasproduct = hasproduct)
 
@@ -207,10 +205,7 @@ def single_product(product_id):
                 new_img_id = db.execute("INSERT INTO imgs(file) VALUES (:image_name)", image_name=image_name)
                 db.execute("INSERT INTO product_img(product_id, img_id) VALUES (:product_id, :new_img_id)", product_id=product_id, new_img_id=new_img_id)
                 #create the square thumbnail
-                img = Image.open("static/"+image_name)
-                img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-                destname = 'static/thumbnail_'+image_name
-                img_thumbnail .save(destname)
+                Picture('',image_name,'').create_thumbnail()
         else:
             img_id = request.form['submit']
             image = request.files["image_"+img_id]
@@ -223,10 +218,7 @@ def single_product(product_id):
             if old_extension != new_extension:
                 db.execute("UPDATE imgs SET file=:file WHERE id= :id", file = image_name, id=img_id)
             #create the square thumbnail
-            img = Image.open("static/"+image_name)
-            img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-            destname = 'static/thumbnail_'+image_name
-            img_thumbnail .save(destname)
+            Picture('',image_name,'').create_thumbnail()
     product = Product(product_id, '', '', '', '', '', '')
     hasimg = False
     maximg = False
@@ -237,7 +229,9 @@ def single_product(product_id):
             product.price = row["price"]
         #retrieve all product's images
         for row in db.execute("SELECT id, file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
-            product.add_image([row["id"], row["file"]])
+            pic = Picture(row["id"],row["file"],'')
+            pic.name_thumbnail() 
+            product.add_image(pic)
             hasimg = True
         if len(product.images) == MAX_IMG_PRODUCT:
             maximg = True
