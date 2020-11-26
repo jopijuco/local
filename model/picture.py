@@ -13,3 +13,6 @@ class Picture:
         destname = 'static/thumbnail_'+self.name
         img_thumbnail.save(destname)
         self.thumbnail = img_thumbnail
+    
+    def name_thumbnail(self):
+        self.thumbnail = "thumbnail_"+self.name

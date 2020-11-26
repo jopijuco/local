@@ -121,13 +121,7 @@ def store():
                 image_name="store_front_pic_"+store_id+"."+extension
                 file.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
                 db.execute("UPDATE stores SET front_pic=:front_pic WHERE id= :id", front_pic = image_name, id=store_id)
-                #create the square thumbnail
-                #img = Image.open("static/"+image_name)
-                #img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-                #destname = 'static/thumbnail_'+image_name
-                #img_thumbnail .save(destname)
-                image = Picture('',image_name,'')
-                image.create_thumbnail()
+                Picture('',image_name,'').create_thumbnail()
             #store's address update
             number = request.form.get("number_"+store_id)
             street = request.form.get("street_"+store_id)
@@ -171,10 +165,11 @@ def product():
         price = row["price"]
         imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
         if len(imgs) >= 1:
-            main_img = "thumbnail_"+imgs[0]["file"] 
+            main_img = Picture('', imgs[0]["file"],'')
+            main_img.name_thumbnail() 
         else:
-            main_img  = IMG_DEFAULT
-        product = Product(id, name, description, price, '', '', main_img)
+            main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        product = Product(id, name, description, price, '', '', main_img.thumbnail)
         products.append(product)
     return render_template(PRODUCT_PAGE, products=products, hasproduct = hasproduct)
 
@@ -210,10 +205,7 @@ def single_product(product_id):
                 new_img_id = db.execute("INSERT INTO imgs(file) VALUES (:image_name)", image_name=image_name)
                 db.execute("INSERT INTO product_img(product_id, img_id) VALUES (:product_id, :new_img_id)", product_id=product_id, new_img_id=new_img_id)
                 #create the square thumbnail
-                img = Image.open("static/"+image_name)
-                img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-                destname = 'static/thumbnail_'+image_name
-                img_thumbnail .save(destname)
+                Picture('',image_name,'').create_thumbnail()
         else:
             img_id = request.form['submit']
             image = request.files["image_"+img_id]
@@ -226,10 +218,7 @@ def single_product(product_id):
             if old_extension != new_extension:
                 db.execute("UPDATE imgs SET file=:file WHERE id= :id", file = image_name, id=img_id)
             #create the square thumbnail
-            img = Image.open("static/"+image_name)
-            img_thumbnail = ImageOps.fit(img, (IMG_THUMBNAIL_SIZE, IMG_THUMBNAIL_SIZE), centering=(1.0, 0.0))
-            destname = 'static/thumbnail_'+image_name
-            img_thumbnail .save(destname)
+            Picture('',image_name,'').create_thumbnail()
     product = Product(product_id, '', '', '', '', '', '')
     hasimg = False
     maximg = False
