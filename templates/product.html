@@ -18,23 +18,24 @@
    
     <div class="row">
     {%for product in products%}
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
-        <div class="card">
-            <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img-top"/>
-            <div class="card-body">
-                <span class="badge badge-warning">{{ product.price }}€</span>
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text overflow-hidden product-description">{{ product.description }}</p>
-                <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-3">
+            <div class="card bg-light">
+                <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img-top"/>
+                <div class="card-body">
+                    <span class="badge badge-warning">{{ product.price }}€</span>
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text overflow-hidden product-description">{{ product.description }}</p>
+                    <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
+                </div>
             </div>
         </div>
-    </div>
     {%endfor%} 
-    </div>
+    
 
-    <div class="col-md-12">
-        <form action="/product" method="post" enctype="multipart/form-data">
-            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="add">Add a new product</button>
-        </form>
+        <div class="col-12">
+            <form action="/product" method="post" enctype="multipart/form-data">
+                <button class="btn btn-secondary col-12" type="submit" name="submit" value="add">Add a new product</button>
+            </form>
+        </div>
     </div>
 {% endblock %}
