@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> Order #{{ order.id }}</h1>
+        </div>
+        
+        <!-- <input type="hidden" id="order_id" name="order_id" value="{{ order.id }}"> -->
+        <div class="card-body">
+            <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">
+                <div class="row">
+                    <input type="text" class="form-control" id="status" name="status" value = "{{ order.status }}">
+                    <button class="btn btn-primary ml-2" type="submit" name="submit" value="submit">Edit status</button>
+                </div>
+                
+            </form>
+            <div>Store : {{ order.store_id }}</div>
+            <div>Total amount : {{ order.amount }}€</div>
+            <div>Date : {{ order.date }}</div>
+        </div> 
+    </div> 
+{% endblock %}

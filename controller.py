@@ -238,16 +238,23 @@ def single_product(product_id):
             maximg = True
     return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg, maximg = maximg)
 
-@app.route("/order", methods=[GET, POST])
+@app.route("/order", methods=[GET])
 @login_required
 def order():
-    if request.method == POST:
-        return "TODO"
     orders = []
     for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["business_id"]):
         order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"])
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders)
+    return render_template(ORDER_PAGE, orders = orders)
+
+@app.route("/order_details/<order_id>", methods=[GET, POST])
+@login_required
+def order_details(order_id):
+    if request.method == POST:
+        return "TODO"
+    for row in db.execute("SELECT * FROM orders WHERE id = :id", id = order_id):
+        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"])
+    return render_template(ORDER_DETAILS_PAGE, order = order)
 
 
 @app.route("/history", methods=[GET, POST])

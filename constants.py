@@ -15,6 +15,7 @@ STORE_PAGE = "store.html"
 PRODUCT_PAGE = "product.html"
 SINGLE_PRODUCT_PAGE = "single_product.html"
 ORDER_PAGE = "order.html"
+ORDER_DETAILS_PAGE = "order_details.html"
 HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
 
