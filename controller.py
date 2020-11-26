@@ -243,7 +243,7 @@ def single_product(product_id):
 def order():
     orders = []
     for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["business_id"]):
-        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"])
+        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
         orders.append(order)
     return render_template(ORDER_PAGE, orders = orders)
 
@@ -253,7 +253,7 @@ def order_details(order_id):
     if request.method == POST:
         return "TODO"
     for row in db.execute("SELECT * FROM orders WHERE id = :id", id = order_id):
-        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"])
+        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
     return render_template(ORDER_DETAILS_PAGE, order = order)
 
 
