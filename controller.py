@@ -159,7 +159,9 @@ def product():
         if request.form['submit'] == 'add':
             return redirect(url_for("single_product", product_id = 'new'))
     products = []
+    hasproduct = False
     for row in db.execute("SELECT * FROM products WHERE business_id = :id", id=session["business_id"]):
+        hasproduct = True
         id = row["id"]
         name = row["name"]
         description = row["description"]
@@ -171,7 +173,7 @@ def product():
             main_img  = IMG_DEFAULT
         product = Product(id, name, description, price, '', '', main_img)
         products.append(product)
-    return render_template(PRODUCT_PAGE, products=products)
+    return render_template(PRODUCT_PAGE, products=products, hasproduct = hasproduct)
 
 
 @app.route("/single_product/<product_id>", methods=[GET, POST])
@@ -226,14 +228,14 @@ def single_product(product_id):
             destname = 'static/thumbnail_'+image_name
             img_thumbnail .save(destname)
     product = Product(product_id, '', '', '', '', '', '')
+    hasimg = False
+    maximg = False
     if product_id != 'new':
         for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
             product.name = row["name"]
             product.description = row["description"]
             product.price = row["price"]
         #retrieve all product's images
-        hasimg = False
-        maximg = False
         for row in db.execute("SELECT id, file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=product_id):
             product.add_image([row["id"], row["file"]])
             hasimg = True
