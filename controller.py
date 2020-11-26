@@ -187,7 +187,7 @@ def single_product(product_id):
         total = ""
         tag_id = ""
         img_id = ""
-        if request.form['submit'] == 'add_product':
+        if request.form['submit'] == 'edit_product':
             product_id = db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id)", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=session["business_id"])
         elif request.form['submit'] == 'add_product':
             db.execute("UPDATE products SET name=:name, description=:description,price=:price WHERE id=:id", name=name, description=description, price=price, id=product_id)
