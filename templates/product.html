@@ -6,14 +6,15 @@
 
 {% block main %}
     <h1>Product page</h1>
-    <p>sellers must be able to managed their products</p>
+    <!---
     <ul>TO DO</ul>
-    <li>resize img thumbnail</li>
     <li>responsive grid</li>
-    <li>display promo</li>
-    <li>filter the product by store (and category later, if possible)</li>
-    <li>order the product by price</li>
-
+    <li>order the product by price</li>--->
+    {% if not hasproduct %}
+    <div class="alert alert-warning" role="alert">
+        You don't have any product
+    </div>
+    {% endif %}
    
     <div class="row">
     {%for product in products%}
