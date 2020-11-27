@@ -33,7 +33,7 @@
             <div class="collapse navbar-collapse" id="navbar">
                 
                 {% if session.user_id or session.business_id %}
-                    <ul class="navbar-nav mr-auto mt-2"></ul>
+                    <ul class="navbar-nav mr-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Store</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Product</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Order</a></li>
