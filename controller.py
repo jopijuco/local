@@ -18,7 +18,7 @@ import os
 
 @app.route("/")
 def index():
-    stores = db.execute("SELECT bs.name, st.front_pic FROM stores AS st LEFT JOIN business AS bs ON st.business_id = bs.id")
+    stores = db.execute("SELECT st.id, bs.name, st.front_pic FROM stores AS st LEFT JOIN business AS bs ON st.business_id = bs.id")
     return render_template(INDEX_PAGE, stores=stores)
 
 
@@ -81,6 +81,16 @@ def login():
         return redirect(url_for(INDEX))
 
     return render_template(LOGIN_PAGE)
+
+
+@app.route("/shop/<id>")
+def shop(id):
+    shops = db.execute("SELECT bs.id AS id, bs.name AS name FROM stores AS st INNER JOIN business AS bs ON st.business_id = bs.id AND bs.id = :id", id=id)
+
+    if len(shops) != 1:
+        return "SOMETHING IS WRONG WITH YOUR QUERY RESULTS"
+    products = db.execute("SELECT * FROM products WHERE business_id = :id", id=id)
+    return render_template("shop_products.html", products=products, name=shops[0]["name"])
 
 
 @app.route("/store", methods=[GET, POST])
