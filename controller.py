@@ -64,23 +64,20 @@ def login():
         session.clear()
 
         if request.form.get("type_options") == BUSINESS:
-            user = db.execute("SELECT * FROM user_businesses WHERE username = :username", username=request.form.get("username"))
-
-            # password validation commented to allow to debug with "test users"
-            # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
-            if len(user) != 1:
-                return "FAILED LOGIN"
-            session["business_id"] = user[0]["id"]
+            table = BUSINESS_TABLE
         else:
-            user = db.execute("SELECT * FROM user_customers WHERE username = :username", username=request.form.get("username"))
-
-            # password validation commented to allow to debug with "test users"
-            # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
-            if len(user) != 1:
-                return "FAILED LOGIN"
-            session["user_id"] = user[0]["id"] 
-            
+            table = CUSTOMER_TABLE
+        
+        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
+        # password validation commented to allow to debug with "test users"
+        # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
+        if len(user) != 1:
+            return "FAILED LOGIN"
+        
+        session["user_id"] = user[0]["id"]
+        session["type"] = BUSINESS
         return redirect(url_for(INDEX))
+
     return render_template(LOGIN_PAGE)
 
 
@@ -134,6 +131,7 @@ def store():
         business.add_store(store)
     
     return render_template(STORE_PAGE, business =  business)
+
 
 @app.route("/product", methods=[GET, POST])
 @login_required
