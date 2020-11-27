@@ -65,8 +65,10 @@ def login():
 
         if request.form.get("type_options") == BUSINESS:
             table = BUSINESS_TABLE
+            user_type = BUSINESS
         else:
             table = CUSTOMER_TABLE
+            user_type = CUSTOMER
         
         user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
         # password validation commented to allow to debug with "test users"
@@ -75,7 +77,7 @@ def login():
             return "FAILED LOGIN"
         
         session["user_id"] = user[0]["id"]
-        session["type"] = BUSINESS
+        session["type"] = user_type
         return redirect(url_for(INDEX))
 
     return render_template(LOGIN_PAGE)
