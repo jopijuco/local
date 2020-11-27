@@ -70,7 +70,6 @@ def login():
             # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
             if len(user) != 1:
                 return "FAILED LOGIN"
-            
             session["business_id"] = user[0]["id"]
         else:
             user = db.execute("SELECT * FROM user_customers WHERE username = :username", username=request.form.get("username"))
@@ -79,10 +78,9 @@ def login():
             # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
             if len(user) != 1:
                 return "FAILED LOGIN"
-            
             session["user_id"] = user[0]["id"] 
-            return redirect(url_for(INDEX))
-
+            
+        return redirect(url_for(INDEX))
     return render_template(LOGIN_PAGE)
 
 
