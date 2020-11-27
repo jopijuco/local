@@ -23,14 +23,12 @@ def index():
 
 @app.route("/register", methods=[GET, POST])
 def register():
-    arg = request.path[request.path.find("/")+1:request.path.rfind("/")]
-
     if request.method == POST:
         email = request.form.get("email")
         username = email[:email.find("@")]
 
-        if arg == BUSINESS:
-            check_user = db.executef("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
+        if request.form.get("type_options") == BUSINESS:
+            check_user = db.execute("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
                                         username=username,
                                         email=email)
             if len(check_user) >= 1:
@@ -42,7 +40,7 @@ def register():
                         email=email,
                         hash_pass=generate_password_hash(password, "sha256"))
         else:
-            check_user = db.executef("SELECT * FROM user_customers WHERE username = :username OR email = :email",
+            check_user = db.execute("SELECT * FROM user_customers WHERE username = :username OR email = :email",
                                         username=username,
                                         email=email)
             if len(check_user) >= 1:
@@ -55,6 +53,7 @@ def register():
                         hash_pass=generate_password_hash(password, "sha256"))
 
         return redirect(url_for(LOGIN))
+
     return render_template(REGISTER_PAGE)
 
 
