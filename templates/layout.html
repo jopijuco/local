@@ -31,18 +31,25 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
-                {% if session.user_id %}
-                    <ul class="navbar-nav mr-auto mt-2">
+                
+                {% if session.user_id or session.business_id %}
+                    <ul class="navbar-nav mr-auto mt-2"></ul>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Store</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Product</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Order</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
                     </ul>
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="{ url_for('account') }">Account</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{ url_for('logout') }">Log Out</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log Out</a></li>
+                    </ul>
+                {% else %}
+                    <ul class="navbar-nav ml-auto mt-2">
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log In</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
                     </ul>
                 {% endif %}
+
             </div>
         </nav>
 

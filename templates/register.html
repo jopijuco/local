@@ -1,19 +1,29 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+    Register
 {% endblock %}
 
 {% block main %}
     <form action="{{ url_for('register') }}" method="POST">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="Email" type="email">
         </div>
         <div class="form-group">
             <input class="form-control" name="password" placeholder="Password" type="password">
         </div>
          <div class="form-group">
             <input class="form-control" name="password2" placeholder="Password (again)" type="password">
+        </div>
+        <div class="form-group">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-secondary active">
+                    <input type="radio" name="type_options" value="business" checked> Business
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" name="type_options" value="customer" autocomplete="off"> Customer
+                </label>
+            </div>
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
     </form>

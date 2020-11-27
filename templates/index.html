@@ -11,7 +11,19 @@
     local: your products
 {% endblock %}
 
-{% block main %}
-    <a href="customer"><button class="btn btn-primary">Customer</button></a>
-    <a href="business"><button class="btn btn-primary">Business</button></a>
+{% block main %}    
+
+    <div class="row">
+    {% for store in stores %}
+        <div class="col-md-4 py-3">
+            <div class="card">
+                <img src=""  alt="store picture" class="card-img-top"/>
+                <div class="card-body">
+                    <h5 class="card-title">{{ store.name }}</h5>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    
 {% endblock %}
