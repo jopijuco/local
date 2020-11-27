@@ -13,6 +13,7 @@ from model.business import *
 from model.store import *
 from model.product import *
 from model.picture import *
+from model.order import *
 import os
 
 
@@ -111,7 +112,7 @@ def store():
             db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["business_id"])
         elif request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
-            db.execute("INSERT INTO stores (business_id, address_id)  VALUES (:id, :address_id)", id=session["business_id"], address_id=new_address_id)
+            db.execute("INSERT INTO stores (business_id, address_id)  VALUES (:id, :address_id)", id = session["business_id"], address_id = new_address_id)
         else:
             store_id = request.form['submit_button']
             #store's image update
@@ -163,7 +164,7 @@ def product():
         name = row["name"]
         description = row["description"]
         price = row["price"]
-        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id=id)
+        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = id)
         if len(imgs) >= 1:
             main_img = Picture('', imgs[0]["file"],'')
             main_img.name_thumbnail() 
@@ -189,7 +190,7 @@ def single_product(product_id):
         img_id = ""
         if request.form['submit'] == 'add_product':
             product_id = db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id)", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=session["business_id"])
-        elif request.form['submit'] == 'edit_product':
+        elif request.form['submit'] == 'add_product':
             db.execute("UPDATE products SET name=:name, description=:description,price=:price WHERE id=:id", name=name, description=description, price=price, id=product_id)
         elif request.form['submit'] == 'add_img':
             #product images
@@ -237,12 +238,23 @@ def single_product(product_id):
             maximg = True
     return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg, maximg = maximg)
 
-@app.route("/order", methods=[GET, POST])
+@app.route("/order", methods=[GET])
 @login_required
 def order():
+    orders = []
+    for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["business_id"]):
+        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
+        orders.append(order)
+    return render_template(ORDER_PAGE, orders = orders)
+
+@app.route("/order_details/<order_id>", methods=[GET, POST])
+@login_required
+def order_details(order_id):
     if request.method == POST:
         return "TODO"
-    return render_template(ORDER_PAGE)
+    for row in db.execute("SELECT * FROM orders WHERE id = :id", id = order_id):
+        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
+    return render_template(ORDER_DETAILS_PAGE, order = order)
 
 
 @app.route("/history", methods=[GET, POST])
