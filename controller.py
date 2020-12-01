@@ -281,8 +281,8 @@ def basket():
     for i in range(len(id_p)):
         products = db.execute(f"SELECT p.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
         basket.append(products)
-    
-    return render_template("basket.html", products=basket)
+
+    return render_template("basket.html", products=basket, total=bm.total("price", basket))
 
 
 @app.route("/order", methods=[GET, POST])

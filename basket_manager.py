@@ -15,3 +15,10 @@ class Basket_Manager():
         name = string[string.find("name:"):]
         value = name[:name.find(",")]
         return value
+    
+    def total(self, field, products):
+        total = 0
+        for result in products:
+            for dict in result:
+                total += float(dict["price"])
+        return total
