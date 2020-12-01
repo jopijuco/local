@@ -16,12 +16,14 @@
     <div class="row">
     {% for store in stores %}
         <div class="col-md-4 py-3">
-            <div class="card">
-                <img src=""  alt="store picture" class="card-img-top"/>
-                <div class="card-body">
-                    <h5 class="card-title">{{ store.name }}</h5>
+            <a href="{{ url_for('shop', id=store.id) }}">
+                <div class="card">
+                    <img src=""  alt="store picture" class="card-img-top"/>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ store.name }}</h5>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     {% endfor %}
     </div>

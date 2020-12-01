@@ -23,6 +23,7 @@ LOGIN = "login"
 USER = "user"
 INDEX = "index"
 STORE = "store"
+BASKET = "basket"
 
 # Users
 BUSINESS = "business"
@@ -32,3 +33,7 @@ CUSTOMER = "customer"
 IMG_DEFAULT = "noimgavailable.jpg"
 IMG_THUMBNAIL_SIZE = 400
 MAX_IMG_PRODUCT = 4
+
+# Tables
+BUSINESS_TABLE = "user_businesses"
+CUSTOMER_TABLE = "user_customers"

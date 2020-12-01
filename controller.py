@@ -1,7 +1,9 @@
+from os import remove
+from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error
 
-from flask.helpers import url_for
+from flask.helpers import make_response, url_for
 from application import app, db
 from constants import *
 from flask import render_template, request, session
@@ -14,12 +16,15 @@ from model.store import *
 from model.product import *
 from model.picture import *
 from model.order import *
+
+import ast
 import os
 
+bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    stores = db.execute("SELECT bs.name, st.front_pic FROM stores AS st LEFT JOIN business AS bs ON st.business_id = bs.id")
+    stores = db.execute("SELECT id, name FROM stores")
     return render_template(INDEX_PAGE, stores=stores)
 
 
@@ -65,26 +70,29 @@ def login():
         session.clear()
 
         if request.form.get("type_options") == BUSINESS:
-            user = db.execute("SELECT * FROM user_businesses WHERE username = :username", username=request.form.get("username"))
-
-            # password validation commented to allow to debug with "test users"
-            # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
-            if len(user) != 1:
-                return "FAILED LOGIN"
-            
-            session["business_id"] = user[0]["id"]
+            table = BUSINESS_TABLE
+            user_type = BUSINESS
         else:
-            user = db.execute("SELECT * FROM user_customers WHERE username = :username", username=request.form.get("username"))
-
-            # password validation commented to allow to debug with "test users"
-            # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
-            if len(user) != 1:
-                return "FAILED LOGIN"
-            
-            session["user_id"] = user[0]["id"] 
-            return redirect(url_for(INDEX))
+            table = CUSTOMER_TABLE
+            user_type = CUSTOMER
+        
+        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
+        # password validation commented to allow to debug with "test users"
+        # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
+        if len(user) != 1:
+            return "FAILED LOGIN"
+        
+        session["user_id"] = user[0]["id"]
+        session["type"] = user_type
+        return redirect(url_for(INDEX))
 
     return render_template(LOGIN_PAGE)
+
+
+@app.route("/shop/<id>")
+def shop(id):
+    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, p.total AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
+    return render_template("shop_products.html", products=products, name=products[0]["shop"])
 
 
 @app.route("/store", methods=[GET, POST])
@@ -137,6 +145,7 @@ def store():
         business.add_store(store)
     
     return render_template(STORE_PAGE, business =  business)
+
 
 @app.route("/product", methods=[GET, POST])
 @login_required
@@ -226,6 +235,56 @@ def single_product(product_id):
             maximg = True
     return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg, maximg = maximg)
 
+
+@app.route("/add_basket/<product>")
+def add_basket(product):
+    dict_product = ast.literal_eval(product)
+    
+    for key in dict_product.keys():
+        if key == "prd_id":
+            bm.add(dict_product[key])
+        elif key == "shop_id":
+            bm.add(dict_product[key])
+
+    resp = redirect(url_for(INDEX))
+    resp.set_cookie("basket", str(bm.get_list()))
+    return resp
+
+
+@app.route("/remove_basket/<product>")
+def remove_basket(product):
+    dict_product = ast.literal_eval(product)
+
+    for key in dict_product.keys():
+        if key == "id":
+            bm.remove(dict_product[key])
+        elif key == "shop_id":
+            bm.remove(dict_product[key])
+
+    resp = redirect(url_for(BASKET))
+    resp.set_cookie("basket", str(bm.get_list()))
+    return resp
+
+
+@app.route("/basket")
+def basket():
+    basket = list()
+    id_p = list()
+    id_s = list()
+
+    for index, id in enumerate(bm.get_list()):
+        if index % 2 == 0:
+            id_p.append(id)
+        else:
+            id_s.append(id)
+    
+    for i in range(len(id_p)):
+        products = db.execute(f"SELECT p.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
+        basket.append(products)
+    
+    return render_template("basket.html", products=basket)
+
+
 @app.route("/order", methods=[GET, POST])
 @login_required
 def order():
@@ -255,7 +314,7 @@ def history():
 
 @app.route("/account", methods=[GET, POST])
 @login_required
-def account():
+def account():  
     return render_template("account.html")
 
 
