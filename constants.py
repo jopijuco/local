@@ -23,6 +23,7 @@ LOGIN = "login"
 USER = "user"
 INDEX = "index"
 STORE = "store"
+BASKET = "basket"
 
 # Users
 BUSINESS = "business"

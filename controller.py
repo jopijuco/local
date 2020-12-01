@@ -1,7 +1,9 @@
+from os import remove
+from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error
 
-from flask.helpers import url_for
+from flask.helpers import make_response, url_for
 from application import app, db
 from constants import *
 from flask import render_template, request, session
@@ -13,12 +15,15 @@ from model.business import *
 from model.store import *
 from model.product import *
 from model.picture import *
+
+import ast
 import os
 
+bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    stores = db.execute("SELECT st.id, bs.name, st.front_pic FROM stores AS st LEFT JOIN business AS bs ON st.business_id = bs.id")
+    stores = db.execute("SELECT id, name FROM stores")
     return render_template(INDEX_PAGE, stores=stores)
 
 
@@ -85,12 +90,8 @@ def login():
 
 @app.route("/shop/<id>")
 def shop(id):
-    shops = db.execute("SELECT bs.id AS id, bs.name AS name FROM stores AS st INNER JOIN business AS bs ON st.business_id = bs.id AND bs.id = :id", id=id)
-
-    if len(shops) != 1:
-        return "SOMETHING IS WRONG WITH YOUR QUERY RESULTS"
-    products = db.execute("SELECT * FROM products WHERE business_id = :id", id=id)
-    return render_template("shop_products.html", products=products, name=shops[0]["name"])
+    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, p.total AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
+    return render_template("shop_products.html", products=products, name=products[0]["shop"])
 
 
 @app.route("/store", methods=[GET, POST])
@@ -234,6 +235,55 @@ def single_product(product_id):
     return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg, maximg = maximg)
 
 
+@app.route("/add_basket/<product>")
+def add_basket(product):
+    dict_product = ast.literal_eval(product)
+    
+    for key in dict_product.keys():
+        if key == "prd_id":
+            bm.add(dict_product[key])
+        elif key == "shop_id":
+            bm.add(dict_product[key])
+
+    resp = redirect(url_for(INDEX))
+    resp.set_cookie("basket", str(bm.get_list()))
+    return resp
+
+
+@app.route("/remove_basket/<product>")
+def remove_basket(product):
+    dict_product = ast.literal_eval(product)
+
+    for key in dict_product.keys():
+        if key == "id":
+            bm.remove(dict_product[key])
+        elif key == "shop_id":
+            bm.remove(dict_product[key])
+
+    resp = redirect(url_for(BASKET))
+    resp.set_cookie("basket", str(bm.get_list()))
+    return resp
+
+
+@app.route("/basket")
+def basket():
+    basket = list()
+    id_p = list()
+    id_s = list()
+
+    for index, id in enumerate(bm.get_list()):
+        if index % 2 == 0:
+            id_p.append(id)
+        else:
+            id_s.append(id)
+    
+    for i in range(len(id_p)):
+        products = db.execute(f"SELECT p.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
+        basket.append(products)
+    
+    return render_template("basket.html", products=basket)
+
+
 @app.route("/order", methods=[GET, POST])
 @login_required
 def order():
@@ -252,7 +302,7 @@ def history():
 
 @app.route("/account", methods=[GET, POST])
 @login_required
-def account():
+def account():  
     return render_template("account.html")
 
 
