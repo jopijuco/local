@@ -35,32 +35,27 @@ def register():
     if request.method == POST:
         email = request.form.get("email")
         username = email[:email.find("@")]
+        user_table = None
 
         if request.form.get("type_options") == BUSINESS:
-            check_user = db.execute("SELECT * FROM user_businesses WHERE username = :username OR email = :email",
-                                        username=username,
-                                        email=email)
-            if len(check_user) >= 1:
-                return "USER ALREADY EXISTS"
-        
-            password = request.form.get("password")
-            db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
-                        username=username,
-                        email=email,
-                        hash_pass=generate_password_hash(password, "sha256"))
+            user_table = BUSINESS_TABLE
         else:
-            check_user = db.execute("SELECT * FROM user_customers WHERE username = :username OR email = :email",
-                                        username=username,
-                                        email=email)
-            if len(check_user) >= 1:
-                return "USER ALREADY EXISTS"
-        
-            password = request.form.get("password")
-            db.execute("INSERT INTO user_customers (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
-                        username=username,
-                        email=email,
-                        hash_pass=generate_password_hash(password, "sha256"))
+            user_table = CUSTOMER_TABLE
 
+        check_user = db.execute(f"SELECT * FROM {user_table} WHERE username = :username OR email = :email",
+                                    username=username,
+                                    email=email)
+        if len(check_user) >= 1:
+            return "USER ALREADY EXISTS"
+    
+        password = request.form.get("password")
+        db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+                    username=username,
+                    email=email,
+                    hash_pass=generate_password_hash(password, "sha256"))
+        
+        if user_table is BUSINESS_TABLE:
+            db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (0,0,0,0,0,0,0)")
         return redirect(url_for(LOGIN))
 
     return render_template(REGISTER_PAGE)
@@ -287,7 +282,7 @@ def basket():
     return render_template("basket.html", products=basket, amount=bm.total("price", basket))
 
 
-@app.route("/orders/", methods=[GET, POST])
+@app.route("/orders", methods=[GET, POST])
 @login_required
 def order():
     if session["type"] == CUSTOMER:
