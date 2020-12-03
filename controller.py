@@ -106,12 +106,15 @@ def store():
             mobile = request.form.get("mobile")
             phone = request.form.get("phone")
             fiscal_number = request.form.get("fiscal_number")
-            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["business_id"])
+            #we assumed that business_id=user_id
+            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
         elif request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
-            db.execute("INSERT INTO stores (business_id, address_id)  VALUES (:id, :address_id)", id = session["business_id"], address_id = new_address_id)
+            db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["user_id"], address_id = new_address_id)
         else:
             store_id = request.form['submit_button']
+            store_name = request.form.get("name_"+store_id)
+            db.execute("UPDATE stores SET name=:name WHERE id=:id", name = store_name, id=store_id)
             #store's image update
             if request.files["image_"+store_id]:
                 file = request.files["image_"+store_id]
@@ -129,22 +132,21 @@ def store():
             country = request.form.get("country_"+store_id)
             db.execute("UPDATE addresses SET number=:number, street=:street, zip_code=:zip_code, city=:city, region=:region, country=:country WHERE id= (SELECT address_id FROM stores WHERE id=:id)", number = number, street = street, zip_code = zip_code, city = city, region = region, country = country, id=store_id)
 
-    business = Business(session["business_id"], '', '', '', '', '')
-    
-    for row in db.execute("SELECT * FROM business WHERE id=:id", id=session["business_id"]):
+    business = Business(session["user_id"], '', '', '', '', '')
+    #we assumed that business_id=user_id
+    for row in db.execute("SELECT * FROM business WHERE id=:id", id=session["user_id"]):
         business.name = row["name"]
         business.description = row["description"]
         business.fiscal_number = row["fiscal_number"]
         business.phone = row["phone"]
         business.mobile = row["mobile"]
-    
-    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"]):
-    #for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=business_id):
-        #if (row["front_pic"] is None or row["front_pic"] == ""):
-        front_pic = IMG_DEFAULT
-        #else:
-            #front_pic = row["front_pic"]
-        store = Store(row["id"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
+    #we assumed that business_id=user_id
+    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["user_id"]):
+        if (row["front_pic"] is None or row["front_pic"] == ""):
+            front_pic = IMG_DEFAULT
+        else:
+            front_pic = row["front_pic"]
+        store = Store(row["id"],row["name"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         business.add_store(store)
     
     return render_template(STORE_PAGE, business =  business)
@@ -191,8 +193,8 @@ def single_product(product_id):
         #we assumed that business_id=user_id
         if request.form['submit'] == 'add_product':
             product_id = db.execute("INSERT INTO products(name, description,business_id) VALUES (:name, :description, :business_id)", name=name, description=description, business_id=session["user_id"])
-            print("product_id : ")
-            print(product_id)
+            for row in db.execute("SELECT id FROM stores WHERE business_id = :id", id=session["user_id"]):
+                db.execute("INSERT INTO product_store (product_id, store_id, price, stock) VALUES (:product_id, :store_id, 0, 0)", product_id=product_id, store_id=row["id"])
         elif request.form['submit'] == 'edit_product':
             db.execute("UPDATE products SET name=:name, description=:description WHERE id=:id", name=name, description=description, id=product_id)
         elif request.form['submit'] == 'add_img':
