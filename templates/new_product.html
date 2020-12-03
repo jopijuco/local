@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> Add a new product </h1>
+        </div>
+        <div class="card-body">
+            <h2>Choose a product among those of the list :</h2>
+        {% if not hasProduct %}
+            <div class="alert alert-warning" role="alert">
+                The list is empty, but you can create your own product below
+            </div>
+        {% else %}
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {%for product in products%}
+                    <tr>
+                        <th scope="row">{{ product.id }}</th>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.description }}</td>        
+                    </tr>
+                {%endfor%} 
+                </tbody>
+            </table>
+        {% endif %}
+        </div> 
+        <div class="card-footer">
+            <h2>if you don't find the product, you can also create a new one :</h2>
+            <form action="/new_product" method="post" enctype="multipart/form-data">
+                <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="create_new_product">Create a new product</button>
+            </form>
+        </div>
+    </div> 
+{% endblock %}

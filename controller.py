@@ -153,9 +153,9 @@ def store():
 @app.route("/product", methods=[GET, POST])
 @login_required
 def product():
-    if request.method == POST:
-        if request.form['submit'] == 'add':
-            return redirect(url_for("single_product", product_id = 'new'))
+    # if request.method == POST:
+    #     if request.form['submit'] == 'add':
+    #         return redirect(url_for("single_product", product_id = 'new'))
     products = []
     hasproduct = False
     #we assumed that business_id=user_id
@@ -184,15 +184,16 @@ def product():
 @login_required
 def single_product(product_id):
     if request.method == POST:
-        print("ici")
         id = request.form.get("product_id")
         name = request.form.get("name")
-        print(name)
         description = request.form.get("description")
+        print(request.form['submit'])
         #we assumed that business_id=user_id
-        #if request.form['submit'] == 'add_product':
-            #product_id = db.execute("INSERT INTO products(name, description,price,discount,total,tag_id,img_id,business_id) VALUES (:name, :description, :price, :discount, :total, :tag_id, :img_id, :business_id)", name=name, description=description, price=price, discount=discount, total=total, tag_id=tag_id, img_id=img_id, business_id=session["user_id"])
-        if request.form['submit'] == 'edit_product':
+        if request.form['submit'] == 'add_product':
+            product_id = db.execute("INSERT INTO products(name, description,business_id) VALUES (:name, :description, :business_id)", name=name, description=description, business_id=session["user_id"])
+            print("product_id : ")
+            print(product_id)
+        elif request.form['submit'] == 'edit_product':
             db.execute("UPDATE products SET name=:name, description=:description WHERE id=:id", name=name, description=description, id=product_id)
         elif request.form['submit'] == 'add_img':
             #product images
@@ -223,6 +224,7 @@ def single_product(product_id):
                     db.execute("UPDATE imgs SET file=:file WHERE id= :id", file = image_name, id=img_id)
                 #create the square thumbnail
                 Picture('',image_name,'').create_thumbnail()
+    print("hello")
     product = Product(product_id, '', '', '', '')
     hasimg = False
     maximg = False
@@ -244,10 +246,28 @@ def single_product(product_id):
             hasimg = True
         if len(product.images) == MAX_IMG_PRODUCT:
             maximg = True
+    else :
+        isOwner = True
     if isOwner:
         return render_template(SINGLE_PRODUCT_PAGE_EDIT, product=product, hasimg = hasimg, maximg = maximg)
     else:
         return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg)
+
+@app.route("/new_product", methods=[GET, POST])
+@login_required
+def new_product():
+    if request.method == POST:
+        if request.form['submit'] == 'create_new_product':
+            return redirect(url_for("single_product", product_id = 'new'))
+    products = []
+    hasProduct = False
+    #we assumed that business_id=user_id
+    #retrieve all products that business doesn't own (!business_id in product table) AND that are not selled yet (not in product_store)
+    for row in db.execute("SELECT * FROM products WHERE business_id !=:id AND id NOT IN (SELECT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id=:id))", id = session["user_id"]):
+        product = Product(row["id"], False, row["name"], row["description"], "")
+        products.append(product)
+        hasProduct = True
+    return render_template(NEW_PRODUCT_PAGE, products = products, hasProduct = hasProduct)
 
 
 @app.route("/add_basket/<product>")
