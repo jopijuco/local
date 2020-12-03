@@ -1,3 +1,5 @@
+from datetime import datetime
+from logging import exception
 from os import remove
 from basket_manager import Basket_Manager
 import re
@@ -91,7 +93,7 @@ def login():
 
 @app.route("/shop/<id>")
 def shop(id):
-    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, p.total AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
+    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
     return render_template("shop_products.html", products=products, name=products[0]["shop"])
 
 
@@ -279,20 +281,34 @@ def basket():
             id_s.append(id)
     
     for i in range(len(id_p)):
-        products = db.execute(f"SELECT p.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
+        products = db.execute(f"SELECT p.*, ps.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
         basket.append(products)
-    
-    return render_template("basket.html", products=basket)
+
+    return render_template("basket.html", products=basket, amount=bm.total("price", basket))
 
 
-@app.route("/order", methods=[GET, POST])
+@app.route("/orders/", methods=[GET, POST])
 @login_required
 def order():
-    orders = []
-    for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["business_id"]):
-        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
-        orders.append(order)
-    return render_template(ORDER_PAGE, orders = orders)
+    if session["type"] == CUSTOMER:
+        if request.method == POST:
+            now = datetime.now().strftime("%Y-%m-%d %H:%m:%s")
+            amount = float(request.form.get("amount"))
+        
+            # status order and store are hardcoded bcs are not yet defined: discuss
+            db.execute(f"INSERT INTO orders (date, amount, status_id, store_id, customer_id) VALUES ('{now}', {amount}, 1, 1, {session['user_id']})")
+            bm.empty_basket()
+            return redirect(url_for(ORDER))
+
+        orders = db.execute(f"SELECT date, amount FROM orders WHERE customer_id = {session['user_id']}")
+        return render_template(ORDER_PAGE, orders=orders)
+    else:
+        orders = []
+        for row in db.execute(f"SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = {session['user_id']})"):
+            order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
+            orders.append(order)
+        return render_template(ORDER_PAGE, orders=orders)
+
 
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
@@ -322,4 +338,7 @@ def account():
 @login_required
 def logout():
     session.clear()
-    return redirect((url_for(INDEX)))
+    bm.empty_basket()
+    resp = redirect(url_for(INDEX))
+    resp.set_cookie("basket", "", expires=0)
+    return resp

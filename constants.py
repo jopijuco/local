@@ -25,6 +25,7 @@ USER = "user"
 INDEX = "index"
 STORE = "store"
 BASKET = "basket"
+ORDER = "order"
 
 # Users
 BUSINESS = "business"
@@ -38,3 +39,6 @@ MAX_IMG_PRODUCT = 4
 # Tables
 BUSINESS_TABLE = "user_businesses"
 CUSTOMER_TABLE = "user_customers"
+
+# Messages
+PURCHASE_MESSAGE = "Thanks for your purchase. We hope you enjoy it."
