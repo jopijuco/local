@@ -23,5 +23,5 @@ class Basket_Manager():
                 total += float(dict[field])
         return total
     
-    def empty_list(self):
+    def empty_basket(self):
         del self.basket[:]
