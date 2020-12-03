@@ -20,7 +20,7 @@ class Basket_Manager():
         total = 0
         for result in products:
             for dict in result:
-                total += float(dict["price"])
+                total += float(dict[field])
         return total
     
     def empty_list(self):
