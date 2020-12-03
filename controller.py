@@ -1,3 +1,4 @@
+from logging import exception
 from os import remove
 from basket_manager import Basket_Manager
 import re
@@ -322,4 +323,7 @@ def account():
 @login_required
 def logout():
     session.clear()
-    return redirect((url_for(INDEX)))
+    bm.empty_list()
+    resp = redirect(url_for(INDEX))
+    resp.set_cookie("basket", "", expires=0)
+    return resp

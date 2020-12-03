@@ -22,3 +22,6 @@ class Basket_Manager():
             for dict in result:
                 total += float(dict["price"])
         return total
+    
+    def empty_list(self):
+        del self.basket[:]
