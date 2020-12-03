@@ -22,7 +22,8 @@
         <div class="card">
             <img src="{{url_for('static', filename= product.main_img )}}"  alt="product picture" class="card-img-top"/>
             <div class="card-body">
-                <span class="badge badge-warning">{{ product.price }}€</span>
+                <!-- <span class="badge badge-warning">{{ product.price }}€</span> -->
+                <span class="badge badge-warning">{{ product.isOwner }}</span>
                 <h5 class="card-title">{{ product.name }}</h5>
                 <p class="card-text">{{ product.description }}</p>
                 <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary">Edit</a>
