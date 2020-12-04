@@ -18,14 +18,16 @@ ORDER_PAGE = "order.html"
 ORDER_DETAILS_PAGE = "order_details.html"
 HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
+BUS_FORM_PAGE = "business_form.html"
 
-# Redirect
+# Redirects
 LOGIN = "login"
 USER = "user"
 INDEX = "index"
 STORE = "store"
 BASKET = "basket"
 ORDER = "order"
+BUS_FORM = "business_form"
 
 # Users
 BUSINESS = "business"
