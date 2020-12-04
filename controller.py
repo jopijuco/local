@@ -54,8 +54,8 @@ def register():
                     email=email,
                     hash_pass=generate_password_hash(password, "sha256"))
         
-        if user_table is BUSINESS_TABLE:
-            db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (0,0,0,0,0,0,0)")
+        #if user_table is BUSINESS_TABLE:
+            #db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (0,0,0,0,0,0,0)")
         return redirect(url_for(LOGIN))
 
     return render_template(REGISTER_PAGE)
@@ -78,12 +78,40 @@ def login():
         # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
         if len(user) != 1:
             return "FAILED LOGIN"
-        
+
         session["user_id"] = user[0]["id"]
         session["type"] = user_type
+
+        if user_type == BUSINESS:
+            business = db.execute(f"SELECT id FROM business WHERE user_id = {session['user_id']}")
+
+            if not business:
+                return redirect(url_for(BUS_FORM))
+    return render_template(LOGIN_PAGE)
+
+
+@app.route("/business-form", methods=[GET, POST])
+@login_required
+def business_form():
+    if request.method == POST:
+        # get the form data
+        name = request.form.get("name")
+        description = request.form.get("description")
+        fiscal_number = request.form.get("fiscal_number")
+        phone = request.form.get("phone")
+        mobile = request.form.get("mobile")
+        sector = request.form.get("sector")
+
+        try:
+            business = db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
+        except Error as e:
+            return render_template(BUS_FORM_PAGE, message=e)
+        
+        db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}, {session['user_id']})")
         return redirect(url_for(INDEX))
 
-    return render_template(LOGIN_PAGE)
+    #sectors = db.execute("SELECT * FROM sectors")
+    return render_template(BUS_FORM_PAGE)
 
 
 @app.route("/shop/<id>")
