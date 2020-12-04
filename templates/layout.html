@@ -31,6 +31,7 @@
                         </ul>
                     {% elif session.type == "business" %}
                         <ul class="navbar-nav mr-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
                         </ul>

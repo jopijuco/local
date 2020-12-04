@@ -3,7 +3,7 @@ from logging import exception
 from os import remove
 from basket_manager import Basket_Manager
 import re
-from sqlite3.dbapi2 import Error
+from sqlite3.dbapi2 import Error, InternalError
 
 from flask.helpers import make_response, url_for
 from application import app, db
@@ -27,8 +27,13 @@ bm = Basket_Manager()
 @app.route("/")
 def index():
     stores = db.execute("SELECT id, name FROM stores")
-    return render_template(INDEX_PAGE, stores=stores)
-
+    try:
+        if session['type'] == BUSINESS:
+            stores = db.execute(f"SELECT * FROM stores WHERE business_id = {session['business_id']}")
+        return render_template(INDEX_PAGE, stores=stores)
+    except KeyError:
+        return render_template(INDEX_PAGE, stores=stores)
+    
 
 @app.route("/register", methods=[GET, POST])
 def register():
@@ -54,10 +59,7 @@ def register():
                     email=email,
                     hash_pass=generate_password_hash(password, "sha256"))
         
-        #if user_table is BUSINESS_TABLE:
-            #db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (0,0,0,0,0,0,0)")
         return redirect(url_for(LOGIN))
-
     return render_template(REGISTER_PAGE)
 
 
@@ -74,19 +76,20 @@ def login():
             user_type = CUSTOMER
         
         user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
-        # password validation commented to allow to debug with "test users"
-        # or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
+        #or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
         if len(user) != 1:
             return "FAILED LOGIN"
-
+        
         session["user_id"] = user[0]["id"]
         session["type"] = user_type
 
         if user_type == BUSINESS:
             business = db.execute(f"SELECT id FROM business WHERE user_id = {session['user_id']}")
-
             if not business:
                 return redirect(url_for(BUS_FORM))
+            else:
+                session["business_id"] = business[0]["id"]
+                return redirect(url_for(INDEX))
     return render_template(LOGIN_PAGE)
 
 
