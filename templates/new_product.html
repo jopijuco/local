@@ -11,6 +11,7 @@
         </div>
         <div class="card-body">
             <h2>Choose a product among those of the list :</h2>
+            <form action="/new_product" method="post" enctype="multipart/form-data">
         {% if not hasProduct %}
             <div class="alert alert-warning" role="alert">
                 The list is empty, but you can create your own product below
@@ -22,6 +23,7 @@
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
+                    <th scope="col">Choice</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -29,17 +31,23 @@
                     <tr>
                         <th scope="row">{{ product.id }}</th>
                         <td>{{ product.name }}</td>
-                        <td>{{ product.description }}</td>        
+                        <td>{{ product.description }}</td>  
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" value="{{ product.id }}" name="productChoice">
+                            </div>
+                        </td>
                     </tr>
                 {%endfor%} 
                 </tbody>
             </table>
+            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="add_existing_product">Add this product</button>
+
         {% endif %}
         </div> 
         <div class="card-footer">
             <h2>if you don't find the product, you can also create a new one :</h2>
-            <form action="/new_product" method="post" enctype="multipart/form-data">
-                <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="create_new_product">Create a new product</button>
+            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="create_new_product">Create a new product</button>
             </form>
         </div>
     </div> 

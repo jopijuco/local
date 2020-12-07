@@ -111,6 +111,7 @@ def store():
         elif request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
             db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["user_id"], address_id = new_address_id)
+            #to do : when adding a new store, automatically add all products in product_store table
         else:
             store_id = request.form['submit_button']
             store_name = request.form.get("name_"+store_id)
@@ -226,7 +227,6 @@ def single_product(product_id):
                     db.execute("UPDATE imgs SET file=:file WHERE id= :id", file = image_name, id=img_id)
                 #create the square thumbnail
                 Picture('',image_name,'').create_thumbnail()
-    print("hello")
     product = Product(product_id, '', '', '', '')
     hasimg = False
     maximg = False
@@ -261,6 +261,9 @@ def new_product():
     if request.method == POST:
         if request.form['submit'] == 'create_new_product':
             return redirect(url_for("single_product", product_id = 'new'))
+        if request.form['submit'] == 'add_existing_product':
+            print("you wanna add the product :")
+            print(request.form.get("productChoice"))
     products = []
     hasProduct = False
     #we assumed that business_id=user_id
