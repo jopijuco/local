@@ -1,6 +1,7 @@
 from datetime import datetime
+from forms import CustomerForm, LoginForm, RegisterForm
 from logging import exception
-from os import remove
+from os import O_NDELAY, remove
 from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error, InternalError
@@ -60,12 +61,14 @@ def register():
                     hash_pass=generate_password_hash(password, "sha256"))
         
         return redirect(url_for(LOGIN))
-    return render_template(REGISTER_PAGE)
+    return render_template(REGISTER_PAGE, form=RegisterForm(request.form))
 
 
 @app.route("/login", methods=[GET, POST])
 def login():
-    if request.method == POST:
+    form = LoginForm()
+
+    if request.method == POST and form.validate_on_submit():
         session.clear()
 
         if request.form.get("type_options") == BUSINESS:
@@ -74,9 +77,9 @@ def login():
         else:
             table = CUSTOMER_TABLE
             user_type = CUSTOMER
-        
-        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
-        #or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
+
+        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=form.username.data)
+        #or not check_password_hash(user[0]["hash_pass"], form.password.data)
         if len(user) != 1:
             return "FAILED LOGIN"
         
@@ -90,7 +93,8 @@ def login():
             else:
                 session["business_id"] = business[0]["id"]
                 return redirect(url_for(INDEX))
-    return render_template(LOGIN_PAGE)
+        return redirect(url_for(INDEX))
+    return render_template(LOGIN_PAGE, form=form, message="")
 
 
 @app.route("/business-form", methods=[GET, POST])
@@ -106,7 +110,7 @@ def business_form():
         sector = request.form.get("sector")
 
         try:
-            business = db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
+            db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
         except Error as e:
             return render_template(BUS_FORM_PAGE, message=e)
         
@@ -356,8 +360,13 @@ def history():
 
 @app.route("/account", methods=[GET, POST])
 @login_required
-def account():  
-    return render_template("account.html")
+def account():
+    if request.method == POST:
+        
+        return render_template(ACCOUNT_PAGE)
+    customer = db.execute(f"SELECT * FROM customers AS c INNER JOIN user_customers AS uc ON c.id = uc.id AND uc.id = {session['user_id']} INNER JOIN addresses AS a ON c.address_id = a.id")
+
+    return render_template(ACCOUNT_PAGE, form=CustomerForm(request))
 
 
 @app.route("/logout")
