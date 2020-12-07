@@ -21,3 +21,13 @@ footer {
   height: 50px;
   /*background-color: aqua;*/
 }
+
+.product_card_name{
+  height : 50px;
+  overflow: hidden;
+}
+
+.product_card_description{
+  height : 70px;
+  overflow: hidden;
+}

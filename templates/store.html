@@ -56,6 +56,12 @@
 
           <div class="col-md-6">
             <div class="form-row ">
+              <div class="form-group col-md-12">
+                <label for="number">Name</label>
+                <input type="text" class="form-control" id="name_{{ store.id }}" name="name_{{ store.id }}" value="{{ store.name }}">
+              </div>
+            </div>
+            <div class="form-row ">
               <div class="form-group col-md-2">
                 <label for="number">Number</label>
                 <input type="text" class="form-control" id="number_{{ store.id }}" name="number_{{ store.id }}" value="{{ store.number }}">
