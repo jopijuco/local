@@ -1,14 +1,10 @@
-from wtforms import form
+from flask_wtf import FlaskForm
 from wtforms import validators
-from wtforms import fields
 from wtforms.fields.core import DateField, IntegerField, SelectField, StringField
 from wtforms.fields.simple import PasswordField
 from wtforms.fields.html5 import EmailField
-from wtforms.form import Form
-from wtforms import Form
-from wtforms.validators import Email, InputRequired, ValidationError
-from flask_wtf import FlaskForm
-import email_validator
+from wtforms.validators import Email, InputRequired
+
 
 class RegisterForm(FlaskForm):
     email = EmailField([Email(), validators.input_required()], render_kw={"placeholder": "Email"})
