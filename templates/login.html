@@ -5,7 +5,9 @@
     Log In
 {% endblock %}
 
-{% block form %} {{ form_action( url_for('login'), "POST") }} {% endblock %}
+{% block form %} {{ form_action(url_for('login'), "POST") }} {% endblock %}
+
+{{ form.csrf_token }}
 
 {% block fields %}
     {% for field in form %}
