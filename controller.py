@@ -262,8 +262,9 @@ def new_product():
         if request.form['submit'] == 'create_new_product':
             return redirect(url_for("single_product", product_id = 'new'))
         if request.form['submit'] == 'add_existing_product':
-            print("you wanna add the product :")
-            print(request.form.get("productChoice"))
+            product_id = request.form.get("productChoice")
+            print(product_id)
+            return redirect(url_for("single_product_store", product_id = product_id))
     products = []
     hasProduct = False
     #we assumed that business_id=user_id
@@ -273,6 +274,32 @@ def new_product():
         products.append(product)
         hasProduct = True
     return render_template(NEW_PRODUCT_PAGE, products = products, hasProduct = hasProduct)
+
+@app.route("/single_product_store/<product_id>", methods=[GET, POST])
+@login_required
+def single_product_store(product_id):
+    print("here")
+    if request.method == POST:
+        #recup l'ID du produit
+        #todo : vérifier si on peut récup product_id autrement
+        product_id = request.form.get("product_id")
+        #we assumed that business_id=user_id
+        for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+            store_id = row["id"]
+            price = request.form.get("price_"+store_id)
+            quantity = request.form.get("quantity_"+store_id)
+            db.execute("UPDATE product_store SET price=:price, quantity=:quantity WHERE product_id=:id AND store_id=:id", price=price, quantity=quantity, store_id=store_id, product_id=product_id)
+    product = Product(product_id, '', '', '', '')
+    for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
+        product.name = row["name"]
+        product.description = row["description"]
+        product.stock = []
+        for row in db.execute("SELECT * FROM product_store WHERE product_id = :id", id=product_id):
+            store_id = row["store_id"]
+            stock = row["stock"]
+            product.add_stock(store_id,stock)
+            #print("add stock")
+    return render_template(SINGLE_PRODUCT_STORE_PAGE, product_id = product_id, product = product)
 
 
 @app.route("/add_basket/<product>")
