@@ -162,7 +162,7 @@ def product():
     products = []
     hasproduct = False
     #we assumed that business_id=user_id
-    for row in db.execute("SELECT p.* FROM products p INNER JOIN product_store ps ON (ps.product_id = p.id) INNER JOIN stores s ON (s.id=ps.store_id) WHERE s.business_id=:id", id=session["user_id"]):
+    for row in db.execute("SELECT DISTINCT p.* FROM products p INNER JOIN product_store ps ON (ps.product_id = p.id) INNER JOIN stores s ON (s.id=ps.store_id) WHERE s.business_id=:id", id=session["user_id"]):
         hasproduct = True
         id = row["id"]
         name = row["name"]
@@ -190,7 +190,6 @@ def single_product(product_id):
         id = request.form.get("product_id")
         name = request.form.get("name")
         description = request.form.get("description")
-        print(request.form['submit'])
         #we assumed that business_id=user_id
         if request.form['submit'] == 'add_product':
             product_id = db.execute("INSERT INTO products(name, description,business_id) VALUES (:name, :description, :business_id)", name=name, description=description, business_id=session["user_id"])
@@ -263,11 +262,13 @@ def new_product():
             return redirect(url_for("single_product", product_id = 'new'))
         if request.form['submit'] == 'add_existing_product':
             product_id = request.form.get("productChoice")
-            print(product_id)
+            #we assumed that business_id=user_id
+            for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+                db.execute("INSERT INTO product_store (product_id, store_id, price, stock) VALUES (:product_id, :store_id, 0, 0)", product_id=product_id, store_id=row["id"])
             return redirect(url_for("single_product_store", product_id = product_id))
     products = []
     hasProduct = False
-    #we assumed that business_id=user_id
+    
     #retrieve all products that business doesn't own (!business_id in product table) AND that are not selled yet (not in product_store)
     for row in db.execute("SELECT * FROM products WHERE business_id !=:id AND id NOT IN (SELECT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id=:id))", id = session["user_id"]):
         product = Product(row["id"], False, row["name"], row["description"], "")
@@ -278,7 +279,6 @@ def new_product():
 @app.route("/single_product_store/<product_id>", methods=[GET, POST])
 @login_required
 def single_product_store(product_id):
-    print("here")
     if request.method == POST:
         #recup l'ID du produit
         #todo : vérifier si on peut récup product_id autrement
@@ -297,8 +297,7 @@ def single_product_store(product_id):
         for row in db.execute("SELECT * FROM product_store WHERE product_id = :id", id=product_id):
             store_id = row["store_id"]
             stock = row["stock"]
-            product.add_stock(store_id,stock)
-            #print("add stock")
+            #product.add_stock(store_id,stock)
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product_id = product_id, product = product)
 
 
