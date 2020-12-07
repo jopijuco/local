@@ -320,12 +320,15 @@ def single_product_store(product_id):
     for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
         product.name = row["name"]
         product.description = row["description"]
-        product.stock = []
         for row in db.execute("SELECT * FROM product_store WHERE product_id = :id", id=product_id):
-            store_id = row["store_id"]
-            stock = row["stock"]
-            #product.add_stock(store_id,stock)
-    return render_template(SINGLE_PRODUCT_STORE_PAGE, product_id = product_id, product = product)
+            product.add_stock(row["store_id"],row["stock"])
+            product.add_price(row["store_id"],row["price"])
+    #we assumed that business_id=user_id
+    stores = []
+    for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+        store = Store(row["id"],row["name"],'','','','','','','')
+        stores.append(store)
+    return render_template(SINGLE_PRODUCT_STORE_PAGE, product_id = product_id, product = product, stores = stores)
 
 
 @app.route("/add_basket/<product>")
