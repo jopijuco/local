@@ -7,7 +7,7 @@
 {% block main %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title">IN PROGRESS :  Update stock and price</h1>
+            <h1 class="card-title">{{ product.name }} : stock and price</h1>
         </div>
         <form action="{{ url_for('single_product_store', product_id=product.id) }}" method="post" enctype="multipart/form-data">
         <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
@@ -50,7 +50,7 @@
                 {%endfor%} 
                 </tbody>
             </table>
-            <button class="btn btn-secondary col-md-12" type="submit" name="submit" value="submit">Edit</button>
+            <button class="btn btn-primary col-md-12" type="submit" name="submit" value="submit">Edit</button>
         </div> 
         </form>
 {% endblock %}
