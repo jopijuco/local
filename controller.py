@@ -214,7 +214,6 @@ def product():
 @login_required
 def single_product(product_id):
     if request.method == POST:
-        id = request.form.get("product_id")
         name = request.form.get("name")
         description = request.form.get("description")
         #we assumed that business_id=user_id
@@ -307,15 +306,11 @@ def new_product():
 @login_required
 def single_product_store(product_id):
     if request.method == POST:
-        #recup l'ID du produit
-        #todo : vérifier si on peut récup product_id autrement
-        product_id = request.form.get("product_id")
         #we assumed that business_id=user_id
         for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
-            store_id = row["id"]
-            price = request.form.get("price_"+store_id)
-            quantity = request.form.get("quantity_"+store_id)
-            db.execute("UPDATE product_store SET price=:price, quantity=:quantity WHERE product_id=:id AND store_id=:id", price=price, quantity=quantity, store_id=store_id, product_id=product_id)
+            price = request.form.get("price_"+str(row["id"]))
+            stock = request.form.get("stock_"+str(row["id"]))
+            db.execute("UPDATE product_store SET price=:price, stock=:stock WHERE product_id=:product_id AND store_id=:store_id", price=price, stock=stock, store_id=row["id"], product_id=product_id)
     product = Product(product_id, '', '', '', '')
     for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
         product.name = row["name"]
@@ -328,7 +323,7 @@ def single_product_store(product_id):
     for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
         store = Store(row["id"],row["name"],'','','','','','','')
         stores.append(store)
-    return render_template(SINGLE_PRODUCT_STORE_PAGE, product_id = product_id, product = product, stores = stores)
+    return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
 
 
 @app.route("/add_basket/<product>")
