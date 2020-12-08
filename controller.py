@@ -19,6 +19,7 @@ from model.product import *
 from model.picture import *
 from model.order import *
 from model.status import *
+from model.customer import *
 
 import ast
 import os
@@ -370,10 +371,12 @@ def order():
     if session["type"] == BUSINESS:
         orders = []
         #retrieve all orders not completed (status_id != 4)
-        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, sta.name AS status_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
+        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
             s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
             store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
-            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, row["customer_name"])
+            c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+            customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
+            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
             orders.append(order)
         return render_template(ORDER_PAGE, orders=orders, history = False)
 
@@ -423,10 +426,12 @@ def history():
     if session["type"] == BUSINESS:
         orders = []
         #retrieve all completed orders (status_id = 4)
-        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, sta.name AS status_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4", id = session["business_id"]):
+        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4", id = session["business_id"]):
             s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
             store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
-            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, row["customer_name"])
+            c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+            customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
+            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
             orders.append(order)
         return render_template(ORDER_PAGE, orders=orders, history = True)
 

@@ -40,7 +40,7 @@
                     {% if not history %}
                         <td>{{ order.status }}</td>
                     {% endif %}
-                        <td>{{ order.customer }}</td>
+                        <td>{{ order.customer.first_name }} {{ order.customer.last_name }}</td>
                         <td><a href="{{ url_for('order_details', order_id=order.id)}}" class="badge badge-primary">View details</a></td>           
                     </tr>
                 {%endfor%} 
