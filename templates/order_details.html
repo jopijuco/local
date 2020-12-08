@@ -27,9 +27,10 @@
                 <div class="form-group mx-sm-3 mb-2">
                     <label for="status" class="mr-2" >Status :</label>
                     <select class="form-control" id="status">
-                        <option value=1>Open</option>
-                        <option value=2>In preparation</option>
-                      </select>
+                    {%for status in status_list%}
+                        <option value={{ status.id }}>{{ status.name }}</option>
+                    {%endfor%} 
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Edit status</button>
 
