@@ -20,11 +20,35 @@ The user can register either as business or customer. During registration you ne
 - Name
 - Password: any constraint?
 
-Business registration allows you to access personnal business area, where you can manage your store(s), your product(s) and your order(s). 
+
+### Customer View
+
+As a Customer, you can start your shopping without beeing logged, but you must be logged as a customer to finalize your order.
+When accessing the basket page, you can finalize the order.
+
+####Shopping
+to complete
+
+####Orders
+to complete
+
+####Account
+to complete
+
+### Business View
+
+Business registration allows you to access personnal business area, where you can manage your store(s), your product(s) and your order(s).
+
+####Stores
+A Business has at least one store
 When the order's status is completed, you can't see it in the orders tab anymore, you must go to the history tab to find it.
 
-As a For Customers, you can start your shopping without beeing logged, but you must be logged as a customer to finalize your order.
-When accessing the basket page, customer can finalize the order.
+####Products
+A Business can create a new product and add it to all of its stores. In this case, the business is the owner of this product and is able to modify product's name, description and images.
+A Business can also add an existing product to his store(s). In this case, it's not the product's owner so it can't modify product's name, description and images.
+When a Business add a product to his stores (by creating a new one or picking an existing), he must enter the price and the quantity for each of his store.
+
+####Orders
 
 ### Routing
 
@@ -64,16 +88,4 @@ This version is the first of a possible future real application. Possible improv
 5. Then run `python -m flask run` to run the app
 5. Click on the URL displayed on your command prompt `http://:xxx.x.x.x:xxxx/`
 6. You are ready to go!
-
-
-
-
-##Business View
-
-A Business has at least one store
-
-#Product management
-A Business can create a new product and add it to all of its stores. In this case, the business is the owner of this product and is able to modify product's name, description and images.
-A Business can also add an existing product to his store(s). In this case, it's not the product's owner so it can't modify product's name, description and images.
-When a Business add a product to his stores (by creating a new one or picking an existing), he must enter the price and the quantity for each of his store.
 
