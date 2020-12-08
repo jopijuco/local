@@ -1,5 +1,5 @@
 from datetime import datetime
-from forms import CustomerForm, LoginForm, RegisterForm
+from forms import BusinessForm, CustomerForm, LoginForm, RegisterForm
 from logging import exception
 from os import O_NDELAY, remove
 from basket_manager import Basket_Manager
@@ -38,15 +38,17 @@ def index():
 
 @app.route("/register", methods=[GET, POST])
 def register():
-    if request.method == POST:
-        email = request.form.get("email")
+    form = RegisterForm()
+
+    if request.method == POST and form.validate_on_submit():
+        email = form.email.data("email")
         username = email[:email.find("@")]
         user_table = None
 
         if request.form.get("type_options") == BUSINESS:
-            user_table = BUSINESS_TABLE
+            user_table = USER_BUSINESS_TABLE
         else:
-            user_table = CUSTOMER_TABLE
+            user_table = USER_CUSTOMER_TABLE
 
         check_user = db.execute(f"SELECT * FROM {user_table} WHERE username = :username OR email = :email",
                                     username=username,
@@ -61,7 +63,7 @@ def register():
                     hash_pass=generate_password_hash(password, "sha256"))
         
         return redirect(url_for(LOGIN))
-    return render_template(REGISTER_PAGE, form=RegisterForm(request.form))
+    return render_template(REGISTER_PAGE, form=form)
 
 
 @app.route("/login", methods=[GET, POST])
@@ -72,10 +74,10 @@ def login():
         session.clear()
 
         if request.form.get("type_options") == BUSINESS:
-            table = BUSINESS_TABLE
+            table = USER_BUSINESS_TABLE
             user_type = BUSINESS
         else:
-            table = CUSTOMER_TABLE
+            table = USER_CUSTOMER_TABLE
             user_type = CUSTOMER
 
         user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=form.username.data)
@@ -361,12 +363,37 @@ def history():
 @app.route("/account", methods=[GET, POST])
 @login_required
 def account():
-    if request.method == POST:
-        
-        return render_template(ACCOUNT_PAGE)
-    customer = db.execute(f"SELECT * FROM customers AS c INNER JOIN user_customers AS uc ON c.id = uc.id AND uc.id = {session['user_id']} INNER JOIN addresses AS a ON c.address_id = a.id")
+    if session["type"] == CUSTOMER:
+        form = CustomerForm()
+        table = CUSTOMER_TABLE
+    else:
+        form = BusinessForm()
+        table = BUSINESS_TABLE
 
-    return render_template(ACCOUNT_PAGE, form=CustomerForm(request))
+    if request.method == POST:
+        #and form.validate_on_submit()
+        check_data = db.execute(f"SELECT * FROM {table} WHERE user_id = {session['user_id']}")
+        
+        if len(check_data) == 0:
+            for field in form.__iter__():
+                if field.name == "first_name" or field.name == "last_name" or field.name == "age":
+                    table = "customers"
+                    data = int(field.data)
+                else:
+                    data = str(field.data)
+                db.execute(f"INSERT INTO {table}({field.name}) VALUES({data})")
+        else:
+            for field in form.__iter__():
+                if field.name == "user_id" or field.name == "address_id" or field.name == "activity_sector_id":
+                    data = int(field.data)
+                else:
+                    data = str(field.data)
+                db.execute(f"UPDATE {table} SET {field.name} = {data} WHERE user_id = {session['user_id']}")
+
+        return render_template(ACCOUNT_PAGE, form=form)
+    #customer = db.execute(f"SELECT * FROM customers AS c INNER JOIN user_customers AS uc ON c.id = uc.id AND uc.id = {session['user_id']} INNER JOIN addresses AS a ON c.address_id = a.id")
+
+    return render_template(ACCOUNT_PAGE, form=form)
 
 
 @app.route("/logout")
