@@ -7,22 +7,72 @@
 {% block main %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title"> Order #{{ order.id }}</h1>
+            <h1 class="card-title"> Order #{{ order.id }} - {{ order.status }}</h1>
         </div>
         
-        <!-- <input type="hidden" id="order_id" name="order_id" value="{{ order.id }}"> -->
         <div class="card-body">
-            <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">
-                <div class="row">
-                    <input type="text" class="form-control" id="status" name="status" value = "{{ order.status }}">
-                    <button class="btn btn-primary ml-2" type="submit" name="submit" value="submit">Edit status</button>
+        {% if not history %}
+            <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">    
+                <div class="form-group mx-sm-3 mb-2">
+                    <label for="status" class="mr-2" >Status :</label>
+                    <select class="form-control" id="status" name="status">
+                    {%for status in status_list%}
+                        {% if status.id == order.status_id %}
+                            <option value={{ status.id }} selected>{{ status.name }}</option>
+                        {% else %}
+                            <option value={{ status.id }}>{{ status.name }}</option>
+                        {%endif%} 
+                    {%endfor%} 
+                    </select>
                 </div>
-                
+                <button type="submit" class="btn btn-primary mb-2">Edit status</button>
             </form>
-            <div>Customer : {{ order.customer_id }}</div>
-            <div>Store : {{ order.store_id }}</div>
-            <div>Total amount : {{ order.amount }}€</div>
-            <div>Date : {{ order.date }}</div>
+            <hr class="my-4">
+        {% endif %}
+            <div class="row jumbotron">
+                <div class="col-4">
+                    <div><b>Ref. : </b>#{{ order.id }}</div>
+                    <div><b>Date : </b>{{ order.date }}</div>
+                    <div><b>Total amount : </b>{{ order.amount }}€</div>
+                </div>
+                <div class="col-4">
+                    <h3>Customer</h3>
+                    <div>{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
+                    <div>{{ order.customer.number }} {{ order.customer.street }}</div>
+                    <div>{{ order.customer.zip_code }} {{ order.customer.city }}</div>
+                    <div>{{ order.customer.region }} {{ order.customer.country }}</div>
+                </div>
+                <div class="col-4">
+                    <h3>Store</h3>
+                    <div>{{ order.store.name }}</div>
+                    <div>{{ order.store.number }} {{ order.store.street }}</div>
+                    <div>{{ order.store.zip_code }} {{ order.store.city }}</div>
+                    <div>{{ order.store.region }} {{ order.store.country }}</div>
+                </div>
+            </div>
+            
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col" class="text-right">Quantity</th>
+                        <th scope="col" class="text-right">Final price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in order.products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td class="text-right">{{ product.quantity }}</td>
+                        <td class="text-right">{{ product.final_price }}€</td>
+                    </tr>
+                {% endfor %}
+                    <tr>
+                        <td colspan = 2 class="text-right"><b>TOTAL</b></td>
+                        <td class="text-right">{{ order.amount }}€</td>
+                    </tr>
+                </tbody>
+            </table>
         </div> 
     </div> 
 {% endblock %}
