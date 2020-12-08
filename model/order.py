@@ -9,5 +9,11 @@ class Order:
         self.customer = customer
         self.products = []
 
-    #def add_product(self, product):
-        #self.products.append(product)
+    def add_product(self, product):
+        self.products.append(product)
+
+class Product_ordered:
+    def __init__(self, name, quantity, final_price):
+        self.name = name
+        self.quantity = quantity
+        self.final_price = final_price

@@ -1,5 +1,3 @@
-from application import  db
-
 class Product:
     def __init__(self, id, isOwner, name, description, main_img):
         self.id = id

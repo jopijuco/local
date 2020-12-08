@@ -27,12 +27,50 @@
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Edit status</button>
             </form>
+            <hr class="my-4">
         {% endif %}
-
-            <div>Customer : {{ order.customer }}</div>
-            <div>Store : {{ order.store }}</div>
-            <div>Total amount : {{ order.amount }}€</div>
-            <div>Date : {{ order.date }}</div>
+            <div class="row jumbotron">
+                <div class="col-4">
+                    <div><b>Ref. : </b>#{{ order.id }}</div>
+                    <div><b>Date : </b>{{ order.date }}</div>
+                    <div><b>Total amount : </b>{{ order.amount }}€</div>
+                </div>
+                <div class="col-4">
+                    <h3>Customer</h3>
+                    <div>{{ order.customer }}</div>
+                    <div>Customer adress</div>
+                </div>
+                <div class="col-4">
+                    <h3>Store</h3>
+                    <div>{{ order.store.name }}</div>
+                    <div>{{ order.store.number }} {{ order.store.street }}</div>
+                    <div>{{ order.store.zip_code }} {{ order.store.city }}</div>
+                    <div>{{ order.region }} {{ order.store.country }}</div>
+                </div>
+            </div>
+            
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col" class="text-right">Quantity</th>
+                        <th scope="col" class="text-right">Final price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in order.products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td class="text-right">{{ product.quantity }}</td>
+                        <td class="text-right">{{ product.final_price }}€</td>
+                    </tr>
+                {% endfor %}
+                    <tr>
+                        <td colspan = 2 class="text-right"><b>TOTAL</b></td>
+                        <td class="text-right">{{ order.amount }}€</td>
+                    </tr>
+                </tbody>
+            </table>
         </div> 
     </div> 
 {% endblock %}

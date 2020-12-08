@@ -35,8 +35,8 @@
                     <tr>
                         <th scope="row">{{ order.id }}</th>
                         <td>{{ order.date }}</td>
-                        <td>{{ order.store }}</td>
-                        <td>{{ order.amount }}€</td>
+                        <td>{{ order.store.name }}</td>
+                        <td class="text-right">{{ order.amount }}€</td>
                     {% if not history %}
                         <td>{{ order.status }}</td>
                     {% endif %}
