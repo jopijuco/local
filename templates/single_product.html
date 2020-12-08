@@ -36,7 +36,9 @@
             {%endfor%} 
             </div>
             <div class="card-footer">
-                <a href="{{ url_for('single_product_store', product_id=product.id)}}" class="btn btn-primary mt-1">Manage your stock and prices</a>
+                <div class="col-12">
+                    <a href="{{ url_for('single_product_store', product_id=product.id)}}" class="btn btn-secondary col-12">Manage your stock and prices</a>
+                </div>
             </div>
         </div>
         
