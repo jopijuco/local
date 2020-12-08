@@ -24,13 +24,14 @@ The user can register either as business or customer. During registration you ne
 ### Customer View
 
 As a Customer, you can start your shopping without beeing logged, but you must be logged as a customer to finalize your order.
-When accessing the basket page, you can finalize the order.
 
 #### Shopping
-to complete
+When landing on the website, you can enter in any shop you want to see the product's catalogue and add some in your basket.
+When accessing the basket page, you can finalize your order if you're logged in.
 
 #### Orders
-to complete
+An order is relative to one store. If you want to buy products from different stores, you must create different order.
+You can follow your order status in the order tab.
 
 #### Account
 to complete
@@ -40,15 +41,21 @@ to complete
 Business registration allows you to access personnal business area, where you can manage your store(s), your product(s) and your order(s).
 
 #### Stores
-A Business has at least one store
-When the order's status is completed, you can't see it in the orders tab anymore, you must go to the history tab to find it.
+A Business has at least one store.
+As a business, you can create as many stores as you want. When creating a new store, all the product of your existing stores are automatically added in the new store, but you must update the quantity and price to make them available for shopping.
 
 #### Products
 A Business can create a new product and add it to all of its stores. In this case, the business is the owner of this product and is able to modify product's name, description and images.
-A Business can also add an existing product to his store(s). In this case, it's not the product's owner so it can't modify product's name, description and images.
+A Business can also add an existing product   all of its stores. In this case, the business is not the product's owner so it can't modify product's name, description and images.
+
 When a Business add a product to his stores (by creating a new one or picking an existing), he must enter the price and the quantity for each of his store.
+If the quantity is 0, the product will not be display in the customer's view.
+
 
 #### Orders
+When a customer make an order in one of your store, you can see it in the order tab, with the open status.
+You can update the status of all of your order, the customer will see the modification in his own order tab.
+When the order's status is completed, you can't see it in the orders tab anymore, you must go to the history tab to find it.
 
 ### Routing
 
