@@ -401,9 +401,12 @@ def order_details(order_id):
         if request.method == POST:
             new_status = request.form.get("status")
             db.execute("UPDATE orders SET status_id=:status_id WHERE id=:id", id=order_id, status_id=new_status)
-        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
+        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE o.id = :id", id = order_id):
             order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"],row["store_name"], row["customer_name"])
-        return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list)
+        history = False
+        if order.status_id == 4:
+            history = True
+        return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, history = history)
 
 
 @app.route("/history")

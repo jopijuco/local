@@ -7,11 +7,11 @@
 {% block main %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title"> Order #{{ order.id }}</h1>
+            <h1 class="card-title"> Order #{{ order.id }} - {{ order.status }}</h1>
         </div>
         
-        <!-- <input type="hidden" id="order_id" name="order_id" value="{{ order.id }}"> -->
         <div class="card-body">
+        {% if not history %}
             <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">    
                 <div class="form-group mx-sm-3 mb-2">
                     <label for="status" class="mr-2" >Status :</label>
@@ -26,11 +26,8 @@
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Edit status</button>
-
-
-
-
             </form>
+        {% endif %}
 
             <div>Customer : {{ order.customer }}</div>
             <div>Store : {{ order.store }}</div>
