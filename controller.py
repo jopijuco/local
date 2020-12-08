@@ -133,12 +133,11 @@ def store():
             mobile = request.form.get("mobile")
             phone = request.form.get("phone")
             fiscal_number = request.form.get("fiscal_number")
-            #we assumed that business_id=user_id
-            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["user_id"])
+            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["business_id"])
         elif request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
-            new_store_id = db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["user_id"], address_id = new_address_id)
-            for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=session["user_id"]):
+            new_store_id = db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["business_id"], address_id = new_address_id)
+            for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=session["business_id"]):
                 db.execute("INSERT INTO product_store (product_id, store_id, price, stock)  VALUES (:product_id, :store_id, 0, 0)", product_id = row["product_id"], store_id=new_store_id)
         else:
             store_id = request.form['submit_button']
@@ -161,16 +160,14 @@ def store():
             country = request.form.get("country_"+store_id)
             db.execute("UPDATE addresses SET number=:number, street=:street, zip_code=:zip_code, city=:city, region=:region, country=:country WHERE id= (SELECT address_id FROM stores WHERE id=:id)", number = number, street = street, zip_code = zip_code, city = city, region = region, country = country, id=store_id)
 
-    business = Business(session["user_id"], '', '', '', '', '')
-    #we assumed that business_id=user_id
-    for row in db.execute("SELECT * FROM business WHERE id=:id", id=session["user_id"]):
+    business = Business(session["business_id"], '', '', '', '', '')
+    for row in db.execute("SELECT * FROM business WHERE id=:id", id=session["business_id"]):
         business.name = row["name"]
         business.description = row["description"]
         business.fiscal_number = row["fiscal_number"]
         business.phone = row["phone"]
         business.mobile = row["mobile"]
-    #we assumed that business_id=user_id
-    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["user_id"]):
+    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"]):
         if (row["front_pic"] is None or row["front_pic"] == ""):
             front_pic = IMG_DEFAULT
         else:
@@ -184,19 +181,14 @@ def store():
 @app.route("/product", methods=[GET, POST])
 @login_required
 def product():
-    # if request.method == POST:
-    #     if request.form['submit'] == 'add':
-    #         return redirect(url_for("single_product", product_id = 'new'))
     products = []
     hasproduct = False
-    #we assumed that business_id=user_id
-    for row in db.execute("SELECT DISTINCT p.* FROM products p INNER JOIN product_store ps ON (ps.product_id = p.id) INNER JOIN stores s ON (s.id=ps.store_id) WHERE s.business_id=:id", id=session["user_id"]):
+    for row in db.execute("SELECT DISTINCT p.* FROM products p INNER JOIN product_store ps ON (ps.product_id = p.id) INNER JOIN stores s ON (s.id=ps.store_id) WHERE s.business_id=:id", id=session["business_id"]):
         hasproduct = True
         id = row["id"]
         name = row["name"]
         description = row["description"]
-        #we assumed that business_id=user_id
-        if row["business_id"]==session["user_id"]:
+        if row["business_id"]==session["business_id"]:
             isOwner = True
         else:
             isOwner = False
@@ -217,10 +209,9 @@ def single_product(product_id):
     if request.method == POST:
         name = request.form.get("name")
         description = request.form.get("description")
-        #we assumed that business_id=user_id
         if request.form['submit'] == 'add_product':
-            product_id = db.execute("INSERT INTO products(name, description,business_id) VALUES (:name, :description, :business_id)", name=name, description=description, business_id=session["user_id"])
-            for row in db.execute("SELECT id FROM stores WHERE business_id = :id", id=session["user_id"]):
+            product_id = db.execute("INSERT INTO products(name, description,business_id) VALUES (:name, :description, :business_id)", name=name, description=description, business_id=session["business_id"])
+            for row in db.execute("SELECT id FROM stores WHERE business_id = :id", id=session["business_id"]):
                 db.execute("INSERT INTO product_store (product_id, store_id, price, stock) VALUES (:product_id, :store_id, 0, 0)", product_id=product_id, store_id=row["id"])
         elif request.form['submit'] == 'edit_product':
             db.execute("UPDATE products SET name=:name, description=:description WHERE id=:id", name=name, description=description, id=product_id)
@@ -260,8 +251,7 @@ def single_product(product_id):
         for row in db.execute("SELECT * FROM products WHERE id = :id", id=product_id):
             product.name = row["name"]
             product.description = row["description"]
-            #we assumed that business_id=user_id
-            if row["business_id"] == session["user_id"]:
+            if row["business_id"] == session["business_id"]
                 isOwner = True
             else:
                 isOwner = False
@@ -289,15 +279,14 @@ def new_product():
             return redirect(url_for("single_product", product_id = 'new'))
         if request.form['submit'] == 'add_existing_product':
             product_id = request.form.get("productChoice")
-            #we assumed that business_id=user_id
-            for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+            for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["business_id"]):
                 db.execute("INSERT INTO product_store (product_id, store_id, price, stock) VALUES (:product_id, :store_id, 0, 0)", product_id=product_id, store_id=row["id"])
             return redirect(url_for("single_product_store", product_id = product_id))
     products = []
     hasProduct = False
     
     #retrieve all products that business doesn't own (!business_id in product table) AND that are not selled yet (not in product_store)
-    for row in db.execute("SELECT * FROM products WHERE business_id !=:id AND id NOT IN (SELECT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id=:id))", id = session["user_id"]):
+    for row in db.execute("SELECT * FROM products WHERE business_id !=:id AND id NOT IN (SELECT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id=:id))", id = session["business_id"]):
         product = Product(row["id"], False, row["name"], row["description"], "")
         products.append(product)
         hasProduct = True
@@ -307,8 +296,7 @@ def new_product():
 @login_required
 def single_product_store(product_id):
     if request.method == POST:
-        #we assumed that business_id=user_id
-        for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+        for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["business_id"]):
             price = request.form.get("price_"+str(row["id"]))
             stock = request.form.get("stock_"+str(row["id"]))
             db.execute("UPDATE product_store SET price=:price, stock=:stock WHERE product_id=:product_id AND store_id=:store_id", price=price, stock=stock, store_id=row["id"], product_id=product_id)
@@ -319,9 +307,8 @@ def single_product_store(product_id):
         for row in db.execute("SELECT * FROM product_store WHERE product_id = :id", id=product_id):
             product.add_stock(row["store_id"],row["stock"])
             product.add_price(row["store_id"],row["price"])
-    #we assumed that business_id=user_id
     stores = []
-    for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["user_id"]):
+    for row in db.execute("SELECT s.* FROM stores s WHERE business_id=:id", id=session["business_id"]):
         store = Store(row["id"],row["name"],'','','','','','','')
         stores.append(store)
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
@@ -378,15 +365,13 @@ def basket():
 
 @app.route("/orders", methods=[GET, POST])
 @login_required
-#order page is developped for business only
-#todo : adapt de order page for customer also
 def order():
-  if session["type"] == BUSINESS:
-    orders = []
-    #we assumed that business_id=user_id
-    for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["user_id"]):
-        order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
-        orders.append(order)
+    if session["type"] == BUSINESS:
+        orders = []
+        for row in db.execute("SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = :id)", id = session["business_id"]):
+            order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
+            orders.append(order)
+        return render_template(ORDER_PAGE, orders=orders)
 
     if session["type"] == CUSTOMER:
         if request.method == POST:
@@ -400,12 +385,7 @@ def order():
 
         orders = db.execute(f"SELECT date, amount FROM orders WHERE customer_id = {session['user_id']}")
         return render_template(ORDER_PAGE, orders=orders)
-    else:
-        orders = []
-        for row in db.execute(f"SELECT * FROM orders WHERE store_id IN (select id FROM stores WHERE business_id = {session['user_id']})"):
-            order = Order(row["id"], row["date"], row["amount"], row["status"], row["store_id"], row["customer_id"])
-            orders.append(order)
-  return render_template(ORDER_PAGE, orders=orders)
+    
 
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
