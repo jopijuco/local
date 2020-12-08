@@ -28,7 +28,11 @@
                     <label for="status" class="mr-2" >Status :</label>
                     <select class="form-control" id="status">
                     {%for status in status_list%}
-                        <option value={{ status.id }}>{{ status.name }}</option>
+                        {% if status.id == order.status_id %}
+                            <option value={{ status.id }} selected>{{ status.name }}</option>
+                        {% else %}
+                            <option value={{ status.id }}>{{ status.name }}</option>
+                        {%endif%} 
                     {%endfor%} 
                     </select>
                 </div>

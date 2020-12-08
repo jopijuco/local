@@ -370,8 +370,8 @@ def order():
     if session["type"] == BUSINESS:
         orders = []
         #retrieve all orders not completed (status_id != 4)
-        for row in db.execute("SELECT o.id, o.date, o.amount, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
-            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["store_name"], row["customer_name"])
+        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
+            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], row["store_name"], row["customer_name"])
             orders.append(order)
         return render_template(ORDER_PAGE, orders=orders)
 
@@ -400,8 +400,8 @@ def order_details(order_id):
             status_list.append(status)
         if request.method == POST:
             return "TODO"
-        for row in db.execute("SELECT o.id, o.date, o.amount, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
-            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["store_name"], row["customer_name"])
+        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, sta.name AS status_name, sto.name AS store_name, c.first_name || ' ' || c.last_name AS customer_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"]):
+            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"],row["store_name"], row["customer_name"])
         return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list)
 
 @app.route("/history", methods=[GET, POST])
