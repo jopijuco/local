@@ -37,15 +37,17 @@
                 </div>
                 <div class="col-4">
                     <h3>Customer</h3>
-                    <div>{{ order.customer }}</div>
-                    <div>Customer adress</div>
+                    <div>{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
+                    <div>{{ order.customer.number }} {{ order.customer.street }}</div>
+                    <div>{{ order.customer.zip_code }} {{ order.customer.city }}</div>
+                    <div>{{ order.customer.region }} {{ order.customer.country }}</div>
                 </div>
                 <div class="col-4">
                     <h3>Store</h3>
                     <div>{{ order.store.name }}</div>
                     <div>{{ order.store.number }} {{ order.store.street }}</div>
                     <div>{{ order.store.zip_code }} {{ order.store.city }}</div>
-                    <div>{{ order.region }} {{ order.store.country }}</div>
+                    <div>{{ order.store.region }} {{ order.store.country }}</div>
                 </div>
             </div>
             
