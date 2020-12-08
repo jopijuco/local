@@ -27,10 +27,10 @@
                     <tr>
                         <th scope="row">{{ order.id }}</th>
                         <td>{{ order.date }}</td>
-                        <td>{{ order.store_id }}</td>
+                        <td>{{ order.store }}</td>
                         <td>{{ order.amount }}€</td>
                         <td>{{ order.status }}</td>
-                        <td>{{ order.customer_id }}</td>
+                        <td>{{ order.customer }}</td>
                         <td><a href="{{ url_for('order_details', order_id=order.id)}}" class="badge badge-primary">View details</a></td>           
                     </tr>
                 {%endfor%} 

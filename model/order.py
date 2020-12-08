@@ -1,11 +1,11 @@
 class Order:
-    def __init__(self, id, date, amount, status, store_id, customer_id):
+    def __init__(self, id, date, amount, status, store, customer):
         self.id = id
         self.date = date
         self.amount = amount
         self.status = status
-        self.store_id = store_id
-        self.customer_id = customer_id
+        self.store = store
+        self.customer = customer
         self.products = []
 
     #def add_product(self, product):
