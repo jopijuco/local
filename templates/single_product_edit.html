@@ -52,17 +52,24 @@
                     Maximum number of pictures is reached
                 </div>
             {% endif %}
-            {%for img in product.images%}
-                <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
-                <div class="form-group">
-                    <label>Modify image</label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="image_{{ img.id }}" id="image">
-                        <label class="custom-file-label" for="image">Select image...</label>
+                <div class="row">
+                {%for img in product.images%}
+                <div class="col-12 col-md-6  mt-5">
+                    <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
+                    <div class="row">
+                        <div class="form-group col-7">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="image_{{ img.id }}" id="image">
+                                <label class="custom-file-label" for="image">Select image...</label>
+                            </div>
+                        </div>
+                        <span class="col-5 ">
+                            <button class="btn btn-primary align-bottom" type="submit" name="submit" value="{{ img.id }}">Edit image</button>
+                        </span>
                     </div>
                 </div>
-                <button class="btn btn-primary" type="submit" name="submit" value="{{ img.id }}">Edit image</button>
-            {%endfor%} 
+                {%endfor%} 
+                </div>
             </div>
             <div class="card-footer">
                 <div class="col-12">

@@ -31,9 +31,14 @@
                     This product has no picture
                 </div>
             {% endif %}
-            {%for img in product.images%}
-                <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
-            {%endfor%} 
+                <div class="row">
+                {%for img in product.images%}
+                    <div class="col-12 col-md-6">
+                        <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
+                    </div>
+                
+                {%endfor%} 
+                </div>
             </div>
             <div class="card-footer">
                 <div class="col-12">
