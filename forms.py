@@ -1,4 +1,6 @@
 from flask_wtf import FlaskForm
+from wtforms.widgets.core import TextArea
+from wtforms.widgets.html5 import NumberInput
 from geo import countries
 from wtforms.fields.core import DateField, IntegerField, SelectField, StringField
 from wtforms.fields.simple import PasswordField
@@ -91,10 +93,18 @@ class AddressAccountForm(FlaskForm):
         )
 
 
-class BusinessForm(FlaskForm):
-    #name
-    #description
-    #fiscal_number
-    #phone
-    #mobile
-    pass
+class BusinessAccountForm(FlaskForm):
+    name = StringField("Name",
+        validators=[DataRequired(), Length(5, 15, "Name does not respect our rules.")])
+    description = StringField("Description",
+        widget=TextArea()
+        )
+    fiscal_number = StringField("Fiscal number",
+        validators=[DataRequired(), Length(8, 15, "Fiscal number not valid.")]
+        )
+    phone = StringField("Phone",
+        validators=[DataRequired(), Length(6, 20, "Phone number is not valid.")]
+        )
+    mobile = StringField("Mobile",
+        validators=[DataRequired(), Length(6, 20, "Mobile number is not valid.")]
+        )

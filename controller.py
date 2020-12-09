@@ -3,7 +3,7 @@ from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from forms import *
 from logging import exception
-from os import O_NDELAY, remove
+from os import O_NDELAY, name, remove
 from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error, InternalError
@@ -21,7 +21,6 @@ from model.store import *
 from model.product import *
 from model.picture import *
 from model.order import *
-from model.customer import *
 
 import ast
 import os
@@ -370,6 +369,12 @@ def account():
     customer_form = CustomerAccountForm()
     user_form = UserAccountForm()
     address_form = AddressAccountForm()
+    business_form = BusinessForm()
+
+    if business_form.validate_on_submit():
+        db.execute(f"UPDATE business SET fiscal_number = :fiscal_number, phone = :phone, mobile = :mobile, name = :name, description = :description WHERE id = {session['business_id']}",
+            fiscal_number=business_form.fiscal_number.data, phone=business_form.phone.data, mobile=business_form.mobile.data,
+            name=business_form.name.data, description=business_form.description.data)
 
     if customer_form.validate_on_submit():
         db.execute(f"UPDATE customers SET first_name = :first_name, last_name = :last_name, age = :age WHERE user_id = {session['user_id']}",
@@ -399,26 +404,34 @@ def account():
 
         return redirect(url_for(ACCOUNT))
     
-    # check customer
-    query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
-    qc = ast.literal_eval(query_customer[1:len(query_customer)-1])
-    # check user
-    query_user = str(db.execute(f"SELECT email from user_customers WHERE id = {session['user_id']}"))
-    qu = ast.literal_eval(query_user[1:len(query_user)-1])
-    # check address
-    query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
-    qa = ast.literal_eval(query_address[1:len(query_address)-1])
+    if session["type"] == BUSINESS:
+        #check business
+        query_business = db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}")
+        qb = ast.literal_eval(query_business[1:len(query_business)-1])
+        field_data = MultiDict()
+        field_data.update(qb)
+        return render_template(ACCOUNT_PAGE, form=BusinessAccountForm(formdata=field_data))
+    else:
+        # check customer
+        query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
+        qc = ast.literal_eval(query_customer[1:len(query_customer)-1])
+        # check user
+        query_user = str(db.execute(f"SELECT email from user_customers WHERE id = {session['user_id']}"))
+        qu = ast.literal_eval(query_user[1:len(query_user)-1])
+        # check address
+        query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
+        qa = ast.literal_eval(query_address[1:len(query_address)-1])
+
+        field_data = MultiDict()
+        field_data.update(qu)
+        field_data.update(qc)
+        field_data.update(qa)
     
-    field_data = MultiDict()
-    field_data.update(qu)
-    field_data.update(qc)
-    field_data.update(qa)
-    
-    return render_template(ACCOUNT_PAGE,
-        customer=CustomerAccountForm(formdata=field_data),
-        user=UserAccountForm(formdata=field_data),
-        address=AddressAccountForm(formdata=field_data)
-        )
+        return render_template(ACCOUNT_PAGE,
+            customer=CustomerAccountForm(formdata=field_data),
+            user=UserAccountForm(formdata=field_data),
+            address=AddressAccountForm(formdata=field_data)
+            )
 
 
 @app.route("/logout")
