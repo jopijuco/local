@@ -1,58 +1,100 @@
 from flask_wtf import FlaskForm
-from wtforms import validators
+from geo import countries
 from wtforms.fields.core import DateField, IntegerField, SelectField, StringField
 from wtforms.fields.simple import PasswordField
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, InputRequired
+from wtforms.validators import DataRequired, Email, EqualTo, InputRequired, Length
 
 
 class RegisterForm(FlaskForm):
-    email = EmailField([Email(), validators.input_required()], render_kw={"placeholder": "Email"})
-    password = PasswordField([validators.input_required(), validators.length(min=4)], render_kw={"placeholder": "Password"})
-    confirm_pass = PasswordField([validators.input_required(), validators.length(min=4)], render_kw={"placeholder": "Confirm Password"})
-
-    def validate_email(form, field):
-        if len(field.data) < 4:
-            return False
-    
-    def validate_password(form, field):
-        if len(field.data) < 4:
-            return False
-    
-    def validate_confirm_pass(form, field):
-        if len(field.data) < 4:
-            return False
+    email = EmailField(
+        validators=[
+            Email("Not a valid email address"),
+            DataRequired("Must submit an email."),
+            Length(min=8, message="Not a valid email address")],
+        render_kw={"placeholder": "Email"}
+        )
+    password = PasswordField(
+        validators=[
+            DataRequired("Must submit a password"),
+            Length(min=4, message="This password is too short. Must have at least 4 characters.")],
+        render_kw={"placeholder": "Password"}
+        )
+    confirm_pass = PasswordField(
+        validators=[
+            EqualTo("password", "Passwords must match."),
+            Length(4)],
+        render_kw={"placeholder": "Confirm Password"}
+        )
 
 
 class LoginForm(FlaskForm):
-    username = StringField([validators.input_required(), validators.length(min=4, max=15)], render_kw={"placeholder": "Username"})
-    password = PasswordField([validators.input_required(), validators.length(min=4)], render_kw={"placeholder": "Password"})
+    username = StringField(
+        validators=[
+            DataRequired("Must provide your username"),
+            Length(4, 15, "Username is not valid. Try again.")],
+        render_kw={"placeholder": "Username"}
+        )
+    password = PasswordField(
+        validators=[
+            DataRequired("Must provide your password."),
+            Length(4, message="Password is incorrect. Try again.")],
+        render_kw={"placeholder": "Password"}
+        )
 
-    def validate_username(form, field):
-        if len(field.data) < 4 or len(field.data) > 15:
-            return False
-    
-    def validate_password(form, field):
-        if len(field.data) < 4:
-            return False
+
+class CustomerAccountForm(FlaskForm):
+    first_name = StringField("First name",
+        validators=[Length(15)]
+        )
+    last_name = StringField("Last name",
+        validators=[Length(20)]
+        )
+    age = IntegerField("Age",
+        validators=[Length(16, 100, "This number is not valid")]
+        )
 
 
-class CustomerForm(FlaskForm):
-    first_name = StringField("First name")
-    last_name = StringField("Last name")
+class UserAccountForm(FlaskForm):
     email = EmailField("Email")
-    password = PasswordField("Password")
-    confirm_password = PasswordField("Confirm Password")
-    fiscal_number = StringField([InputRequired("Fiscal number"), validators.length(min=9, max=15)])
-    birthday = DateField("Birth date")
-    address = StringField("Address")
-    street_number = IntegerField("Street number", [InputRequired(), validators.length(min=1, max=4)])
-    floor = StringField("Floor", [validators.length(min=1, max=10)])
-    city = StringField("City", [InputRequired(), validators.length(min=4, max=4)])
-    region = StringField("Region", [InputRequired(), validators.length(min=4, max=4)])
-    country = SelectField("Country")
-    zipcode = IntegerField("Zipcode", [InputRequired(), validators.length(min=4, max=9)])
+    password = PasswordField("Password",
+        validators=[Length(4, message="")]
+        )
+
+
+class AddressAccountForm(FlaskForm):
+    street = StringField("Address")
+    number = IntegerField("Street number",
+        validators=[Length(min=1, max=9999)]
+        )
+    floor = StringField("Floor",
+        validators=[Length(1, 8, "Floor is not valid.")]
+        )
+    city = StringField("City",
+        validators=[Length(2, 30, "City not valid")]
+        )
+    region = StringField("Region",
+        validators=[Length(2, 30, "Region not valid.")]
+        )
+
+    def country_list():
+        countries_name = list()
+        for country in countries:
+            countries_name.append(country["name"])
+        return countries_name
+
+    country = SelectField("Country",
+        choices=country_list()
+        )
+    zip_code = IntegerField("Zipcode",
+        validators=[Length(4, 10, "Zipcode is not valid.")]
+        )
 
 
 class BusinessForm(FlaskForm):
+    #name
+    #description
+    #fiscal_number
+    #phone
+    #mobile
     pass
