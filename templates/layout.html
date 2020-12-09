@@ -24,18 +24,16 @@
             <div class="collapse navbar-collapse" id="navbar">
                 
                 {% if session.user_id %}
+                    <ul class="navbar-nav mr-auto mt-2">
                     {% if session.type == "customer" %}
-                        <ul class="navbar-nav mr-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
-                        </ul>
                     {% elif session.type == "business" %}
-                        <ul class="navbar-nav mr-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Store</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
-                        </ul>
                     {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
+                    </ul>
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log Out</a></li>
