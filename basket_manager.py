@@ -24,4 +24,5 @@ class Basket_Manager():
         return total
     
     def empty_basket(self):
+        print ("delete basket")
         del self.basket[:]

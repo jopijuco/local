@@ -5,25 +5,32 @@
 {% endblock %}
 
 {% block main %}    
-    {% if products %}
+    {% if full_basket %}
         <h2>your basket:</h2>
-        <div class="row">
-        {% for product in products %}
-            {% for item in product %}
-                <div class="col-md-4 py-3">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename= product.main_img) }}"  alt="product picture" class="card-img-top"/>
-                        <div class="card-body">
-                            <span class="badge badge-warning">{{ item["price"] }}€</span>
-                            <h5 class="card-title">{{ item["name"] }}</h5>
-                            <p class="card-text">{{ item["description"] }}</p>
-                            <a href="{{ url_for('remove_basket', product=item) }}" class="btn btn-primary">Remove</a>
-                        </div>
+       
+        {% for basket in full_basket.baskets %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h1 class="card-title"> 
+                        Store_id : {{ basket.store_id }}
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive-md">
+                        <table class="table table-hover">
+                        {% for product in basket.products %}
+                            <tr>
+                                <td>{{ product.name }}</th>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.final_price }}€</td>
+                            </td>
+                        {% endfor %}
+                        </table>
                     </div>
                 </div>
-            {% endfor %}
+            </div>
         {% endfor %}
-        </div>
+       
         <hr>
         <div class="row">
             <h4>Total:</h4>
@@ -31,7 +38,7 @@
         </div>
         <hr>
         <div class="row">
-            <form action="{{ url_for('order') }}" method="POST">
+            <form action="{{ url_for('basket') }}" method="POST">
                 <input type="hidden" name="amount" value="{{ amount }}">
                 <button class="btn btn-secondary" type="submit">Buy</button>
             </form>
