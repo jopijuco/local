@@ -1,30 +1,37 @@
-{% extends "layout.html" %}
+{% extends "signin_layout.html" %}
+{% from "macros.html" import form_action %}
 
 {% block title %}
     Register
 {% endblock %}
 
-{% block main %}
-    <form action="{{ url_for('register') }}" method="POST">
+{% block form %} {{ form_action(url_for('register'), "POST") }} {% endblock %}
+
+{{ form.csrf_token }}
+
+{% block fields %}
+    {% for field in form %}
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="Email" type="email">
+            {{ field(class_="form-control", autofocus=true) }}
+            
+            {% if field.errors %}
+            <ul class="errors">
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}  
+
         </div>
-        <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password" type="password">
-        </div>
-         <div class="form-group">
-            <input class="form-control" name="password2" placeholder="Password (again)" type="password">
-        </div>
-        <div class="form-group">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-secondary active">
-                    <input type="radio" name="type_options" value="customer" checked> Customer
-                </label>
-                <label class="btn btn-secondary">
-                    <input type="radio" name="type_options" value="business" autocomplete="off"> Business
-                </label>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit">Register</button>
-    </form>
+    {% endfor %}
 {% endblock %}
+
+{% block failed %}
+    {% if message %}
+    <ul class="errors">
+        <li>{{ message }}</li>
+    </ul>
+    {% endif %}
+{% endblock %}
+
+{% block submit %} Register {% endblock %}

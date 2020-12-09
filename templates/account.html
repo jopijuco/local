@@ -1,12 +1,118 @@
 {% extends "layout.html" %}
+{% from "macros.html" import form_action %}
 
 {% block title %}
-    Account
+    local: account
 {% endblock %}
 
 {% block main %}
-   
-    {% for x in data %}
-    {%endfor%}
+    <h4>Edit account</h4>
+    {{ form_action(url_for('account'), "POST") }}
+    {{ customer.csrf_token }}
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ customer.first_name.label }}
+                    {{ customer.first_name(class_="form-control") }}
+                    
+                    {% if customer.first_name.errors %}
+                    <ul class="errors">
+                        {% for error in customer.first_name.errors %}
+                        <li>{{ field.error }}</li>
+                        {% endfor %}
+                    </ul>        
+                    {% endif%}
 
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ customer.last_name.label }}
+                    {{ customer.last_name(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ customer.age.label }}
+                    {{ customer.age(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Update</button>
+    </form>
+    <hr>
+    {{ form_action(url_for('account'), "POST") }}
+    {{ user.csrf_token }}
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group">
+                    {{ user.email.label }}
+                    {{ user.email(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ user.password.label }}
+                    {{ user.password(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Update</button>
+    </form>
+    <hr>
+    {{ form_action(url_for('account'), "POST") }}
+    {{ address.csrf_token }}
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    {{ address.street.label }}
+                    {{ address.street(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+                <div class="form-group">
+                    {{ address.number.label }}
+                    {{ address.number(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-1">
+                <div class="form-group">
+                    {{ address.floor.label }}
+                    {{ address.floor(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    {{ address.zip_code.label }}
+                    {{ address.zip_code(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    {{ address.city.label }}
+                    {{ address.city(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    {{ address.region.label }}
+                    {{ address.region(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ address.country.label }}
+                    {{ address.country(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Update</button>
+    </form>
 {% endblock %}

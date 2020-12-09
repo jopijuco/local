@@ -1,6 +1,9 @@
 from datetime import datetime
+
+from werkzeug.datastructures import MultiDict
+from forms import *
 from logging import exception
-from os import remove
+from os import O_NDELAY, name, remove
 from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error, InternalError
@@ -40,60 +43,66 @@ def index():
 
 @app.route("/register", methods=[GET, POST])
 def register():
-    if request.method == POST:
-        email = request.form.get("email")
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        email = form.email.data
         username = email[:email.find("@")]
-        user_table = None
+        table = None
 
         if request.form.get("type_options") == BUSINESS:
-            user_table = BUSINESS_TABLE
+            table = USER_BUSINESS_TABLE
         else:
-            user_table = CUSTOMER_TABLE
+            table = USER_CUSTOMER_TABLE
 
-        check_user = db.execute(f"SELECT * FROM {user_table} WHERE username = :username OR email = :email",
+        check_user = db.execute(f"SELECT * FROM {table} WHERE username = :username OR email = :email",
                                     username=username,
                                     email=email)
         if len(check_user) >= 1:
-            return "USER ALREADY EXISTS"
+            message="This user already exists."
+            return render_template(REGISTER_PAGE, form=form, message=message)
     
-        password = request.form.get("password")
-        db.execute("INSERT INTO user_businesses (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
+        db.execute(f"INSERT INTO {table} (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
                     username=username,
                     email=email,
-                    hash_pass=generate_password_hash(password, "sha256"))
+                    hash_pass=generate_password_hash(form.password.data, "sha256"))
         
         return redirect(url_for(LOGIN))
-    return render_template(REGISTER_PAGE)
+    return render_template(REGISTER_PAGE, form=form)
 
 
 @app.route("/login", methods=[GET, POST])
 def login():
-    if request.method == POST:
+    form = LoginForm()
+
+    if form.validate_on_submit():
         session.clear()
 
         if request.form.get("type_options") == BUSINESS:
-            table = BUSINESS_TABLE
+            table = USER_BUSINESS_TABLE
             user_type = BUSINESS
         else:
-            table = CUSTOMER_TABLE
+            table = USER_CUSTOMER_TABLE
             user_type = CUSTOMER
+
+        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=form.username.data)
         
-        user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=request.form.get("username"))
-        #or not check_password_hash(user[0]["hash_pass"], request.form.get("password"))
-        if len(user) != 1:
-            return "FAILED LOGIN"
+        if len(user) != 1 or not check_password_hash(user[0]["hash_pass"], form.password.data):
+            message = "Login failed."
+            return render_template(LOGIN_PAGE, form=form, message=message)
         
         session["user_id"] = user[0]["id"]
         session["type"] = user_type
 
         if user_type == BUSINESS:
             business = db.execute(f"SELECT id FROM business WHERE user_id = {session['user_id']}")
-            if not business:
+            if not business:  
                 return redirect(url_for(BUS_FORM))
             else:
                 session["business_id"] = business[0]["id"]
                 return redirect(url_for(INDEX))
-    return render_template(LOGIN_PAGE)
+        return redirect(url_for(INDEX))
+    return render_template(LOGIN_PAGE, form=form)
 
 
 @app.route("/business-form", methods=[GET, POST])
@@ -109,7 +118,7 @@ def business_form():
         sector = request.form.get("sector")
 
         try:
-            business = db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
+            db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
         except Error as e:
             return render_template(BUS_FORM_PAGE, message=e)
         
@@ -469,8 +478,73 @@ def history():
     
 @app.route("/account", methods=[GET, POST])
 @login_required
-def account():  
-    return render_template("account.html")
+def account():
+    customer_form = CustomerAccountForm()
+    user_form = UserAccountForm()
+    address_form = AddressAccountForm()
+    business_form = BusinessForm()
+
+    if business_form.validate_on_submit():
+        db.execute(f"UPDATE business SET fiscal_number = :fiscal_number, phone = :phone, mobile = :mobile, name = :name, description = :description WHERE id = {session['business_id']}",
+            fiscal_number=business_form.fiscal_number.data, phone=business_form.phone.data, mobile=business_form.mobile.data,
+            name=business_form.name.data, description=business_form.description.data)
+
+    if customer_form.validate_on_submit():
+        db.execute(f"UPDATE customers SET first_name = :first_name, last_name = :last_name, age = :age WHERE user_id = {session['user_id']}",
+            first_name=customer_form.first_name.data, last_name=customer_form.last_name.data, age=customer_form.age.data)
+    
+    if user_form.validate_on_submit():
+        db.execute(f"UPDATE user_customers SET email = :email, hash_pass = :password WHERE id = {session['user_id']}",
+            email=user_form.email.data, password=generate_password_hash(user_form.password.data, "sha256"))
+
+    if address_form.validate_on_submit():
+        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c WHERE c.user_id = {session['user_id']}")
+        
+        if len(check_address) == 0:
+            db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
+                street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
+                city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
+
+            address_id = db.execute(f"SELECT id FROM addresses WHERE street = {address_form.street.data} AND number = {address_form.number.data} AND zip_code = {address_form.zip_code.data} AND city = {address_form.city.data} AND region = {address_form.region.data} AND country = {address_form.country.data}")
+
+            db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
+        else:
+            address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
+
+            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['id']}",
+                street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
+                city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
+
+        return redirect(url_for(ACCOUNT))
+    
+    if session["type"] == BUSINESS:
+        #check business
+        query_business = db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}")
+        qb = ast.literal_eval(query_business[1:len(query_business)-1])
+        field_data = MultiDict()
+        field_data.update(qb)
+        return render_template(ACCOUNT_PAGE, form=BusinessAccountForm(formdata=field_data))
+    else:
+        # check customer
+        query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
+        qc = ast.literal_eval(query_customer[1:len(query_customer)-1])
+        # check user
+        query_user = str(db.execute(f"SELECT email from user_customers WHERE id = {session['user_id']}"))
+        qu = ast.literal_eval(query_user[1:len(query_user)-1])
+        # check address
+        query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
+        qa = ast.literal_eval(query_address[1:len(query_address)-1])
+
+        field_data = MultiDict()
+        field_data.update(qu)
+        field_data.update(qc)
+        field_data.update(qa)
+    
+        return render_template(ACCOUNT_PAGE,
+            customer=CustomerAccountForm(formdata=field_data),
+            user=UserAccountForm(formdata=field_data),
+            address=AddressAccountForm(formdata=field_data)
+            )
 
 
 @app.route("/logout")
