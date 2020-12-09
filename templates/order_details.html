@@ -11,7 +11,7 @@
         </div>
         
         <div class="card-body">
-        {% if not history %}
+        {% if updateStatusAvailable %}
             <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">    
                 <div class="form-group mx-sm-3 mb-2">
                     <label for="status" class="d-none d-md-inline mr-2" >Status :</label>
