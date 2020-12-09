@@ -14,7 +14,7 @@
         {% if not history %}
             <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">    
                 <div class="form-group mx-sm-3 mb-2">
-                    <label for="status" class="mr-2" >Status :</label>
+                    <label for="status" class="d-none d-md-inline mr-2" >Status :</label>
                     <select class="form-control" id="status" name="status">
                     {%for status in status_list%}
                         {% if status.id == order.status_id %}
@@ -30,19 +30,19 @@
             <hr class="my-4">
         {% endif %}
             <div class="row jumbotron">
-                <div class="col-4">
+                <div class="col-12  mb-3 col-md-4 mb-md-0">
                     <div><b>Ref. : </b>#{{ order.id }}</div>
                     <div><b>Date : </b>{{ order.date }}</div>
                     <div><b>Total amount : </b>{{ order.amount }}€</div>
                 </div>
-                <div class="col-4">
+                <div class="col-12 col-sm-6 col-md-4 ">
                     <h3>Customer</h3>
                     <div>{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
                     <div>{{ order.customer.number }} {{ order.customer.street }}</div>
                     <div>{{ order.customer.zip_code }} {{ order.customer.city }}</div>
                     <div>{{ order.customer.region }} {{ order.customer.country }}</div>
                 </div>
-                <div class="col-4">
+                <div class="col-12 col-sm-6 col-md-4 ">
                     <h3>Store</h3>
                     <div>{{ order.store.name }}</div>
                     <div>{{ order.store.number }} {{ order.store.street }}</div>
