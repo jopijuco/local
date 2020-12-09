@@ -339,9 +339,7 @@ def remove_basket(product):
     for key in dict_product.keys():
         if key == "id":
             bm.remove(dict_product[key])
-        # elif key == "shop_id":
-        #     bm.remove(dict_product[key])
-
+    
     resp = redirect(url_for(BASKET))
     resp.set_cookie("basket", str(bm.get_list()))
     return resp
