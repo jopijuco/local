@@ -12,12 +12,19 @@
             <div class="card mt-3">
                 <div class="card-header">
                     <h1 class="card-title"> 
-                        Store_id : {{ basket.store_id }}
+                        Store : {{ basket.store_name }}
                     </h1>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive-md">
                         <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">product</th>
+                                    <th scope="col">quantity</th>
+                                    <th scope="col">total price</th>
+                                </tr>
+                            </thead>
                         {% for product in basket.products %}
                             <tr>
                                 <td>{{ product.name }}</th>

@@ -354,7 +354,6 @@ def basket():
     id_s = list()
 
     for index, id in enumerate(bm.get_list()):
-        print("here")
         if index % 2 == 0:
             id_p.append(id)
         else:
@@ -370,13 +369,21 @@ def basket():
         #remove doublon from store id list
         store_id_list = list(set(id_s))
         for id in store_id_list:
-            new_basket = Basket(id, 0)
+            store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=id)
+            new_basket = Basket(id, store_name[0]["name"], 0)
             amount = 0
-            for x in basket:
-                for y in x:
+            for b in basket:
+                for y in b:
                     if y['store_id'] == new_basket.store_id:
-                        p = Product_ordered(y["product_id"], y["name"], 1, y["price"])
-                        new_basket.add_product(p)
+                        product_exist = False
+                        for p in new_basket.products:
+                            if p.id == y["product_id"]:
+                                p.quantity += 1
+                                p.final_price += y["price"]
+                                product_exist = True
+                        if not product_exist:
+                            p = Product_ordered(y["product_id"], y["name"], 1, y["price"])
+                            new_basket.add_product(p)
                         amount += y["price"]
             new_basket.amount = amount
             full_basket.add_basket(new_basket)
@@ -390,15 +397,9 @@ def basket():
             order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = session['user_id'])
             for b in a.products:
                 db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
-                #a.id, quantity = a.quantity, price = a.price)
         bm.empty_basket()  
         full_basket = False
-                #order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
-        #orders.append(order)
-    #     print(a.store_id)
-    #     for b in a.products:
-    #         print(b.name)
-    #print(full_basket)
+        
     return render_template("basket.html", products=basket, full_basket = full_basket, amount=bm.total("price", basket))
 
 
@@ -424,33 +425,32 @@ def order():
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
 def order_details(order_id):
-    #to do : customer view
+    updateStatusAvailable = False
+    
+    status_list = []
+    for row in db.execute("SELECT * FROM status"):
+        status = Status(row["id"], row["name"], row["description"])
+        status_list.append(status)
+    if request.method == POST:
+        new_status = request.form.get("status")
+        db.execute("UPDATE orders SET status_id=:status_id WHERE id=:id", id=order_id, status_id=new_status)
+    for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name, sto.name AS store_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) WHERE o.id = :id", id = order_id):
+        s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
+        store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
+        c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+        customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
+        order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
     if session["type"] == BUSINESS:
-        status_list = []
-        for row in db.execute("SELECT * FROM status"):
-            status = Status(row["id"], row["name"], row["description"])
-            status_list.append(status)
-        if request.method == POST:
-            new_status = request.form.get("status")
-            db.execute("UPDATE orders SET status_id=:status_id WHERE id=:id", id=order_id, status_id=new_status)
-        for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name, sto.name AS store_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) WHERE o.id = :id", id = order_id):
-            s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
-            store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
-            c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
-            customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
-            order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
-        history = False
-        if order.status_id == 4:
-            history = True
-        for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
-            product = Product_ordered(row["product_id"], row["name"], row["quantity"], row["final_price"])
-            order.add_product(product)
-        return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, history = history)
+        if order.status_id != 4:
+            updateStatusAvailable = True
+    for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
+        product = Product_ordered(row["product_id"], row["name"], row["quantity"], row["final_price"])
+        order.add_product(product)
+    return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
 
 @app.route("/history")
 @login_required
-#to do : customer view
 def history():
     orders = []
     #retrieve all completed orders (status_id = 4)
@@ -466,8 +466,7 @@ def history():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-        
-    return render_template(ORDER_PAGE, orders=orders, history = True)
+    return render_template(ORDER_PAGE, orders=orders, updateStatusAvailable = False)
 
     
 @app.route("/account", methods=[GET, POST])

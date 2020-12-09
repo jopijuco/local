@@ -6,8 +6,9 @@ class FullBasket:
         self.baskets.append(basket)
 
 class Basket:
-    def __init__(self, store_id, amount):
+    def __init__(self, store_id, store_name, amount):
         self.store_id = store_id
+        self.store_name = store_name
         self.amount = amount
         self.products = []
 
