@@ -13,8 +13,9 @@ class Order:
         self.products.append(product)
 
 class Product_ordered:
-    def __init__(self, id, name, quantity, final_price):
+    def __init__(self, id, name, unit_price, quantity, final_price):
         self.id = id
         self.name = name
+        self.unit_price = unit_price
         self.quantity = quantity
         self.final_price = final_price

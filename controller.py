@@ -3,7 +3,8 @@ from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from forms import *
 from logging import exception
-from os import O_NDELAY, name, remove
+#from os import O_NDELAY, name, remove
+from os import name, remove
 from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error, InternalError
@@ -104,7 +105,7 @@ def login():
         return redirect(url_for(INDEX))
     return render_template(LOGIN_PAGE, form=form)
 
-
+#to do before pull request : retreive initial code for business_form
 @app.route("/business-form", methods=[GET, POST])
 @login_required
 def business_form():
@@ -117,12 +118,12 @@ def business_form():
         mobile = request.form.get("mobile")
         sector = request.form.get("sector")
 
-        try:
-            db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
-        except Error as e:
-            return render_template(BUS_FORM_PAGE, message=e)
+        # try:
+        #     db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
+        # except Error as e:
+        #     return render_template(BUS_FORM_PAGE, message=e)
         
-        db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}, {session['user_id']})")
+        session["business_id"] = db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES ({fiscal_number}, 1, {phone}, {mobile}, '{name}', '{description}', {session['user_id']})")
         return redirect(url_for(INDEX))
 
     #sectors = db.execute("SELECT * FROM sectors")
@@ -389,7 +390,7 @@ def basket():
                                 p.final_price += y["price"]
                                 product_exist = True
                         if not product_exist:
-                            p = Product_ordered(y["product_id"], y["name"], 1, y["price"])
+                            p = Product_ordered(y["product_id"], y["price"], y["name"], 1, y["price"])
                             new_basket.add_product(p)
                         amount += y["price"]
             new_basket.amount = amount
@@ -427,7 +428,7 @@ def order():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, history = False)
+    return render_template(ORDER_PAGE, orders=orders,  title ="My current orders")
 
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
@@ -451,7 +452,7 @@ def order_details(order_id):
         if order.status_id != 4:
             updateStatusAvailable = True
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
-        product = Product_ordered(row["product_id"], row["name"], row["quantity"], row["final_price"])
+        product = Product_ordered(row["product_id"], '', row["name"], row["quantity"], row["final_price"])
         order.add_product(product)
     return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
@@ -473,7 +474,7 @@ def history():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, updateStatusAvailable = False)
+    return render_template(ORDER_PAGE, orders=orders, title = "History (completed orders)")
 
     
 @app.route("/account", methods=[GET, POST])

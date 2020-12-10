@@ -21,13 +21,19 @@
                             <thead>
                                 <tr>
                                     <th scope="col">product</th>
+                                    <th scope="col">product</th>
+                                    <th scope="col">unit price</th>
                                     <th scope="col">quantity</th>
                                     <th scope="col">total price</th>
                                 </tr>
                             </thead>
                         {% for product in basket.products %}
                             <tr>
-                                <td>{{ product.name }}</th>
+                                <td class="w-25">
+                                    <img src="https://s3.eu-central-1.amazonaws.com/bootstrapbaymisc/blog/24_days_bootstrap/sheep-3.jpg" class="img-fluid img-thumbnail" alt="Sheep">
+                                </td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.unit_price }}€</td>
                                 <td>{{ product.quantity }}</td>
                                 <td>{{ product.final_price }}€</td>
                             </td>
