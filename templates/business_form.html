@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -28,18 +27,90 @@
             </div>
         </nav>
         <main class="container p-5">
-            <form action="{{ url_for('business_form') }}" method="POST">
-                <input type="text" name="name" placeholder="Designation">
-                <input type="text" name="description" placeholder="Description">
-                <input type="text" name="fiscal_number" placeholder="Fiscal number">
-                <input type="text" name="phone" placeholder="Phone">
-                <input type="text" name="mobile" placeholder="Mobile phone">
-                <select name="sectors">
-                {% for sector in sectors %}
-                    <option value="{{ sector.id }}">{{ sector.name }}</option>
-                {% endfor %}
-                </select>
-                <button class="btn btn-primary" type="submit">Submit</button>
+            <h3>Welcome {{ username }},</h3>
+            <h5>Please submit your info so you can start selling your products!</h5>
+            {% from "macros.html" import form_action %}
+            {{ form_action( url_for('business_form'), "POST") }}
+            {{ form.csrf_token }}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.name.label }}
+                            {{ form.name(class_="form-control") }}
+
+                            {% if form.name.errors %}
+                            <ul class="errors">
+                            {% for error in form.name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.fiscal_number.label }}
+                            {{ form.fiscal_number(class_="form-control") }}
+
+                            {% if form.fiscal_number.errors %}
+                            <ul class="errors">
+                            {% for error in form.first_name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.activity_sector.label }}
+                            {{ form.activity_sector(class_="form-control") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form.description.label }}
+                            {{ form.description(class_="form-control") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.phone.label }}
+                            {{ form.phone(class_="form-control") }}
+
+                            {% if form.phone.errors %}
+                            <ul class="errors">
+                            {% for error in form.first_name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.mobile.label }}
+                            {{ form.mobile(class_="form-control") }}
+
+                            {% if form.mobile.errors %}
+                            <ul class="errors">
+                            {% for error in form.first_name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                </div>
+                {{ form.submit(class_="btn btn-primary") }}
             </form>
         </main>
         <footer class="small text-center text-muted">
