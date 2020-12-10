@@ -1,11 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms.widgets.core import TextArea
-from wtforms.widgets.html5 import NumberInput
-from geo import countries
+from wtforms.widgets.core import SubmitInput, TextArea
 from wtforms.fields.core import DateField, IntegerField, SelectField, StringField
-from wtforms.fields.simple import PasswordField
+from wtforms.fields.simple import PasswordField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, Email, EqualTo, InputRequired, Length
+
+from application import db
+from geo import countries
 
 
 class RegisterForm(FlaskForm):
@@ -95,7 +96,8 @@ class AddressAccountForm(FlaskForm):
 
 class BusinessAccountForm(FlaskForm):
     name = StringField("Name",
-        validators=[DataRequired(), Length(5, 15, "Name does not respect our rules.")])
+        validators=[DataRequired(), Length(5, 15, "Name does not respect our rules.")]
+        )
     description = StringField("Description",
         widget=TextArea()
         )
@@ -108,3 +110,21 @@ class BusinessAccountForm(FlaskForm):
     mobile = StringField("Mobile",
         validators=[DataRequired(), Length(6, 20, "Mobile number is not valid.")]
         )
+
+
+class BusinessForm(BusinessAccountForm):
+    def get_sectors():
+        query = db.execute("SELECT id, name FROM activity_sector")
+        sectors = list()
+
+        for value in query:
+            sectors.append((value["id"], value["name"]))
+        return sectors
+
+    activity_sector = SelectField("Sector",
+        choices=get_sectors()
+        )
+    submit = SubmitField("Submit")
+
+class CustomerForm(FlaskForm):
+    pass
