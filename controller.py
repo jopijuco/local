@@ -390,7 +390,13 @@ def basket():
                                 p.final_price += y["price"]
                                 product_exist = True
                         if not product_exist:
-                            p = Product_ordered(y["product_id"], y["price"], y["name"], 1, y["price"])
+                            imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = y["product_id"])
+                            if len(imgs) >= 1:
+                                main_img = Picture('', imgs[0]["file"],'')
+                                main_img.name_thumbnail() 
+                            else:
+                                main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+                            p = Product_ordered(y["product_id"], y["name"], main_img.thumbnail,  y["price"], 1, y["price"])
                             new_basket.add_product(p)
                         amount += y["price"]
             new_basket.amount = amount
@@ -452,7 +458,7 @@ def order_details(order_id):
         if order.status_id != 4:
             updateStatusAvailable = True
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
-        product = Product_ordered(row["product_id"], '', row["name"], row["quantity"], row["final_price"])
+        product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"])
         order.add_product(product)
     return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
