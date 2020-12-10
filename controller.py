@@ -5,7 +5,7 @@ from forms import *
 from logging import exception
 #from os import O_NDELAY, name, remove
 from os import name, remove
-from basket_manager import Basket_Manager
+from basket_manager import *
 import re
 from sqlite3.dbapi2 import Error, InternalError
 
@@ -24,7 +24,6 @@ from model.picture import *
 from model.order import *
 from model.status import *
 from model.customer import *
-from model.basket import *
 
 import ast
 import os
@@ -367,7 +366,7 @@ def remove_basket():
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
-    bask = bm.get_dict()
+    basket = bm.get_dict()
     store_list = bm.get_store_list()
     if len(store_list) > 0 :
         full_basket = FullBasket()
@@ -375,9 +374,9 @@ def basket():
             store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=store_id)
             new_basket = Basket(store_id, store_name[0]["name"], 0)
             amount = 0
-            for key, value in bask.items():
+            for key, value in basket.items():
                 if key[1] == store_id:
-                    product_info = db.execute("SELECT p.name, sp.price FROM products p INNER JOIN product_store sp ON (p.id = sp.product_id AND sp.store_id = :store_id) WHERE p.id = :product_id", store_id = key[1], product_id = key[0])
+                    product_info = db.execute("SELECT p.name, sp.price, sp.stock FROM products p INNER JOIN product_store sp ON (p.id = sp.product_id AND sp.store_id = :store_id) WHERE p.id = :product_id", store_id = key[1], product_id = key[0])
                     imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = key[0])
                     if len(imgs) >= 1:
                         main_img = Picture('', imgs[0]["file"],'')
@@ -385,7 +384,7 @@ def basket():
                     else:
                         main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
                     final_price = float(value) * float(product_info[0]["price"])
-                    p = Product_ordered(key[0], product_info[0]["name"], main_img.thumbnail,  product_info[0]["price"], value, final_price)
+                    p = Product_ordered(key[0], product_info[0]["name"], main_img.thumbnail,  product_info[0]["price"], value, final_price, product_info[0]["stock"])
                     new_basket.add_product(p)
                     amount += final_price
             new_basket.amount = amount
@@ -393,6 +392,7 @@ def basket():
     else:
         full_basket = False
 
+    #make an order
     if request.method == POST:
         orders = []
         for a in full_basket.baskets:
@@ -449,7 +449,7 @@ def order_details(order_id):
         if order.status_id != 4:
             updateStatusAvailable = True
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
-        product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"])
+        product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"], '')
         order.add_product(product)
     return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
