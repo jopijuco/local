@@ -8,8 +8,8 @@ class Basket_Manager():
     def add(self, product_id, quantity):
         self.basket[product_id] = quantity
     
-    def remove(self, product_id):
-        del self.basket.remove[product_id]
+    # def remove(self, product_id):
+    #     del self.basket.remove[product_id]
     
     # def get_name(string):
     #     name = string[string.find("name:"):]
@@ -31,4 +31,4 @@ class Basket_Manager():
         return list(set(store_list))
     
     def empty_basket(self):
-        del self.basket[:]
+        del self.basket

@@ -326,22 +326,6 @@ def single_product_store(product_id):
         stores.append(store)
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
 
-
-# @app.route("/add_basket/<product>")
-# def add_basket(product):
-#     dict_product = ast.literal_eval(product)
-    
-#     for key in dict_product.keys():
-#         print("key :"+key)
-#         if key == "prd_id":
-#             bm.add(dict_product[key],1)
-#         # elif key == "shop_id":
-#         #     bm.add(dict_product[key])
-#     print(bm.get_list())
-#     resp = redirect(url_for(INDEX))
-#     resp.set_cookie("basket", str(bm.get_list()))
-#     return resp
-
 @app.route("/add_basket", methods=[GET, POST])
 def add_basket():
     if request.method == POST:
@@ -362,19 +346,13 @@ def add_basket():
         resp.set_cookie("basket", str(bm.get_list()))
     return resp
 
-@app.route("/remove_basket/<product_id>")
-def remove_basket(product_id):
-    print(product_id)
-    print(bm.get_list())
-    bm.remove(2)
-    bm.remove(1)
-    print(bm.get_list())
-    # dict_product = ast.literal_eval(product)
-
-    # for key in dict_product.keys():
-    #     if key == "id":
-    #         bm.remove(dict_product[key])
-    
+@app.route("/remove_basket", methods=[GET, POST])
+def remove_basket():
+    if request.method == POST:
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        basket = bm.get_list()
+        del basket[product_id, store_id]  
     resp = redirect(url_for(BASKET))
     resp.set_cookie("basket", str(bm.get_list()))
     return resp
