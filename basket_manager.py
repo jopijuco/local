@@ -16,12 +16,18 @@ class Basket_Manager():
     #     value = name[:name.find(",")]
     #     return value
     
-    def total(self, field, products):
+    def total(self, full_basket):
         total = 0
-        for result in products:
-            for dict in result:
-                total += float(dict[field])
+        for b in full_basket.baskets:
+            total += float(b.amount)
         return total
+    
+    def get_store_list(self):
+        store_list = []
+        for key in self.basket:
+            store_list.append(key[1])
+        #remove doublon from store_list
+        return list(set(store_list))
     
     def empty_basket(self):
         del self.basket[:]

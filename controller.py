@@ -347,10 +347,12 @@ def add_basket():
     if request.method == POST:
         product_id = request.form.get("product_id")
         store_id = request.form.get("store_id")
+        print("ajout du produit : "+str(product_id))
+        print("du store : "+str(store_id))
         new = True
         basket = bm.get_list()
         for key in basket:
-            if key[0] == product_id and key[0] == store_id:
+            if key[0] == product_id and key[1] == store_id:
                 print("quantité initiale :"+str(basket[key]))
                 basket[key] += 1
                 print("deja dans le panier, quantity++"+str(basket[key]))
@@ -385,52 +387,41 @@ def remove_basket(product_id):
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
-    basket = list()
-    # id_p = list()
-    # id_s = list()
-
-    # for index, id in enumerate(bm.get_list()):
-    #     if index % 2 == 0:
-    #         id_p.append(id)
-    #     else:
-    #         id_s.append(id)
-    id_s = [1, 2]
-
     bask = bm.get_list()
-    for key in bask:
-    #for i in range(len(id_p)):
-        products = db.execute(f"SELECT p.*, ps.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {bask[key]} AND ps.store_id = 1 INNER JOIN stores AS s ON ps.store_id = s.id")
-        basket.append(products)
-    
-    #new stucture
-    if len(basket) > 0 :
+
+    store_list = bm.get_store_list()
+    if len(store_list) > 0 :
         full_basket = FullBasket()
-        #remove doublon from store id list
-        store_id_list = list(set(id_s))
-        for id in store_id_list:
-            store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=id)
-            new_basket = Basket(id, store_name[0]["name"], 0)
+        for store_id in store_list:
+            store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=store_id)
+            new_basket = Basket(store_id, store_name[0]["name"], 0)
             amount = 0
-            for b in basket:
-                for y in b:
-                    if y['store_id'] == new_basket.store_id:
-                        product_exist = False
-                        for p in new_basket.products:
-                            if p.id == y["product_id"]:
-                                p.quantity += 1
-                                p.final_price += y["price"]
-                                product_exist = True
-                        if not product_exist:
-                            imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = y["product_id"])
-                            if len(imgs) >= 1:
-                                main_img = Picture('', imgs[0]["file"],'')
-                                main_img.name_thumbnail() 
-                            else:
-                                main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
-                            p = Product_ordered(y["product_id"], y["name"], main_img.thumbnail,  y["price"], 1, y["price"])
-                            new_basket.add_product(p)
-                        amount += y["price"]
+            for key, value in bask.items():
+                if key[1] == store_id:
+                    #exist = False
+                    #for product in new_basket.products:
+                        # if product.id == key[0]:
+                        #     print("passsaaaaage+++++++++++++++++++++++++++++++++++++++")
+                        #     product.quantity += 1
+                        #     product.final_price += product.unit_price
+                        #     amount += product.unit_price
+                        #     exist = True
+                        #     break
+                    #if not exist:
+                    product_info = db.execute("SELECT p.name, sp.price FROM products p INNER JOIN product_store sp ON (p.id = sp.product_id AND sp.store_id = :store_id) WHERE p.id = :product_id", store_id = key[1], product_id = key[0])
+                    imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = key[0])
+                    if len(imgs) >= 1:
+                        main_img = Picture('', imgs[0]["file"],'')
+                        main_img.name_thumbnail() 
+                    else:
+                        main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+                    final_price = float(value) * float(product_info[0]["price"])
+                    p = Product_ordered(key[0], product_info[0]["name"], main_img.thumbnail,  product_info[0]["price"], value, final_price)
+                    new_basket.add_product(p)
+                    amount += product_info[0]["price"]     
             new_basket.amount = amount
+            print("ajouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuut")
+            print(new_basket.store_id)
             full_basket.add_basket(new_basket)
     else:
         full_basket = False
@@ -445,7 +436,7 @@ def basket():
         bm.empty_basket()  
         full_basket = False
         
-    return render_template("basket.html", products=basket, full_basket = full_basket, amount=bm.total("price", basket))
+    return render_template("basket.html", products=basket, full_basket = full_basket, amount=bm.total(full_basket))
 
 
 @app.route("/orders", methods=[GET, POST])
