@@ -22,7 +22,7 @@
                                 <tr>
                                     <th colspan=2 scope="col">product</th>
                                     <th scope="col" class="text-right">unit price</th>
-                                    <th scope="col" class="text-right">quantity</th>
+                                    <th colspan=2 scope="col" class="text-right">quantity</th>
                                     <th scope="col" class="text-right">total price</th>
                                 </tr>
                             </thead>
@@ -33,7 +33,26 @@
                                 </td>
                                 <td>{{ product.name }}</td>
                                 <td class="text-right">{{ product.unit_price }}€</td>
-                                <td class="text-right">{{ product.quantity }}</td>
+                               
+                                <form action="{{ url_for('update_quantity_basket') }}" method="post" class="form-inline" enctype="multipart/form-data">    
+                                    <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+                                    <input type="hidden" id="store_id" name="store_id" value="{{ basket.store_id }}">
+                                    <td>
+                                        <select class="form-control" id="quantity" name="quantity">
+                                        {%for i in range(1, 10)%} 
+                                            {% if product.quantity == i %}
+                                                <option value={{ i }} selected>{{ i }}</option>
+                                            {% else %}
+                                                <option value={{ i }}>{{ i }}</option>
+                                            {%endif%} 
+                                        {%endfor%} 
+                                        </select>
+                                    </td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary mb-2">V</button>
+                                </td>
+                                </form>
+
                                 <td class="text-right">{{ product.final_price }}€</td>
 
                                 <form action="{{ url_for('remove_basket')}}" method="post" enctype="multipart/form-data">
@@ -42,7 +61,7 @@
                                     <td><button class="btn btn-primary" type="submit" name="submit" value="add">Remove</button></td>
                                 </form>
 
-                            </td>
+                            </tr>
                         {% endfor %}
                         </table>
                     </div>

@@ -335,15 +335,30 @@ def add_basket():
         basket = bm.get_list()
         for key in basket:
             if key[0] == product_id and key[1] == store_id:
-                print("quantité initiale :"+str(basket[key]))
+                #print("quantité initiale :"+str(basket[key]))
                 basket[key] += 1
-                print("deja dans le panier, quantity++"+str(basket[key]))
+                #print("deja dans le panier, quantity++"+str(basket[key]))
                 new = False
         if new:
             bm.add((product_id,store_id),1)
       
         resp = redirect(url_for(INDEX))
         resp.set_cookie("basket", str(bm.get_list()))
+    return resp
+
+@app.route("/update_quantity_basket", methods=[GET, POST])
+def update_quantity_basket():
+    if request.method == POST:
+        print("update quantity to"+request.form.get("quantity"))
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        basket = bm.get_list()
+        print(product_id)
+        print(type(request.form.get("quantity")))
+        basket[product_id, store_id] = int(request.form.get("quantity"))
+        print(basket)
+    resp = redirect(url_for(BASKET))
+    resp.set_cookie("basket", str(bm.get_list()))
     return resp
 
 @app.route("/remove_basket", methods=[GET, POST])
@@ -362,8 +377,6 @@ def remove_basket():
 def basket():    
     bask = bm.get_list()
     store_list = bm.get_store_list()
-    print("longueur")
-    print(len(store_list))
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
@@ -386,7 +399,6 @@ def basket():
             new_basket.amount = amount
             full_basket.add_basket(new_basket)
     else:
-        print("enter here")
         full_basket = False
 
     if request.method == POST:
@@ -428,7 +440,6 @@ def order():
 @login_required
 def order_details(order_id):
     updateStatusAvailable = False
-    
     status_list = []
     for row in db.execute("SELECT * FROM status"):
         status = Status(row["id"], row["name"], row["description"])
