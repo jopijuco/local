@@ -332,33 +332,26 @@ def add_basket():
         product_id = request.form.get("product_id")
         store_id = request.form.get("store_id")
         new = True
-        basket = bm.get_list()
+        basket = bm.get_dict()
         for key in basket:
             if key[0] == product_id and key[1] == store_id:
-                #print("quantité initiale :"+str(basket[key]))
                 basket[key] += 1
-                #print("deja dans le panier, quantity++"+str(basket[key]))
                 new = False
         if new:
             bm.add((product_id,store_id),1)
-      
         resp = redirect(url_for(INDEX))
-        resp.set_cookie("basket", str(bm.get_list()))
+        resp.set_cookie("basket", str(bm.get_dict()))
     return resp
 
 @app.route("/update_quantity_basket", methods=[GET, POST])
 def update_quantity_basket():
     if request.method == POST:
-        print("update quantity to"+request.form.get("quantity"))
         product_id = request.form.get("product_id")
         store_id = request.form.get("store_id")
-        basket = bm.get_list()
-        print(product_id)
-        print(type(request.form.get("quantity")))
-        basket[product_id, store_id] = int(request.form.get("quantity"))
-        print(basket)
+        basket = bm.get_dict()
+        bm.add((product_id,store_id),int(request.form.get("quantity")))
     resp = redirect(url_for(BASKET))
-    resp.set_cookie("basket", str(bm.get_list()))
+    resp.set_cookie("basket", str(bm.get_dict()))
     return resp
 
 @app.route("/remove_basket", methods=[GET, POST])
@@ -366,16 +359,15 @@ def remove_basket():
     if request.method == POST:
         product_id = request.form.get("product_id")
         store_id = request.form.get("store_id")
-        basket = bm.get_list()
-        del basket[product_id, store_id]  
+        basket = bm.get_dict()
+        bm.remove((product_id,store_id))
     resp = redirect(url_for(BASKET))
-    resp.set_cookie("basket", str(bm.get_list()))
+    resp.set_cookie("basket", str(bm.get_dict()))
     return resp
-
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
-    bask = bm.get_list()
+    bask = bm.get_dict()
     store_list = bm.get_store_list()
     if len(store_list) > 0 :
         full_basket = FullBasket()

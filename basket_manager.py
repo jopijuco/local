@@ -2,24 +2,18 @@ class Basket_Manager():
     def __init__(self):
         self.basket = {}
     
-    def get_list(self):
+    def get_dict(self):
         return self.basket
     
-    def add(self, product_id, quantity):
-        self.basket[product_id] = quantity
+    def add(self, key, quantity):
+        self.basket[key] = quantity
     
-    # def remove(self, product_id):
-    #     del self.basket.remove[product_id]
-    
-    # def get_name(string):
-    #     name = string[string.find("name:"):]
-    #     value = name[:name.find(",")]
-    #     return value
+    def remove(self, key):
+        del self.basket[key]
     
     def total(self, full_basket):
         total = 0
         for b in full_basket.baskets:
-            print("------->"+str(b.amount))
             total += float(b.amount)
         return total
     
@@ -32,3 +26,21 @@ class Basket_Manager():
     
     def empty_basket(self):
         self.basket = {}
+
+#fullBasket = one or more basket (1 basket per store)
+class FullBasket:
+    def __init__(self):
+        self.baskets = []
+
+    def add_basket(self, basket):
+        self.baskets.append(basket)
+
+class Basket:
+    def __init__(self, store_id, store_name, amount):
+        self.store_id = store_id
+        self.store_name = store_name
+        self.amount = amount
+        self.products = []
+
+    def add_product(self, product):
+        self.products.append(product)
