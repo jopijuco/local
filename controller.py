@@ -33,10 +33,14 @@ bm = Basket_Manager()
 @app.route("/")
 def index():
     stores = db.execute("SELECT id, name FROM stores")
+    message = None
     try:
         if session['type'] == BUSINESS:
             stores = db.execute(f"SELECT * FROM stores WHERE business_id = {session['business_id']}")
-        return render_template(INDEX_PAGE, stores=stores)
+
+            if not stores:
+                message = "You don't have any registered stores."
+        return render_template(INDEX_PAGE, stores=stores, message=message)
     except KeyError:
         return render_template(INDEX_PAGE, stores=stores)
     
@@ -108,25 +112,23 @@ def login():
 @app.route("/business-form", methods=[GET, POST])
 @login_required
 def business_form():
-    if request.method == POST:
-        # get the form data
-        name = request.form.get("name")
-        description = request.form.get("description")
-        fiscal_number = request.form.get("fiscal_number")
-        phone = request.form.get("phone")
-        mobile = request.form.get("mobile")
-        sector = request.form.get("sector")
+    form = BusinessForm()
 
-        try:
-            db.execute(f"UPDATE business SET ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}) WHERE id = {session['user_id']}")
-        except Error as e:
-            return render_template(BUS_FORM_PAGE, message=e)
-        
-        db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES ({fiscal_number}, {sector}, {phone}, {mobile}, {name}, {description}, {session['user_id']})")
+    if form.validate_on_submit():
+        db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (:fiscal, :sector, :phone, :mobile, :name, :desc, :user)",
+            fiscal=form.fiscal_number.data, sector=form.activity_sector.data, phone=form.phone.data, mobile=form.mobile.data,
+            name=form.name.data, desc=form.description.data, user=session['user_id'])
+            
         return redirect(url_for(INDEX))
+    
+    username = db.execute(f"SELECT username from user_businesses WHERE id = {session['user_id']}")
+    return render_template(BUS_FORM_PAGE, form=BusinessForm(), username=username[0]["username"])
 
-    #sectors = db.execute("SELECT * FROM sectors")
-    return render_template(BUS_FORM_PAGE)
+
+@app.route("/customer-form", methods=[GET, POST])
+@login_required
+def customer_form():
+    pass
 
 
 @app.route("/shop/<id>")
@@ -283,6 +285,7 @@ def single_product(product_id):
     else:
         return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg)
 
+
 @app.route("/new_product", methods=[GET, POST])
 @login_required
 def new_product():
@@ -303,6 +306,7 @@ def new_product():
         products.append(product)
         hasProduct = True
     return render_template(NEW_PRODUCT_PAGE, products = products, hasProduct = hasProduct)
+
 
 @app.route("/single_product_store/<product_id>", methods=[GET, POST])
 @login_required
@@ -519,11 +523,15 @@ def account():
     
     if session["type"] == BUSINESS:
         #check business
-        query_business = db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}")
+        query_business = str(db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}"))
         qb = ast.literal_eval(query_business[1:len(query_business)-1])
         field_data = MultiDict()
         field_data.update(qb)
-        return render_template(ACCOUNT_PAGE, form=BusinessAccountForm(formdata=field_data))
+        return render_template(ACCOUNT_PAGE,
+            form=BusinessAccountForm(formdata=field_data),
+            user_type=session["type"],
+            tax_number=field_data.get("fiscal_number")
+            )
     else:
         # check customer
         query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
