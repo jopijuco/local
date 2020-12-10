@@ -35,6 +35,7 @@
                                 <td class="text-right">{{ product.unit_price }}€</td>
                                 <td class="text-right">{{ product.quantity }}</td>
                                 <td class="text-right">{{ product.final_price }}€</td>
+                                <td><a href="{{ url_for('remove_basket', product_id=product.id) }}" class="btn btn-primary">Remove</a></td>
                             </td>
                         {% endfor %}
                         </table>

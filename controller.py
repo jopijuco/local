@@ -132,8 +132,8 @@ def business_form():
 
 @app.route("/shop/<id>")
 def shop(id):
-    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
-    return render_template("shop_products.html", products=products, name=products[0]["shop"])
+    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
+    return render_template("shop_products.html", products=products, name=products[0]["store"])
 
 
 @app.route("/store", methods=[GET, POST])
@@ -327,28 +327,56 @@ def single_product_store(product_id):
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
 
 
-@app.route("/add_basket/<product>")
-def add_basket(product):
-    dict_product = ast.literal_eval(product)
+# @app.route("/add_basket/<product>")
+# def add_basket(product):
+#     dict_product = ast.literal_eval(product)
     
-    for key in dict_product.keys():
-        if key == "prd_id":
-            bm.add(dict_product[key])
-        elif key == "shop_id":
-            bm.add(dict_product[key])
+#     for key in dict_product.keys():
+#         print("key :"+key)
+#         if key == "prd_id":
+#             bm.add(dict_product[key],1)
+#         # elif key == "shop_id":
+#         #     bm.add(dict_product[key])
+#     print(bm.get_list())
+#     resp = redirect(url_for(INDEX))
+#     resp.set_cookie("basket", str(bm.get_list()))
+#     return resp
 
-    resp = redirect(url_for(INDEX))
-    resp.set_cookie("basket", str(bm.get_list()))
+@app.route("/add_basket", methods=[GET, POST])
+def add_basket():
+    if request.method == POST:
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        new = True
+        basket = bm.get_list()
+        for key in basket:
+            if key[0] == product_id and key[0] == store_id:
+                print("quantité initiale :"+str(basket[key]))
+                basket[key] += 1
+                print("deja dans le panier, quantity++"+str(basket[key]))
+                new = False
+        if new:
+            bm.add((product_id,store_id),1)
+        # elif key == "shop_id":
+        #     bm.add(dict_product[key])
+        print(bm.get_list())
+        resp = redirect(url_for(INDEX))
+        resp.set_cookie("basket", str(bm.get_list()))
     return resp
 
 
-@app.route("/remove_basket/<product>")
-def remove_basket(product):
-    dict_product = ast.literal_eval(product)
+@app.route("/remove_basket/<product_id>")
+def remove_basket(product_id):
+    print(product_id)
+    print(bm.get_list())
+    bm.remove(2)
+    bm.remove(1)
+    print(bm.get_list())
+    # dict_product = ast.literal_eval(product)
 
-    for key in dict_product.keys():
-        if key == "id":
-            bm.remove(dict_product[key])
+    # for key in dict_product.keys():
+    #     if key == "id":
+    #         bm.remove(dict_product[key])
     
     resp = redirect(url_for(BASKET))
     resp.set_cookie("basket", str(bm.get_list()))
@@ -358,17 +386,20 @@ def remove_basket(product):
 @app.route("/basket", methods=[GET, POST])
 def basket():    
     basket = list()
-    id_p = list()
-    id_s = list()
+    # id_p = list()
+    # id_s = list()
 
-    for index, id in enumerate(bm.get_list()):
-        if index % 2 == 0:
-            id_p.append(id)
-        else:
-            id_s.append(id)
+    # for index, id in enumerate(bm.get_list()):
+    #     if index % 2 == 0:
+    #         id_p.append(id)
+    #     else:
+    #         id_s.append(id)
+    id_s = [1, 2]
 
-    for i in range(len(id_p)):
-        products = db.execute(f"SELECT p.*, ps.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
+    bask = bm.get_list()
+    for key in bask:
+    #for i in range(len(id_p)):
+        products = db.execute(f"SELECT p.*, ps.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {bask[key]} AND ps.store_id = 1 INNER JOIN stores AS s ON ps.store_id = s.id")
         basket.append(products)
     
     #new stucture
