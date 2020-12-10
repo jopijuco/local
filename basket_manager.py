@@ -31,4 +31,4 @@ class Basket_Manager():
         return list(set(store_list))
     
     def empty_basket(self):
-        del self.basket
+        self.basket = {}
