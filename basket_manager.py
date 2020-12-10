@@ -19,6 +19,7 @@ class Basket_Manager():
     def total(self, full_basket):
         total = 0
         for b in full_basket.baskets:
+            print("------->"+str(b.amount))
             total += float(b.amount)
         return total
     

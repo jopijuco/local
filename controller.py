@@ -347,8 +347,6 @@ def add_basket():
     if request.method == POST:
         product_id = request.form.get("product_id")
         store_id = request.form.get("store_id")
-        print("ajout du produit : "+str(product_id))
-        print("du store : "+str(store_id))
         new = True
         basket = bm.get_list()
         for key in basket:
@@ -359,13 +357,10 @@ def add_basket():
                 new = False
         if new:
             bm.add((product_id,store_id),1)
-        # elif key == "shop_id":
-        #     bm.add(dict_product[key])
-        print(bm.get_list())
+      
         resp = redirect(url_for(INDEX))
         resp.set_cookie("basket", str(bm.get_list()))
     return resp
-
 
 @app.route("/remove_basket/<product_id>")
 def remove_basket(product_id):
@@ -388,8 +383,9 @@ def remove_basket(product_id):
 @app.route("/basket", methods=[GET, POST])
 def basket():    
     bask = bm.get_list()
-
     store_list = bm.get_store_list()
+    print("longueur")
+    print(len(store_list))
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
@@ -398,16 +394,6 @@ def basket():
             amount = 0
             for key, value in bask.items():
                 if key[1] == store_id:
-                    #exist = False
-                    #for product in new_basket.products:
-                        # if product.id == key[0]:
-                        #     print("passsaaaaage+++++++++++++++++++++++++++++++++++++++")
-                        #     product.quantity += 1
-                        #     product.final_price += product.unit_price
-                        #     amount += product.unit_price
-                        #     exist = True
-                        #     break
-                    #if not exist:
                     product_info = db.execute("SELECT p.name, sp.price FROM products p INNER JOIN product_store sp ON (p.id = sp.product_id AND sp.store_id = :store_id) WHERE p.id = :product_id", store_id = key[1], product_id = key[0])
                     imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = key[0])
                     if len(imgs) >= 1:
@@ -418,12 +404,11 @@ def basket():
                     final_price = float(value) * float(product_info[0]["price"])
                     p = Product_ordered(key[0], product_info[0]["name"], main_img.thumbnail,  product_info[0]["price"], value, final_price)
                     new_basket.add_product(p)
-                    amount += product_info[0]["price"]     
+                    amount += final_price
             new_basket.amount = amount
-            print("ajouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuut")
-            print(new_basket.store_id)
             full_basket.add_basket(new_basket)
     else:
+        print("enter here")
         full_basket = False
 
     if request.method == POST:
@@ -435,8 +420,11 @@ def basket():
                 db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
         bm.empty_basket()  
         full_basket = False
-        
-    return render_template("basket.html", products=basket, full_basket = full_basket, amount=bm.total(full_basket))
+
+    total_amount = 0
+    if full_basket:
+        total_amount = bm.total(full_basket)    
+    return render_template("basket.html", full_basket = full_basket, amount = total_amount)
 
 
 @app.route("/orders", methods=[GET, POST])
