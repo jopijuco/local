@@ -10,3 +10,6 @@ env/Scripts/
 
 # python env
 .cfg
+
+# debug for visual studio code
+lauch.json
