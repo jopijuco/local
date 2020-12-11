@@ -8,13 +8,28 @@
     }
 {% endblock %}
 {% block title %}
-    local: your products
+    your products
 {% endblock %}
 
-{% block main %}
+{% block main %}    
 
-    <div>
-       <h1>Welcome {{ name}} !</h1>
+    {% if message %}
+    <h5>{{ message }}</h5>
+    {% endif %}
+
+    <div class="row">
+    {% for store in stores %}
+        <div class="col-md-4 py-3">
+            <a href="{{ url_for('shop', id=store.id) }}">
+                <div class="card">
+                    <img src=""  alt="store picture" class="card-img-top"/>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ store.name }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
     </div>
-
+    
 {% endblock %}

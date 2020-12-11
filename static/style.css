@@ -21,3 +21,27 @@ footer {
   height: 50px;
   /*background-color: aqua;*/
 }
+
+.product_card_name{
+  height : 50px;
+  overflow: hidden;
+}
+
+.product_card_description{
+  height : 70px;
+  overflow: hidden;
+}
+
+.item {
+  position:relative;
+  padding-top:20px;
+  display:inline-block;
+}
+.notify-badge{
+  position: absolute;
+  right:-10px;
+  top:5px;
+  text-align: center;
+  padding:5px 10px;
+  font-size:16px;
+}

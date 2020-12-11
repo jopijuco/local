@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">{{ product.name }} : stock and price</h1>
+        </div>
+        <form action="{{ url_for('single_product_store', product_id=product.id) }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+        <div class="card-body">
+            <div>
+                <label for="name">Name : </label>
+                <span id="name"> {{ product.name }}</span>
+            </div>
+            <div>
+                <label for="description">Description :</label>
+                <span id="description">{{ product.description }}</span>
+            </div>
+
+            <table class="table table-hover mt-3">
+                <thead>
+                  <tr>
+                    <th scope="col">Store</th>
+                    <th scope="col">Unit price</th>
+                    <th scope="col">Quantity in stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {%for store in stores%}
+                    <tr>
+                        <td>{{ store.name }}</td>
+                        <td>
+                            <div class="input-group">
+                                <input type="number" step=".01" class="form-control" id="price_{{ store.id }}" name="price_{{ store.id }}" value = "{{ product.price[store.id] }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div> 
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <input type="number" step="1" class="form-control" id="stock_{{ store.id }}" name="stock_{{ store.id }}" value = "{{ product.stock[store.id] }}">
+                            </div> 
+                        </td>
+                    </tr>
+                {%endfor%} 
+                </tbody>
+            </table>
+            <button class="btn btn-primary col-md-12" type="submit" name="submit" value="submit">Edit</button>
+        </div> 
+        </form>
+{% endblock %}

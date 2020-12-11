@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ name }}
+{% endblock %}
+
+{% block main %}    
+    {% if full_basket %}
+        <h2>your basket:</h2>
+       
+        {% for basket in full_basket.baskets %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h1 class="card-title"> 
+                        Store : {{ basket.store_name }}
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive-md">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">product</th>
+                                    <th scope="col">quantity</th>
+                                    <th scope="col">total price</th>
+                                </tr>
+                            </thead>
+                        {% for product in basket.products %}
+                            <tr>
+                                <td>{{ product.name }}</th>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.final_price }}€</td>
+                            </td>
+                        {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+       
+        <hr>
+        <div class="row">
+            <h4>Total:</h4>
+            <h4>{{ amount }}€</h4>
+        </div>
+        <hr>
+        <div class="row">
+            <form action="{{ url_for('basket') }}" method="POST">
+                <input type="hidden" name="amount" value="{{ amount }}">
+                <button class="btn btn-secondary" type="submit">Buy</button>
+            </form>
+        </div>
+    {% else %}
+        <h4>Your basket is empty.</h4>
+    {% endif %}
+{% endblock %}

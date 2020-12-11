@@ -5,6 +5,49 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Order page (TO DO)</h1>
-    <p>sellers must be able to see new orders</p>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> 
+                {% if not history %}
+                    My current orders 
+                {% else %}
+                    History (completed orders)
+                {% endif %}
+            </h1>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive-md">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Store</th>
+                        <th scope="col">Amount</th>
+                    {% if not history %}
+                        <th scope="col">Status</th>
+                    {% endif %}
+                        <th scope="col">Customer</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {%for order in orders%}
+                        <tr>
+                            <th scope="row">{{ order.id }}</th>
+                            <td>{{ order.date }}</td>
+                            <td>{{ order.store.name }}</td>
+                            <td class="text-right">{{ order.amount }}€</td>
+                        {% if not history %}
+                            <td>{{ order.status }}</td>
+                        {% endif %}
+                            <td>{{ order.customer.first_name }} {{ order.customer.last_name }}</td>
+                            <td><a href="{{ url_for('order_details', order_id=order.id)}}" class="badge badge-primary">View details</a></td>           
+                        </tr>
+                    {%endfor%} 
+                    </tbody>
+                </table>
+            </div>
+        </div> 
+    </div> 
 {% endblock %}

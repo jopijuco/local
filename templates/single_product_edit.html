@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> {{ product.name }} (product_id : {{ product.id }})</h1>
+        </div>
+        <form action="{{ url_for('single_product', product_id=product.id) }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value = "{{ product.name }}">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ product.description }}</textarea>
+            </div>
+            {% if product.id  == 'new' %}
+                <button class="btn btn-primary" type="submit" name="submit" value="add_product">Add a new product</button>
+            {% else %}
+                <button class="btn btn-primary" type="submit" name="submit" value="edit_product">Edit</button>
+            {% endif %}
+        </div> 
+
+        {% if product.id  != 'new' %}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Pictures</h2>
+            </div>
+            <div class="card-body">
+            {% if not hasimg %}
+                <div class="alert alert-warning" role="alert">
+                    This product has no picture
+                </div>
+            {% endif %}
+            {% if not maximg %}
+                <div class="form-group">
+                    <label>Add new picture</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="new_image" id="new_image">
+                        <label class="custom-file-label" for="new_image">Select image...</label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit" name="submit" value="add_img">Add a new picture</button>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    Maximum number of pictures is reached
+                </div>
+            {% endif %}
+                <div class="row">
+                {%for img in product.images%}
+                <div class="col-12 col-md-6  mt-5">
+                    <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
+                    <div class="row">
+                        <div class="form-group col-7">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="image_{{ img.id }}" id="image">
+                                <label class="custom-file-label" for="image">Select image...</label>
+                            </div>
+                        </div>
+                        <span class="col-5 ">
+                            <button class="btn btn-primary align-bottom" type="submit" name="submit" value="{{ img.id }}">Edit image</button>
+                        </span>
+                    </div>
+                </div>
+                {%endfor%} 
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="col-12">
+                    <a href="{{ url_for('single_product_store', product_id=product.id)}}" class="btn btn-secondary col-12">Manage your stock and prices</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        </form>
+{% endblock %}

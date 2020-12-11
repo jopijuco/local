@@ -1,17 +1,37 @@
-{% extends "layout.html" %}
+{% extends "signin_layout.html" %}
+{% from "macros.html" import form_action %}
 
 {% block title %}
     Log In
 {% endblock %}
 
-{% block main %}
-    <form action="{{ url_for('login') }}" method="POST">
+{% block form %} {{ form_action(url_for('login'), "POST") }} {% endblock %}
+
+{{ form.csrf_token }}
+
+{% block fields %}
+    {% for field in form %}
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password" type="password">
-        </div>
-        <button class="btn btn-primary" type="submit">Log In</button>
-    </form>
+            {{ field(class_="form-control", autofocus=true) }}
+            
+            {% if field.errors %}
+            <ul class="errors">
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}  
+             
+        </div> 
+    {% endfor %}
 {% endblock %}
+
+{% block failed %}
+    {% if message %}
+    <ul class="errors">
+        <li>{{ message }}</li>
+    </ul>
+    {% endif %}
+{% endblock %}
+
+{% block submit %} Log In {% endblock %}

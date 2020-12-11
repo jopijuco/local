@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> {{ product.name }} (product_id : {{ product.id }})</h1>
+        </div>
+        <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+        <div class="card-body">
+            <div>
+                <label for="name">Name : </label>
+                <span id="name"> {{ product.name }}</span>
+            </div>
+            <div>
+                <label for="description">Description :</label>
+                <span id="description">{{ product.description }}</span>
+            </div>
+        </div> 
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Pictures</h2>
+            </div>
+            <div class="card-body">
+            {% if not hasimg %}
+                <div class="alert alert-warning" role="alert">
+                    This product has no picture
+                </div>
+            {% endif %}
+                <div class="row">
+                {%for img in product.images%}
+                    <div class="col-12 col-md-6">
+                        <img src="{{url_for('static', filename= img.name )}}"  alt="product picture" class="img-thumbnail"/>
+                    </div>
+                
+                {%endfor%} 
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="col-12">
+                    <a href="{{ url_for('single_product_store', product_id=product.id)}}" class="btn btn-secondary col-12">Manage your stock and prices</a>
+                </div>
+            </div>
+        </div>
+        
+        
+{% endblock %}
