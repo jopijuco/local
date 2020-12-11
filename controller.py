@@ -1,21 +1,13 @@
-from datetime import datetime
-
-from werkzeug.datastructures import MultiDict
-from forms import *
-from logging import exception
-#from os import O_NDELAY, name, remove
-from basket_manager import Basket_Manager
-import re
-from sqlite3.dbapi2 import Error, InternalError
-
-from flask.helpers import make_response, url_for
-from application import app, db
-from constants import *
 from flask import render_template, request, session
-from utils import login_required
-from werkzeug.utils import redirect
+from flask.helpers import url_for
+from werkzeug.datastructures import MultiDict
 from werkzeug.security import check_password_hash, generate_password_hash
-from PIL import Image, ImageOps
+from werkzeug.utils import redirect
+
+from application import app, db
+from basket_manager import Basket_Manager
+from constants import *
+from forms import *
 from model.business import *
 from model.store import *
 from model.product import *
@@ -24,6 +16,7 @@ from model.order import *
 from model.status import *
 from model.customer import *
 from model.basket import *
+from utils import login_required
 
 import ast
 import os
@@ -121,8 +114,8 @@ def form():
                 fiscal=form.fiscal_number.data, sector=form.activity_sector.data, phone=form.phone.data, mobile=form.mobile.data,
                 name=form.name.data, desc=form.description.data, user=session['user_id'])
         else:
-            db.execute(f"INSERT INTO customers (first_name, last_name, age) VALUE (:first_name, :last_name, :age)",
-                first_name=form.first_name.data, last_name=form.last_name.data, age=form.age.data)
+            db.execute(f"INSERT INTO customers (first_name, last_name, age, user_id) VALUES (:first_name, :last_name, :age, :user)",
+                first_name=form.first_name.data, last_name=form.last_name.data, age=form.age.data, user=session['user_id'])
         
         return redirect(url_for(INDEX))
     
@@ -133,8 +126,6 @@ def form():
         return render_template(FORM_PAGE, form=form, username=username[0]["username"], message=message)
     else:
         return redirect(url_for(INDEX))
-    
-    
 
 
 @app.route("/shop/<id>")
@@ -439,6 +430,7 @@ def order():
         orders.append(order)
     return render_template(ORDER_PAGE, orders=orders, history = False)
 
+
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
 def order_details(order_id):
@@ -528,7 +520,6 @@ def account():
         return redirect(url_for(ACCOUNT))
     
     if session["type"] == BUSINESS:
-        #check business
         query_business = str(db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}"))
         qb = ast.literal_eval(query_business[1:len(query_business)-1])
         field_data = MultiDict()
@@ -539,20 +530,21 @@ def account():
             tax_number=field_data.get("fiscal_number")
             )
     else:
-        # check customer
+        field_data = MultiDict()
+        # Customer form data
         query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
         qc = ast.literal_eval(query_customer[1:len(query_customer)-1])
-        # check user
+        field_data.update(qc)
+        # User form data
         query_user = str(db.execute(f"SELECT email from user_customers WHERE id = {session['user_id']}"))
         qu = ast.literal_eval(query_user[1:len(query_user)-1])
-        # check address
-        query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
-        qa = ast.literal_eval(query_address[1:len(query_address)-1])
-
-        field_data = MultiDict()
         field_data.update(qu)
-        field_data.update(qc)
-        field_data.update(qa)
+        # Address form data
+        query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
+        
+        if len(query_address) >= 1:
+            qa = ast.literal_eval(query_address[1:len(query_address)-1])
+            field_data.update(qa)
     
         return render_template(ACCOUNT_PAGE,
             customer=CustomerAccountForm(formdata=field_data),
