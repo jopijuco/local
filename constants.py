@@ -21,7 +21,7 @@ ORDER_PAGE = "order.html"
 ORDER_DETAILS_PAGE = "order_details.html"
 HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
-BUS_FORM_PAGE = "business_form.html"
+FORM_PAGE = "form.html"
 ACCOUNT_PAGE = "account.html"
 
 # Redirects
@@ -31,7 +31,7 @@ INDEX = "index"
 STORE = "store"
 BASKET = "basket"
 ORDER = "order"
-BUS_FORM = "business_form"
+FORM = "form"
 ACCOUNT = "account"
 
 # Users
@@ -50,4 +50,8 @@ BUSINESS_TABLE = "business"
 CUSTOMER_TABLE = "customers"
 
 # Messages
+USER_EXISTS_MESSAGE = "This user already exists."
+LOGIN_FAILED_MESSAGE = "Login failed."
 PURCHASE_MESSAGE = "Thanks for your purchase. We hope you enjoy it."
+BUSINESS_FORM_MESSAGE = "selling your"
+CUSTOMER_FORM_MESSAGE =  "buying local"
