@@ -135,16 +135,16 @@ class AfterLoginForm(FlaskForm):
 
 
 class BusinessForm(BusinessAccountForm, AfterLoginForm):
-    def get_sectors():
-        query = db.execute("SELECT id, name FROM activity_sector")
+    def get_areas():
+        query = db.execute("SELECT id, designation FROM businessAreas")
         sectors = list()
 
         for value in query:
-            sectors.append((value["id"], value["name"]))
+            sectors.append((value["id"], value["designation"]))
         return sectors
 
     activity_sector = SelectField("Sector",
-        choices=get_sectors()
+        choices=get_areas()
         )
 
 
