@@ -126,5 +126,5 @@ class BusinessForm(BusinessAccountForm):
         )
     submit = SubmitField("Submit")
 
-class CustomerForm(FlaskForm):
-    pass
+class CustomerForm(CustomerAccountForm):
+    submit = SubmitField("Submit")

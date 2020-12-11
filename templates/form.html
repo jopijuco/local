@@ -28,9 +28,10 @@
         </nav>
         <main class="container p-5">
             <h3>Welcome {{ username }},</h3>
-            <h5>Please submit your info so you can start selling your products!</h5>
+            <h5>Please submit your info so you can start {{ message }} products!</h5>
             {% from "macros.html" import form_action %}
-            {{ form_action( url_for('business_form'), "POST") }}
+            {% if session["type"] == "business" %}
+            {{ form_action( url_for('form'), "POST") }}
             {{ form.csrf_token }}
                 <div class="row">
                     <div class="col-md-4">
@@ -112,6 +113,50 @@
                 </div>
                 {{ form.submit(class_="btn btn-primary") }}
             </form>
+            {% else %}
+
+            {{ form_action( url_for('form'), "POST") }}
+            {{ form.csrf_token }}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.first_name.label }}
+                            {{ form.first_name(class_="form-control") }}
+
+                            {% if form.first_name.errors %}
+                            <ul class="errors">
+                            {% for error in form.first_name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.last_name.label }}
+                            {{ form.last_name(class_="form-control") }}
+
+                            {% if form.last_name.errors %}
+                            <ul class="errors">
+                            {% for error in form.last_name.errors %}
+                                <li>{{ field.error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.age.label }}
+                            {{ form.age(class_="form-control") }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+            {% endif %}
         </main>
         <footer class="small text-center text-muted">
             2020

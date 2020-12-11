@@ -3,7 +3,7 @@ from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from forms import *
 from logging import exception
-from os import O_NDELAY, name, remove
+#from os import O_NDELAY, name, remove
 from basket_manager import Basket_Manager
 import re
 from sqlite3.dbapi2 import Error, InternalError
@@ -97,38 +97,44 @@ def login():
         
         session["user_id"] = user[0]["id"]
         session["type"] = user_type
-
-        if user_type == BUSINESS:
-            business = db.execute(f"SELECT id FROM business WHERE user_id = {session['user_id']}")
-            if not business:  
-                return redirect(url_for(BUS_FORM))
-            else:
-                session["business_id"] = business[0]["id"]
-                return redirect(url_for(INDEX))
-        return redirect(url_for(INDEX))
+        return redirect(url_for(FORM))
     return render_template(LOGIN_PAGE, form=form)
 
 
-@app.route("/business-form", methods=[GET, POST])
+@app.route("/form", methods=[GET, POST])
 @login_required
-def business_form():
-    form = BusinessForm()
+def form():
+    if session["type"] == BUSINESS:
+        form = BusinessForm()
+        type_table = BUSINESS_TABLE
+        user_table = USER_BUSINESS_TABLE
+        message = BUSINESS_FORM_MESSAGE
+    else:
+        form = CustomerForm()
+        type_table = CUSTOMER_TABLE
+        user_table = USER_CUSTOMER_TABLE
+        message = CUSTOMER_FORM_MESSAGE
 
     if form.validate_on_submit():
-        db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (:fiscal, :sector, :phone, :mobile, :name, :desc, :user)",
-            fiscal=form.fiscal_number.data, sector=form.activity_sector.data, phone=form.phone.data, mobile=form.mobile.data,
-            name=form.name.data, desc=form.description.data, user=session['user_id'])
-            
+        if session["type"] == BUSINESS:
+            db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (:fiscal, :sector, :phone, :mobile, :name, :desc, :user)",
+                fiscal=form.fiscal_number.data, sector=form.activity_sector.data, phone=form.phone.data, mobile=form.mobile.data,
+                name=form.name.data, desc=form.description.data, user=session['user_id'])
+        else:
+            db.execute(f"INSERT INTO customers (first_name, last_name, age) VALUE (:first_name, :last_name, :age)",
+                first_name=form.first_name.data, last_name=form.last_name.data, age=form.age.data)
+        
         return redirect(url_for(INDEX))
     
-    username = db.execute(f"SELECT username from user_businesses WHERE id = {session['user_id']}")
-    return render_template(BUS_FORM_PAGE, form=BusinessForm(), username=username[0]["username"])
+    check_user = db.execute(f"SELECT id FROM {type_table} WHERE user_id = {session['user_id']}")
 
-
-@app.route("/customer-form", methods=[GET, POST])
-@login_required
-def customer_form():
-    pass
+    if not check_user:
+        username = db.execute(f"SELECT username from {user_table} WHERE id = {session['user_id']}")
+        return render_template(FORM_PAGE, form=form, username=username[0]["username"], message=message)
+    else:
+        return redirect(url_for(INDEX))
+    
+    
 
 
 @app.route("/shop/<id>")
