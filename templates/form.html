@@ -42,7 +42,7 @@
                             {% if form.name.errors %}
                             <ul class="errors">
                             {% for error in form.name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -57,7 +57,7 @@
                             {% if form.fiscal_number.errors %}
                             <ul class="errors">
                             {% for error in form.first_name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -88,7 +88,7 @@
                             {% if form.phone.errors %}
                             <ul class="errors">
                             {% for error in form.first_name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -103,7 +103,7 @@
                             {% if form.mobile.errors %}
                             <ul class="errors">
                             {% for error in form.first_name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -126,7 +126,7 @@
                             {% if form.first_name.errors %}
                             <ul class="errors">
                             {% for error in form.first_name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -141,7 +141,7 @@
                             {% if form.last_name.errors %}
                             <ul class="errors">
                             {% for error in form.last_name.errors %}
-                                <li>{{ field.error }}</li>
+                                <li>{{ error }}</li>
                             {% endfor %}
                             </ul>
                             {% endif%}
@@ -152,9 +152,19 @@
                         <div class="form-group">
                             {{ form.age.label }}
                             {{ form.age(class_="form-control") }}
+
+                            {% if form.age.errors %}
+                            <ul class="errors">
+                            {% for error in form.age.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                            {% endif%}
+
                         </div>
                     </div>
                 </div>
+                {{ form.submit(class_="btn btn-primary") }}
             </form>
             {% endif %}
         </main>
