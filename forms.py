@@ -76,7 +76,7 @@ class AddressAccountForm(AccountForm):
         validators=[InputRequired(),
             Length(5, 50)]
         )
-    number = IntegerField("Street number",
+    number = IntegerField("Number",
         validators=[InputRequired(),
             Length(min=1, max=9999)]
         )
