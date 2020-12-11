@@ -42,7 +42,7 @@ class LoginForm(FlaskForm):
 
 
 class AccountForm(FlaskForm):
-    edit = SubmitField("Update")
+    update = SubmitField("Update")
 
 
 class CustomerAccountForm(AccountForm):

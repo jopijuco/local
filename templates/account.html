@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary" type="submit">Update</button>
+            {{ customer.update(class_="btn btn-primary") }}
         </form>
         <hr>
         {{ form_action(url_for('account'), "POST") }}
@@ -63,7 +63,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary" type="submit">Update</button>
+            {{ user.update(class_="btn btn-primary") }}
         </form>
         <hr>
         {{ form_action(url_for('account'), "POST") }}
@@ -117,24 +117,24 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary" type="submit">Update</button>
+            {{ address.update(class_="btn btn-primary") }}
         </form>
     
     {% else %}
         
         {{ form_action(url_for('account'), "POST") }}
-        {{ form.csrf_token }}
+        {{ business.csrf_token }}
 
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ form.name.label }}
-                        {{ form.name(class_="form-control") }}
+                        {{ business.name.label }}
+                        {{ business.name(class_="form-control") }}
 
-                        {% if form.name.errors %}
+                        {% if business.name.errors %}
                         <ul class="errors">
-                        {% for error in form.name.errors %}
-                            <li>{{ field.error }}</li>
+                        {% for error in business.name.errors %}
+                            <li>{{ error }}</li>
                         {% endfor %}
                         </ul>
                         {% endif%}
@@ -151,21 +151,21 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        {{ form.description.label }}
-                        {{ form.description(class_="form-control") }}
+                        {{ business.description.label }}
+                        {{ business.description(class_="form-control") }}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ form.phone.label }}
-                        {{ form.phone(class_="form-control") }}
+                        {{ business.phone.label }}
+                        {{ business.phone(class_="form-control") }}
 
-                        {% if form.phone.errors %}
+                        {% if business.phone.errors %}
                         <ul class="errors">
-                        {% for error in form.phone.errors %}
-                            <li>{{ field.error }}</li>
+                        {% for error in business.phone.errors %}
+                            <li>{{ error }}</li>
                         {% endfor %}
                         </ul>
                         {% endif%}
@@ -174,13 +174,13 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ form.mobile.label }}
-                        {{ form.mobile(class_="form-control") }}
+                        {{ business.mobile.label }}
+                        {{ business.mobile(class_="form-control") }}
 
-                        {% if form.mobile.errors %}
+                        {% if business.mobile.errors %}
                         <ul class="errors">
-                        {% for error in form.mobile.errors %}
-                            <li>{{ field.error }}</li>
+                        {% for error in business.mobile.errors %}
+                            <li>{{ error }}</li>
                         {% endfor %}
                         </ul>
                         {% endif%}
@@ -188,7 +188,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary" type="submit">Edit</button>
+            {{ business.update(class_="btn btn-primary") }}
         </form>
 
     {% endif %}

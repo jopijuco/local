@@ -56,8 +56,7 @@ def register():
                                     username=username,
                                     email=email)
         if len(check_user) >= 1:
-            message="This user already exists."
-            return render_template(REGISTER_PAGE, form=form, message=message)
+            return render_template(REGISTER_PAGE, form=form, message=USER_EXISTS_MESSAGE)
     
         db.execute(f"INSERT INTO {table} (username, email, hash_pass) VALUES (:username, :email, :hash_pass)",
                     username=username,
@@ -85,8 +84,7 @@ def login():
         user = db.execute(f"SELECT * FROM {table} WHERE username = :username", username=form.username.data)
         
         if len(user) != 1 or not check_password_hash(user[0]["hash_pass"], form.password.data):
-            message = "Login failed."
-            return render_template(LOGIN_PAGE, form=form, message=message)
+            return render_template(LOGIN_PAGE, form=form, message=LOGIN_FAILED_MESSAGE)
         
         session["user_id"] = user[0]["id"]
         session["type"] = user_type
@@ -113,6 +111,9 @@ def form():
             db.execute(f"INSERT INTO business (fiscal_number, activity_sector_id, phone, mobile, name, description, user_id) VALUES (:fiscal, :sector, :phone, :mobile, :name, :desc, :user)",
                 fiscal=form.fiscal_number.data, sector=form.activity_sector.data, phone=form.phone.data, mobile=form.mobile.data,
                 name=form.name.data, desc=form.description.data, user=session['user_id'])
+
+            business = db.execute(f"SELECT id from business WHERE user_id = {session['user_id']}")
+            session["business_id"] = business[0]["id"]
         else:
             db.execute(f"INSERT INTO customers (first_name, last_name, age, user_id) VALUES (:first_name, :last_name, :age, :user)",
                 first_name=form.first_name.data, last_name=form.last_name.data, age=form.age.data, user=session['user_id'])
@@ -125,6 +126,10 @@ def form():
         username = db.execute(f"SELECT username from {user_table} WHERE id = {session['user_id']}")
         return render_template(FORM_PAGE, form=form, username=username[0]["username"], message=message)
     else:
+        # temporary, business_id will be deprecated
+        if session["type"] == BUSINESS:
+            business = db.execute(f"SELECT id FROM business WHERE user_id = {session['user_id']}")
+            session["business_id"] = business[0]["id"]
         return redirect(url_for(INDEX))
 
 
@@ -484,12 +489,12 @@ def account():
     customer_form = CustomerAccountForm()
     user_form = UserAccountForm()
     address_form = AddressAccountForm()
-    business_form = BusinessForm()
+    business = BusinessForm()
 
-    if business_form.validate_on_submit():
+    if business.validate_on_submit():
         db.execute(f"UPDATE business SET fiscal_number = :fiscal_number, phone = :phone, mobile = :mobile, name = :name, description = :description WHERE id = {session['business_id']}",
-            fiscal_number=business_form.fiscal_number.data, phone=business_form.phone.data, mobile=business_form.mobile.data,
-            name=business_form.name.data, description=business_form.description.data)
+            fiscal_number=business.fiscal_number.data, phone=business.phone.data, mobile=business.mobile.data,
+            name=business.name.data, description=business.description.data)
 
     if customer_form.validate_on_submit():
         db.execute(f"UPDATE customers SET first_name = :first_name, last_name = :last_name, age = :age WHERE user_id = {session['user_id']}",
@@ -525,7 +530,7 @@ def account():
         field_data = MultiDict()
         field_data.update(qb)
         return render_template(ACCOUNT_PAGE,
-            form=BusinessAccountForm(formdata=field_data),
+            business=BusinessAccountForm(formdata=field_data),
             user_type=session["type"],
             tax_number=field_data.get("fiscal_number")
             )
@@ -540,13 +545,14 @@ def account():
         qu = ast.literal_eval(query_user[1:len(query_user)-1])
         field_data.update(qu)
         # Address form data
-        query_address = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}"))
+        query_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}")
         
-        if len(query_address) >= 1:
-            qa = ast.literal_eval(query_address[1:len(query_address)-1])
+        if query_address:
+            qa = ast.literal_eval(str(query_address)[1:len(str(query_address))-1])
             field_data.update(qa)
     
         return render_template(ACCOUNT_PAGE,
+            user_type=session["type"], 
             customer=CustomerAccountForm(formdata=field_data),
             user=UserAccountForm(formdata=field_data),
             address=AddressAccountForm(formdata=field_data)

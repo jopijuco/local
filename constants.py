@@ -50,6 +50,8 @@ BUSINESS_TABLE = "business"
 CUSTOMER_TABLE = "customers"
 
 # Messages
+USER_EXISTS_MESSAGE = "This user already exists."
+LOGIN_FAILED_MESSAGE = "Login failed."
 PURCHASE_MESSAGE = "Thanks for your purchase. We hope you enjoy it."
 BUSINESS_FORM_MESSAGE = "selling your"
 CUSTOMER_FORM_MESSAGE =  "buying local"
