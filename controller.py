@@ -509,25 +509,25 @@ def account():
         message = UPDATE_ACCOUNT_MESSAGE
 
     if address_form.validate_on_submit():
-        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c WHERE c.user_id = {session['user_id']}")
+        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = {session['user_id']}")
         
         if not check_address:
-            db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
+            db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
                 street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
                 city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
 
-            address_id = db.execute(f"SELECT id FROM addresses WHERE street = {address_form.street.data} AND number = {address_form.number.data} AND zip_code = {address_form.zip_code.data} AND city = {address_form.city.data} AND region = {address_form.region.data} AND country = {address_form.country.data}")
+            address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
+            street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
+            city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
 
             db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
         else:
             address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
 
-            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['id']}",
+            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
                 street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
                 city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
         message = UPDATE_ACCOUNT_MESSAGE
-
-    #return render_template(ACCOUNT_PAGE, message=UPDATE_ACCOUNT_MESSAGE)
     
     if session["type"] == BUSINESS:
         query_business = str(db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}"))
