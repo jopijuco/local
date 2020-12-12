@@ -6,8 +6,14 @@
 {% endblock %}
 
 {% block main %}
-    
+
     <h4>Edit account</h4>
+
+    {% if message %}
+    <div class="alert alert-success" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
 
     {% if user_type == "customer" %}
 
