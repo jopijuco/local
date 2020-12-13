@@ -338,8 +338,11 @@ def add_basket():
                 new = False
         if new:
             bm.add((product_id,store_id),1)
-        resp = redirect(url_for(INDEX))
+        #resp = redirect(url_for(INDEX))
+        resp = redirect(request.referrer)
         resp.set_cookie("basket", str(bm.get_dict()))
+        print("nb article dans le basket : ")
+        print (bm)
     return resp
 
 @app.route("/update_quantity_basket", methods=[GET, POST])
