@@ -22,7 +22,6 @@ from model.picture import *
 from model.order import *
 from model.status import *
 from model.customer import *
-from model.basket import *
 from utils import login_required
 
 
