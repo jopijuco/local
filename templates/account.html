@@ -6,113 +6,191 @@
 {% endblock %}
 
 {% block main %}
+    
     <h4>Edit account</h4>
-    {{ form_action(url_for('account'), "POST") }}
-    {{ customer.csrf_token }}
+
+    {% if user_type == "customer" %}
+
+        {{ form_action(url_for('account'), "POST") }}
+        {{ customer.csrf_token }}
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ customer.first_name.label }}
+                        {{ customer.first_name(class_="form-control") }}
+
+                        {% if customer.first_name.errors %}
+                        <ul class="errors">
+                            {% for error in customer.first_name.errors %}
+                            <li>{{ field.error }}</li>
+                            {% endfor %}
+                        </ul>        
+                        {% endif%}
+
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ customer.last_name.label }}
+                        {{ customer.last_name(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ customer.age.label }}
+                        {{ customer.age(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+            {{ customer.update(class_="btn btn-primary") }}
+        </form>
+        <hr>
+        {{ form_action(url_for('account'), "POST") }}
+        {{ user.csrf_token }}
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        {{ user.email.label }}
+                        {{ user.email(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ user.password.label }}
+                        {{ user.password(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+            {{ user.update(class_="btn btn-primary") }}
+        </form>
+        <hr>
+        {{ form_action(url_for('account'), "POST") }}
+        {{ address.csrf_token }}
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        {{ address.street.label }}
+                        {{ address.street(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1">
+                    <div class="form-group">
+                        {{ address.number.label }}
+                        {{ address.number(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        {{ address.floor.label }}
+                        {{ address.floor(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {{ address.zip_code.label }}
+                        {{ address.zip_code(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {{ address.city.label }}
+                        {{ address.city(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {{ address.region.label }}
+                        {{ address.region(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ address.country.label }}
+                        {{ address.country(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+            {{ address.update(class_="btn btn-primary") }}
+        </form>
+    
+    {% else %}
         
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ customer.first_name.label }}
-                    {{ customer.first_name(class_="form-control") }}
-                    
-                    {% if customer.first_name.errors %}
-                    <ul class="errors">
-                        {% for error in customer.first_name.errors %}
-                        <li>{{ field.error }}</li>
+        {{ form_action(url_for('account'), "POST") }}
+        {{ business.csrf_token }}
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ business.name.label }}
+                        {{ business.name(class_="form-control") }}
+
+                        {% if business.name.errors %}
+                        <ul class="errors">
+                        {% for error in business.name.errors %}
+                            <li>{{ error }}</li>
                         {% endfor %}
-                    </ul>        
-                    {% endif%}
+                        </ul>
+                        {% endif%}
 
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Tax number</label>
+                        <p class="form-control">{{ tax_number }}</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ customer.last_name.label }}
-                    {{ customer.last_name(class_="form-control") }}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        {{ business.description.label }}
+                        {{ business.description(class_="form-control") }}
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ customer.age.label }}
-                    {{ customer.age(class_="form-control") }}
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit">Update</button>
-    </form>
-    <hr>
-    {{ form_action(url_for('account'), "POST") }}
-    {{ user.csrf_token }}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ business.phone.label }}
+                        {{ business.phone(class_="form-control") }}
 
-        <div class="row">
-            <div class="col-md-8">
-                <div class="form-group">
-                    {{ user.email.label }}
-                    {{ user.email(class_="form-control") }}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ user.password.label }}
-                    {{ user.password(class_="form-control") }}
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit">Update</button>
-    </form>
-    <hr>
-    {{ form_action(url_for('account'), "POST") }}
-    {{ address.csrf_token }}
+                        {% if business.phone.errors %}
+                        <ul class="errors">
+                        {% for error in business.phone.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                        {% endif%}
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="form-group">
-                    {{ address.street.label }}
-                    {{ address.street(class_="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ business.mobile.label }}
+                        {{ business.mobile(class_="form-control") }}
+
+                        {% if business.mobile.errors %}
+                        <ul class="errors">
+                        {% for error in business.mobile.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                        {% endif%}
+
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-1">
-                <div class="form-group">
-                    {{ address.number.label }}
-                    {{ address.number(class_="form-control") }}
-                </div>
-            </div>
-            <div class="col-md-1">
-                <div class="form-group">
-                    {{ address.floor.label }}
-                    {{ address.floor(class_="form-control") }}
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    {{ address.zip_code.label }}
-                    {{ address.zip_code(class_="form-control") }}
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    {{ address.city.label }}
-                    {{ address.city(class_="form-control") }}
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    {{ address.region.label }}
-                    {{ address.region(class_="form-control") }}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ address.country.label }}
-                    {{ address.country(class_="form-control") }}
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit">Update</button>
-    </form>
+            {{ business.update(class_="btn btn-primary") }}
+        </form>
+
+    {% endif %}
+
 {% endblock %}
