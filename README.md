@@ -30,7 +30,7 @@ When landing on the website, you can enter in any shop you want to see the produ
 When accessing the basket page, you can finalize your order if you're logged in.
 
 #### Orders
-An order is relative to one store. If you want to buy products from different stores, you must create different order.
+An order is relative to one store. If you want to buy products from different stores, the application will create different order (one order per store).
 You can follow your order status in the order tab.
 
 #### Account
@@ -90,6 +90,8 @@ This version is the first of a possible future real application. Possible improv
 - pip install cs50  
 - pip install requests 
 - pip install Flask-Session 
+- pip install Flask-WTF
+- pip install email-validator
 - pip install pillow 
 4. Once installed run command `set FLASK_APP=application.py`
 5. Then run `python -m flask run` to run the app

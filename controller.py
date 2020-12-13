@@ -1,6 +1,13 @@
 from flask import render_template, request, session
 from flask.helpers import url_for
 from werkzeug.datastructures import MultiDict
+from forms import *
+from logging import exception
+#from os import O_NDELAY, name, remove
+from os import name, remove
+from basket_manager import *
+import re
+from sqlite3.dbapi2 import Error, InternalError
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import redirect
 
@@ -17,6 +24,7 @@ from model.status import *
 from model.customer import *
 from model.basket import *
 from utils import login_required
+
 
 import ast
 import os
@@ -91,7 +99,6 @@ def login():
         return redirect(url_for(FORM))
     return render_template(LOGIN_PAGE, form=form)
 
-
 @app.route("/form", methods=[GET, POST])
 @login_required
 def form():
@@ -135,8 +142,8 @@ def form():
 
 @app.route("/shop/<id>")
 def shop(id):
-    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS shop_id, s.name AS shop FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
-    return render_template("shop_products.html", products=products, name=products[0]["shop"])
+    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
+    return render_template("shop_products.html", products=products, name=products[0]["store"])
 
 
 @app.route("/store", methods=[GET, POST])
@@ -331,78 +338,77 @@ def single_product_store(product_id):
         stores.append(store)
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
 
-
-@app.route("/add_basket/<product>")
-def add_basket(product):
-    dict_product = ast.literal_eval(product)
-    
-    for key in dict_product.keys():
-        if key == "prd_id":
-            bm.add(dict_product[key])
-        elif key == "shop_id":
-            bm.add(dict_product[key])
-
-    resp = redirect(url_for(INDEX))
-    resp.set_cookie("basket", str(bm.get_list()))
+@app.route("/add_basket", methods=[GET, POST])
+def add_basket():
+    if request.method == POST:
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        new = True
+        basket = bm.get_dict()
+        for key in basket:
+            if key[0] == product_id and key[1] == store_id:
+                basket[key] += 1
+                new = False
+        if new:
+            bm.add((product_id,store_id),1)
+        #resp = redirect(url_for(INDEX))
+        resp = redirect(request.referrer)
+        resp.set_cookie("basket", str(bm.get_dict()))
+        print("nb article dans le basket : ")
+        print (bm)
     return resp
 
-
-@app.route("/remove_basket/<product>")
-def remove_basket(product):
-    dict_product = ast.literal_eval(product)
-
-    for key in dict_product.keys():
-        if key == "id":
-            bm.remove(dict_product[key])
-    
+@app.route("/update_quantity_basket", methods=[GET, POST])
+def update_quantity_basket():
+    if request.method == POST:
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        basket = bm.get_dict()
+        bm.add((product_id,store_id),int(request.form.get("quantity")))
     resp = redirect(url_for(BASKET))
-    resp.set_cookie("basket", str(bm.get_list()))
+    resp.set_cookie("basket", str(bm.get_dict()))
     return resp
 
+@app.route("/remove_basket", methods=[GET, POST])
+def remove_basket():
+    if request.method == POST:
+        product_id = request.form.get("product_id")
+        store_id = request.form.get("store_id")
+        basket = bm.get_dict()
+        bm.remove((product_id,store_id))
+    resp = redirect(url_for(BASKET))
+    resp.set_cookie("basket", str(bm.get_dict()))
+    return resp
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
-    basket = list()
-    id_p = list()
-    id_s = list()
-
-    for index, id in enumerate(bm.get_list()):
-        if index % 2 == 0:
-            id_p.append(id)
-        else:
-            id_s.append(id)
-
-    for i in range(len(id_p)):
-        products = db.execute(f"SELECT p.*, ps.*, s.id AS shop_id, s.name AS shop_name FROM product_store AS ps INNER JOIN products AS p ON ps.product_id = p.id AND p.id = {id_p[i]} AND ps.store_id = {id_s[i]} INNER JOIN stores AS s ON ps.store_id = s.id")
-        basket.append(products)
-    
-    #new stucture
-    if len(basket) > 0 :
+    basket = bm.get_dict()
+    store_list = bm.get_store_list()
+    if len(store_list) > 0 :
         full_basket = FullBasket()
-        #remove doublon from store id list
-        store_id_list = list(set(id_s))
-        for id in store_id_list:
-            store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=id)
-            new_basket = Basket(id, store_name[0]["name"], 0)
+        for store_id in store_list:
+            store_name = db.execute("SELECT name FROM stores WHERE id =:id", id=store_id)
+            new_basket = Basket(store_id, store_name[0]["name"], 0)
             amount = 0
-            for b in basket:
-                for y in b:
-                    if y['store_id'] == new_basket.store_id:
-                        product_exist = False
-                        for p in new_basket.products:
-                            if p.id == y["product_id"]:
-                                p.quantity += 1
-                                p.final_price += y["price"]
-                                product_exist = True
-                        if not product_exist:
-                            p = Product_ordered(y["product_id"], y["name"], 1, y["price"])
-                            new_basket.add_product(p)
-                        amount += y["price"]
+            for key, value in basket.items():
+                if key[1] == store_id:
+                    product_info = db.execute("SELECT p.name, sp.price, sp.stock FROM products p INNER JOIN product_store sp ON (p.id = sp.product_id AND sp.store_id = :store_id) WHERE p.id = :product_id", store_id = key[1], product_id = key[0])
+                    imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = key[0])
+                    if len(imgs) >= 1:
+                        main_img = Picture('', imgs[0]["file"],'')
+                        main_img.name_thumbnail() 
+                    else:
+                        main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+                    final_price = float(value) * float(product_info[0]["price"])
+                    p = Product_ordered(key[0], product_info[0]["name"], main_img.thumbnail,  product_info[0]["price"], value, final_price, product_info[0]["stock"])
+                    new_basket.add_product(p)
+                    amount += final_price
             new_basket.amount = amount
             full_basket.add_basket(new_basket)
     else:
         full_basket = False
 
+    #make an order
     if request.method == POST:
         orders = []
         for a in full_basket.baskets:
@@ -412,8 +418,11 @@ def basket():
                 db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
         bm.empty_basket()  
         full_basket = False
-        
-    return render_template("basket.html", products=basket, full_basket = full_basket, amount=bm.total("price", basket))
+
+    total_amount = 0
+    if full_basket:
+        total_amount = bm.total(full_basket)    
+    return render_template("basket.html", full_basket = full_basket, amount = total_amount)
 
 
 @app.route("/orders", methods=[GET, POST])
@@ -433,14 +442,13 @@ def order():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, history = False)
+    return render_template(ORDER_PAGE, orders=orders,  title ="My current orders")
 
 
 @app.route("/order_details/<order_id>", methods=[GET, POST])
 @login_required
 def order_details(order_id):
     updateStatusAvailable = False
-    
     status_list = []
     for row in db.execute("SELECT * FROM status"):
         status = Status(row["id"], row["name"], row["description"])
@@ -458,7 +466,7 @@ def order_details(order_id):
         if order.status_id != 4:
             updateStatusAvailable = True
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
-        product = Product_ordered(row["product_id"], row["name"], row["quantity"], row["final_price"])
+        product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"], '')
         order.add_product(product)
     return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
@@ -480,7 +488,7 @@ def history():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, updateStatusAvailable = False)
+    return render_template(ORDER_PAGE, orders=orders, title = "History (completed orders)")
 
     
 @app.route("/account", methods=[GET, POST])
