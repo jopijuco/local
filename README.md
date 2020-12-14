@@ -1,6 +1,6 @@
 # local
 
-**local** is a web based platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
+**local** is a web platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
 From catering trade to fruit shops or bakeries to specialized businesses and traditional product sellers all have a space on local.
 Where your local products are accessible to everyone.
 
@@ -14,6 +14,22 @@ From a customer point of view they can find more products that are not accessibl
 ## Version
 
 `1.0.0`
+
+* As s **Business** you can:
+    * register;
+    * log in;
+    * create a business (register your activity on **local**);
+    * edit your account info;
+    * add stores;
+    * add products;
+    * check orders received;
+
+* As a **Customer** you can:
+    * register;
+    * log in;
+    * edit your account info;
+    * add products to basket;
+    * buy products;
    
 ## Screenshots
 
@@ -21,42 +37,33 @@ From a customer point of view they can find more products that are not accessibl
 
 ## Tech/framework used:
 
-This `1.0.0` version was built with:
+**local** was built with:
 
 * Flask - as a web application framework;
 * Bootstrap - to views styling;
 * Sqlite3 - database;
 
+## Improvements:
+
+We hope this `1.0.0` version is the first of a possible future real application.
+
+* Filter stores by location or category
+* Apply promo on product's prices
+* Send email notification when order's status change
+* Apply a new design
 
 ## Credits
 
 This projects was an idea of two CS50 students who met online and after a couple of messages decided to start this final project together, they are:
 
-- [@jopijuco](https://github.com/jopijuco)
-- [@JadeRebecca](https://github.com/JadeRebecca)
+* [@JadeRebecca](https://github.com/JadeRebecca)
+* [@jopijuco](https://github.com/jopijuco)
 
 ## License
 
 MIT License
 
 
-
-
-## How it works?
-
-This `1.0.0` version 
-
-
-
-
-## Possible improvements
-
-This version is the first of a possible future real application. Possible improvements:
-
-- Filter stores by location or category
-- Apply promo on product's prices
-- Send email notification when order's status change
-- Apply a new design
 
 ## How to launch application
 
