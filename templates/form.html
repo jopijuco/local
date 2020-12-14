@@ -1,5 +1,5 @@
 {% extends "base_layout.html" %}
-{% from "macros.html" import form_action %}
+{% from "macros.html" import form_action_method %}
 
 {% block title %}
     form
@@ -18,7 +18,7 @@
     
     {% if session["type"] == "business" %}
 
-        {{ form_action( url_for('form'), "POST") }}
+        {{ form_action_method( url_for('form'), "POST") }}
         {{ form.csrf_token }}
                 
             <div class="row">
@@ -104,7 +104,7 @@
             
     {% else %}
 
-        {{ form_action( url_for('form'), "POST") }}
+        {{ form_action_method( url_for('form'), "POST") }}
         {{ form.csrf_token }}
             
             <div class="row">

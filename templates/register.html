@@ -1,11 +1,11 @@
 {% extends "signin_layout.html" %}
-{% from "macros.html" import form_action %}
+{% from "macros.html" import form_action_method %}
 
 {% block title %}
     Register
 {% endblock %}
 
-{% block form %} {{ form_action(url_for('register'), "POST") }} {% endblock %}
+{% block form %} {{ form_action_method(url_for('register'), "POST") }} {% endblock %}
 
 {{ form.csrf_token }}
 
