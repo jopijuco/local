@@ -1,6 +1,6 @@
 # local
 
-local is a web based platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
+**local** is a web based platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
 From catering trade to fruit shops or bakeries to specialized businesses and traditional product sellers all have a space on local.
 Where your local products are accessible to everyone.
 
@@ -13,7 +13,7 @@ From a customer point of view they can find more products that are not accessibl
 
 ## Version
 
-1.0.0
+`1.0.0`
    
 ## Screenshots
 
@@ -21,19 +21,19 @@ From a customer point of view they can find more products that are not accessibl
 
 ## Tech/framework used:
 
-This 1.0.0 version was built with:
+This `1.0.0` version was built with:
 
-- Flask - as a web application framework;
-- Bootstrap - to views styling;
-- Sqlite3 - database;
+* Flask - as a web application framework;
+* Bootstrap - to views styling;
+* Sqlite3 - database;
 
 
 ## Credits
 
 This projects was an idea of two CS50 students who met online and after a couple of messages decided to start this final project together, they are:
 
-- @jopijuco
-- @JadeRebecca
+- [@jopijuco](https://github.com/jopijuco)
+- [@JadeRebecca](https://github.com/JadeRebecca)
 
 ## License
 
@@ -44,7 +44,7 @@ MIT License
 
 ## How it works?
 
-This 1.0.0 version 
+This `1.0.0` version 
 
 
 
