@@ -1,76 +1,53 @@
-# CS50 Final Project - local platform
+# local
 
-The project is a webapp where business can create online shop for local customers.
-This first version is made with a simple and clean design, and focus on the main functionality that locals sellers needs, specially during this particular context.
+local is a web based platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
+From catering trade to fruit shops or bakeries to specialized businesses and traditional product sellers all have a space on local.
+Where your local products are accessible to everyone.
 
+## Motivation
 
-Technologies used:
+This project is a consequence of CS50 course to develop a software from scratch for its final project.
+The idea was to build a web based app for small businesses where they have a platform to sell their products beside their usual
+local customers.
+From a customer point of view they can find more products that are not accessible in big supermarkets and buy more local in a easier way.
 
-- Flask
-- sqlite3
-- Bootstrap
+## Version
 
-## How the website works?
+1.0.0
+   
+## Screenshots
 
-Any user can explore the website without registering, and enter in any shop to see the product's catalogue.
-To buy some products, user must be register and loggued as a customer.
-The user can register either as business or customer. During registration you need to enter these fields:
+[Add some screenshots of the app, max 3]
 
-- Email
-- Name
-- Password: any constraint?
+## Tech/framework used:
 
+This 1.0.0 version was built with:
 
-### Customer View
-
-As a Customer, you can start your shopping without beeing logged, but you must be logged as a customer to finalize your order.
-
-#### Shopping
-When landing on the website, you can enter in any shop you want to see the product's catalogue and add some in your basket.
-When accessing the basket page, you can finalize your order if you're logged in.
-
-#### Orders
-An order is relative to one store. If you want to buy products from different stores, the application will create different order (one order per store).
-You can follow your order status in the order tab.
-
-#### Account
-to complete
-
-### Business View
-
-Business registration allows you to access personnal business area, where you can manage your store(s), your product(s) and your order(s).
-
-#### Stores
-A Business has at least one store.
-As a business, you can create as many stores as you want. When creating a new store, all the product of your existing stores are automatically added in the new store, but you must update the quantity and price to make them available for shopping.
-
-#### Products
-A Business can create a new product and add it to all of its stores. In this case, the business is the owner of this product and is able to modify product's name, description and images.
-A Business can also add an existing product   all of its stores. In this case, the business is not the product's owner so it can't modify product's name, description and images.
-
-When a Business add a product to his stores (by creating a new one or picking an existing), he must enter the price and the quantity for each of his store.
-If the quantity is 0, the product will not be display in the customer's view.
+- Flask - as a web application framework;
+- Bootstrap - to views styling;
+- Sqlite3 - database;
 
 
-#### Orders
-When a customer make an order in one of your store, you can see it in the order tab, with the open status.
-You can update the status of all of your order, the customer will see the modification in his own order tab.
-When the order's status is completed, you can't see it in the orders tab anymore, you must go to the history tab to find it.
+## Credits
 
-### Routing
+This projects was an idea of two CS50 students who met online and after a couple of messages decided to start this final project together, they are:
 
-For all businesses and customer specific pages, each route checks if the user is authenticated. 
-So for example a regular user (not logged in) or a customer cannot enter /xxx/xxx/ route (write an example). 
+- @jopijuco
+- @JadeRebecca
 
-### Sessions
+## License
 
-The webpage uses sessions to confirm that user is registered. 
-To complete...
+MIT License
 
-### Database
 
-Database stores all users, business and orders data. 
-Add a schema of the DB?
+
+
+## How it works?
+
+This 1.0.0 version 
+
+
+
 
 ## Possible improvements
 
@@ -97,4 +74,3 @@ This version is the first of a possible future real application. Possible improv
 5. Then run `python -m flask run` to run the app
 5. Click on the URL displayed on your command prompt `http://:xxx.x.x.x:xxxx/`
 6. You are ready to go!
-
