@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "base_layout.html" %}
 {% block style %}
     table{
         text-align: left;
@@ -7,8 +7,36 @@
         font-weight:bold;
     }
 {% endblock %}
+
 {% block title %}
     your products
+{% endblock %}
+
+{% block tabs %}
+    {% if session.user_id %}
+    <ul class="navbar-nav mr-auto mt-2">
+        
+        {% if session.type == "customer" %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
+        
+        {% else %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Stores</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
+        {% endif %}
+
+    </ul>
+    <ul class="navbar-nav ml-auto mt-2">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log Out</a></li>
+    </ul>
+    {% else %}
+    <ul class="navbar-nav mr-auto mt-2">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
+    </ul>
+    {% endif %}
 {% endblock %}
 
 {% block main %}    

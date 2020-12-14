@@ -76,13 +76,9 @@ class AddressAccountForm(AccountForm):
         validators=[InputRequired(),
             Length(5, 50)]
         )
-    number = IntegerField("Street number",
+    number = IntegerField("Number",
         validators=[InputRequired(),
-            Length(min=1, max=9999)]
-        )
-    floor = StringField("Floor",
-        validators=[InputRequired(),
-            Length(1, 20, "Floor is not valid.")]
+            NumberRange(min=1, max=9999)]
         )
     city = StringField("City",
         validators=[InputRequired(),
@@ -102,7 +98,7 @@ class AddressAccountForm(AccountForm):
     country = SelectField("Country",
         choices=country_list()
         )
-    zip_code = IntegerField("Zipcode",
+    zip_code = StringField("Zipcode",
         validators=[InputRequired(),
             Length(4, 10, "Zipcode is not valid.")]
         )

@@ -497,39 +497,44 @@ def account():
     user_form = UserAccountForm()
     address_form = AddressAccountForm()
     business = BusinessForm()
+    message = None
 
     if business.validate_on_submit():
         db.execute(f"UPDATE business SET fiscal_number = :fiscal_number, phone = :phone, mobile = :mobile, name = :name, description = :description WHERE id = {session['business_id']}",
             fiscal_number=business.fiscal_number.data, phone=business.phone.data, mobile=business.mobile.data,
             name=business.name.data, description=business.description.data)
+        message = UPDATE_ACCOUNT_MESSAGE
 
     if customer_form.validate_on_submit():
         db.execute(f"UPDATE customers SET first_name = :first_name, last_name = :last_name, age = :age WHERE user_id = {session['user_id']}",
             first_name=customer_form.first_name.data, last_name=customer_form.last_name.data, age=customer_form.age.data)
+        message = UPDATE_ACCOUNT_MESSAGE
     
     if user_form.validate_on_submit():
         db.execute(f"UPDATE user_customers SET email = :email, hash_pass = :password WHERE id = {session['user_id']}",
             email=user_form.email.data, password=generate_password_hash(user_form.password.data, "sha256"))
+        message = UPDATE_ACCOUNT_MESSAGE
 
     if address_form.validate_on_submit():
-        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c WHERE c.user_id = {session['user_id']}")
+        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = {session['user_id']}")
         
-        if len(check_address) == 0:
-            db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
+        if not check_address:
+            db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
                 street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
                 city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
 
-            address_id = db.execute(f"SELECT id FROM addresses WHERE street = {address_form.street.data} AND number = {address_form.number.data} AND zip_code = {address_form.zip_code.data} AND city = {address_form.city.data} AND region = {address_form.region.data} AND country = {address_form.country.data}")
+            address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
+            street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
+            city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
 
             db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
         else:
             address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
 
-            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['id']}",
+            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
                 street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
                 city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
-
-        return redirect(url_for(ACCOUNT))
+        message = UPDATE_ACCOUNT_MESSAGE
     
     if session["type"] == BUSINESS:
         query_business = str(db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}"))
@@ -559,7 +564,8 @@ def account():
             field_data.update(qa)
     
         return render_template(ACCOUNT_PAGE,
-            user_type=session["type"], 
+            user_type=session["type"],
+            message=message, 
             customer=CustomerAccountForm(formdata=field_data),
             user=UserAccountForm(formdata=field_data),
             address=AddressAccountForm(formdata=field_data)
