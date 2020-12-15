@@ -46,10 +46,18 @@ From a customer point of view they can find more products that are not accessibl
 * Bootstrap - for views' styling;
 * Sqlite3 - for database management;
 
+## Libraries
+
+* Flask `pip install Flask`
+* Flask-Session `pip install Flask-Session`
+* CS50 `pip install cs50`
+* WTForms `pip install WTForms`
+* Flask-WTF `pip install Flask-WTF`
+
 ## How to launch local ?
 
 1. Clone this repo
-2. Check if you have all the packages installed on your machine (*)
+2. Check if you have all the packages installed on your machine
 3. In your project directory, open your terminal and run:
     * Macbook or Linux `flask run`
     * Windows `python -m flask run`
