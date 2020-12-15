@@ -38,7 +38,7 @@ From a customer point of view they can find more products that are not accessibl
 ![orders](screenshots/orders.png)
 ![login](screenshots/login.png)
 
-## Tech/framework used:
+## Tech/framework used
 
 **local** was built with:
 
@@ -54,7 +54,7 @@ From a customer point of view they can find more products that are not accessibl
 * WTForms `pip install WTForms`
 * Flask-WTF `pip install Flask-WTF`
 
-## How to launch local ?
+## How to launch local
 
 1. Clone this repo
 2. Check if you have all the packages installed on your machine
@@ -65,7 +65,7 @@ From a customer point of view they can find more products that are not accessibl
 5. Click or copy it to your browser
 6. You are ready to go! 
 
-## Improvements:
+## Improvements
 
 We hope `1.0.0` is the first version of a future real application and the improvements are constant but we already have this in mind:
 
