@@ -32,17 +32,29 @@ bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    stores = db.execute("SELECT id, name FROM stores")
+    stores = []
     message = None
     try:
         if session['type'] == BUSINESS:
-            stores = db.execute(f"SELECT * FROM stores WHERE business_id = {session['business_id']}")
-
+            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
             if not stores:
                 message = "You don't have any registered stores."
-        return render_template(INDEX_PAGE, stores=stores, message=message)
+        if session['type'] == CUSTOMER:    
+            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
     except KeyError:
-        return render_template(INDEX_PAGE, stores=stores)
+        stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
+
+    for row in stores_query:
+        if (row["front_pic"] is None or row["front_pic"] == ""):
+            picture = IMG_DEFAULT
+        else:
+            front_pic = row["front_pic"]
+            pic = Picture('', front_pic,'')
+            pic.name_thumbnail() 
+            picture = pic.thumbnail
+        store = Store(row["id"],row["name"],picture,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
+        stores.append(store)
+    return render_template(INDEX_PAGE, stores=stores, message=message)
     
 
 @app.route("/register", methods=[GET, POST])
