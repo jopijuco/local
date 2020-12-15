@@ -36,7 +36,7 @@ From a customer point of view they can find more products that are not accessibl
 
 [Add some screenshots of the app, max 3]
 
-* ![basket](screenshots/basket.png)
+![basket](screenshots/basket.png)
 
 ## Tech/framework used:
 
