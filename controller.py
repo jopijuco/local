@@ -2,16 +2,11 @@ from flask import render_template, request, session
 from flask.helpers import url_for
 from werkzeug.datastructures import MultiDict
 from forms import *
-from logging import exception
-#from os import O_NDELAY, name, remove
-from os import name, remove
 from basket_manager import *
-import re
-from sqlite3.dbapi2 import Error, InternalError
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import redirect
 
-from application import app, db
+from app import app, db
 from basket_manager import Basket_Manager
 from constants import *
 from forms import *

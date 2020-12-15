@@ -5,7 +5,7 @@ from wtforms.fields.simple import PasswordField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length, NumberRange
 
-from application import db
+from app import db
 from geo import countries
 
 
