@@ -1,3 +1,7 @@
-{% macro form_action(url, request) -%}
+{% macro form_action_method(url, request) -%}
     <form action="{{ url }}" method="{{ request }}">
+{%- endmacro %}
+
+{% macro form_action_method_enctype(url, request, enctype) -%}
+    <form action="{{ url }}" method="{{ request }}" enctype="{{ enctype }}">
 {%- endmacro %}

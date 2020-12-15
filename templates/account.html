@@ -1,17 +1,23 @@
-{% extends "layout.html" %}
-{% from "macros.html" import form_action %}
+{% extends "index.html" %}
+{% from "macros.html" import form_action_method %}
 
 {% block title %}
     local: account
 {% endblock %}
 
 {% block main %}
-    
+
     <h4>Edit account</h4>
+
+    {% if message %}
+    <div class="alert alert-success" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
 
     {% if user_type == "customer" %}
 
-        {{ form_action(url_for('account'), "POST") }}
+        {{ form_action_method(url_for('account'), "POST") }}
         {{ customer.csrf_token }}
 
             <div class="row">
@@ -46,7 +52,7 @@
             {{ customer.update(class_="btn btn-primary") }}
         </form>
         <hr>
-        {{ form_action(url_for('account'), "POST") }}
+        {{ form_action_method(url_for('account'), "POST") }}
         {{ user.csrf_token }}
 
             <div class="row">
@@ -66,7 +72,7 @@
             {{ user.update(class_="btn btn-primary") }}
         </form>
         <hr>
-        {{ form_action(url_for('account'), "POST") }}
+        {{ form_action_method(url_for('account'), "POST") }}
         {{ address.csrf_token }}
 
             <div class="row">
@@ -82,12 +88,6 @@
                     <div class="form-group">
                         {{ address.number.label }}
                         {{ address.number(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="form-group">
-                        {{ address.floor.label }}
-                        {{ address.floor(class_="form-control") }}
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -122,7 +122,7 @@
     
     {% else %}
         
-        {{ form_action(url_for('account'), "POST") }}
+        {{ form_action_method(url_for('account'), "POST") }}
         {{ business.csrf_token }}
 
             <div class="row">
