@@ -34,9 +34,9 @@ From a customer point of view they can find more products that are not accessibl
    
 ## Screenshots
 
-[Add some screenshots of the app, max 3]
-
 ![basket](screenshots/basket.png)
+![orders](screenshots/orders.png)
+![login](screenshots/login.png)
 
 ## Tech/framework used:
 
