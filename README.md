@@ -1,35 +1,36 @@
 # local
 
-**local** is a web platform where only local businesses can sell their products online and show themselves to a possible more customers rather than just their locals and neighbors.
-From catering trade to fruit shops or bakeries to specialized businesses and traditional product sellers all have a space on local.
-Where your local products are accessible to everyone.
+**local** is a web platform that allows local businesses to sell their products online and make them available to a broader range of customers rather than just their locals ones and neighbors.
+
+From restaurants to fruit shops, bakeries, specialized businesses ??? or traditional products' makers and sellers, they all have a chance to sell on **local**.
+Local and traditional products are now accessible to everyone, everywhere.
 
 ## Motivation
 
-This project is a consequence of CS50 course to develop a software from scratch for its final project.
-The idea was to build a web based app for small businesses where they have a platform to sell their products beside their usual
-local customers.
-From a customer point of view they can find more products that are not accessible in big supermarkets and buy more local in a easier way.
+This project is a consequence of CS50's final project to develop a software from scratch.
+The idea was to build a web based application for small businesses, allowing them to have a platform to sell and showcase their products to a broader audience.
+
+From a customer point of view they can find more products that are not accessible in big supermarkets and buy local in an easier way.
 
 ## Version
 
 `1.0.0`
 
-* As s **Business** you can:
+* As a **Business** you can:
     * register;
     * log in;
     * create a business (register your activity on **local**);
-    * edit your account info;
+    * edit your account details;
     * add stores;
     * add products;
-    * check orders received;
+    * check orders received.
 
 * As a **Customer** you can:
     * register;
     * log in;
-    * edit your account info;
-    * add products to basket;
-    * buy products;
+    * edit your account details;
+    * add products to a basket;
+    * buy products.
    
 ## Screenshots
 
@@ -40,21 +41,33 @@ From a customer point of view they can find more products that are not accessibl
 **local** was built with:
 
 * Flask - as a web application framework;
-* Bootstrap - to views styling;
-* Sqlite3 - database;
+* Bootstrap - for views' styling;
+* Sqlite3 - for database management;
+
+## How to launch local ?
+
+1. Clone this repo
+2. Check if you have all the packages installed on your machine (*)
+3. In your project directory, open your terminal and run:
+    * Macbook or Linux `flask run`
+    * Windows `python -m flask run`
+4. On your terminal window will display "Running on http://(address):(port)"
+5. Click or copy it to your browser
+6. You are ready to go!
 
 ## Improvements:
 
-We hope this `1.0.0` version is the first of a possible future real application.
+We hope `1.0.0` is the first version of a future real application and the improvements are constant but we already have this in mind:
 
 * Filter stores by location or category
-* Apply promo on product's prices
-* Send email notification when order's status change
+* Apply promo to product's price
+* Send an email notification when order's status change
 * Apply a new design
 
 ## Credits
 
-This projects was an idea of two CS50 students who met online and after a couple of messages decided to start this final project together, they are:
+This project was an idea of two CS50 students who met online and that, after a couple of messages, decided to start working on this final project together.
+They are:
 
 * [@JadeRebecca](https://github.com/JadeRebecca)
 * [@jopijuco](https://github.com/jopijuco)
@@ -62,22 +75,3 @@ This projects was an idea of two CS50 students who met online and after a couple
 ## License
 
 MIT License
-
-
-
-## How to launch application
-
-1. Check that you have Python installed
-2. Clone the code: `git clone https://github.com/.....
-3. Run command prompt in the folder and run these set of command to install Flask and other dependencies :
-- pip install flask 
-- pip install cs50  
-- pip install requests 
-- pip install Flask-Session 
-- pip install Flask-WTF
-- pip install email-validator
-- pip install pillow 
-4. Once installed run command `set FLASK_APP=application.py`
-5. Then run `python -m flask run` to run the app
-5. Click on the URL displayed on your command prompt `http://:xxx.x.x.x:xxxx/`
-6. You are ready to go!
