@@ -2,7 +2,7 @@
 
 **local** is a web platform that allows local businesses to sell their products online and make them available to a broader range of customers rather than just their locals ones and neighbors.
 
-From restaurants to fruit shops, bakeries, specialized businesses ??? or traditional products' makers and sellers, they all have a chance to sell on **local**.
+From restaurants to fruit shops, bakeries, or traditional product makers and sellers, they all have a chance to sell on **local**.
 Local and traditional products are now accessible to everyone, everywhere.
 
 ## Motivation
@@ -63,7 +63,7 @@ We hope `1.0.0` is the first version of a future real application and the improv
 
 * Filter stores by location or category
 * Apply promo to product's price
-* Send an email notification when order's status change
+* Send an email notification when orders' status change
 * Apply a new design
 
 ## Credits
