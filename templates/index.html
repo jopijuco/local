@@ -47,15 +47,20 @@
 
     <div class="row">
     {% for store in stores %}
-        <div class="col-md-4 py-3">
-            <a href="{{ url_for('shop', id=store.id) }}">
-                <div class="card">
-                    <img src=""  alt="store picture" class="card-img-top"/>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ store.name }}</h5>
-                    </div>
+        <div class="col-12 col-md-6 col-lg-4  mt-3">
+            <div class="card">
+                <div class="item">
+                    <img src="{{url_for('static', filename= store.front_pic )}}"  alt="store front picture" class="card-img-top"/>
                 </div>
-            </a>
+                <div class="card-body">
+                    <div class="product_card_name"><h5>{{ store.name }}</h5></div>
+                    <div class="product_card_description">
+                        <p>{{ store.number }} {{ store.street }} </p>
+                        <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
+                    </div>
+                    <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                </div>
+            </div>
         </div>
     {% endfor %}
     </div>
