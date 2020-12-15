@@ -36,6 +36,8 @@ From a customer point of view they can find more products that are not accessibl
 
 [Add some screenshots of the app, max 3]
 
+* ![basket](screenshots/basket.png)
+
 ## Tech/framework used:
 
 **local** was built with:
@@ -53,7 +55,7 @@ From a customer point of view they can find more products that are not accessibl
     * Windows `python -m flask run`
 4. On your terminal window will display "Running on http://(address):(port)"
 5. Click or copy it to your browser
-6. You are ready to go!
+6. You are ready to go! 
 
 ## Improvements:
 
