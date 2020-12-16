@@ -21,7 +21,7 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
         
         {% else %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Stores</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('stores')}}">Stores</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
@@ -58,7 +58,11 @@
                         <p>{{ store.number }} {{ store.street }} </p>
                         <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
                     </div>
-                    <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                    {% if session.type == "business" %}
+                        <a href="{{ url_for('store', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                    {% else %}
+                        <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

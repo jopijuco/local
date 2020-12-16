@@ -153,9 +153,9 @@ def shop(id):
     return render_template("shop_products.html", products=products, name=products[0]["store"])
 
 
-@app.route("/store", methods=[GET, POST])
+@app.route("/stores", methods=[GET, POST])
 @login_required
-def store():
+def stores():
     if request.method == POST:
         if request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
@@ -198,7 +198,34 @@ def store():
         store = Store(row["id"],row["name"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         business.add_store(store)
     
-    return render_template(STORE_PAGE, business =  business)
+    return render_template(STORES_PAGE, business =  business)
+
+
+@app.route("/store/<id>")
+@login_required
+def store(id):
+    validate_user = db.execute(f"SELECT s.id FROM stores AS s INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :id AND b.user_id = :user",
+        id=id, user=session['user_id'])
+    
+    if int(id) is not validate_user[0]["id"]:
+        return "You have no permission to access this page"
+    
+    # store info
+    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
+        store=int(id), user=session['user_id']))
+    store = ast.literal_eval(store_query[1:len(store_query)-1])
+
+    # products info
+    products = db.execute(f"SELECT p.* FROM products AS p INNER JOIN business AS b ON p.business_id = b.id INNER JOIN stores AS s ON b.id = s.business_id WHERE s.id = :store AND b.user_id = :user",
+        store=int(id), user=session['user_id'])
+    
+    return render_template(STORE_PAGE, store=store, products=products)
+
+
+@app.route("/edit_store/<id>", methods=[GET, POST])
+@login_required
+def edit_store(id):
+    return render_template("manage_store.html")
 
 
 @app.route("/product", methods=[GET, POST])
