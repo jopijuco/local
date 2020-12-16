@@ -9,6 +9,7 @@ from werkzeug.utils import redirect
 from app import app, db
 from basket_manager import Basket_Manager
 from constants import *
+from helpers import *
 from forms import *
 from model.business import *
 from model.store import *
@@ -204,11 +205,7 @@ def stores():
 @app.route("/store/<id>")
 @login_required
 def store(id):
-    validate_user = db.execute(f"SELECT s.id FROM stores AS s INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :id AND b.user_id = :user",
-        id=id, user=session['user_id'])
-    
-    if int(id) is not validate_user[0]["id"]:
-        return "You have no permission to access this page"
+    validate_user(id)
     
     # store info
     store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
@@ -222,10 +219,31 @@ def store(id):
     return render_template(STORE_PAGE, store=store, products=products)
 
 
+@app.route("/add_store", methods=[GET, POST])
 @app.route("/edit_store/<id>", methods=[GET, POST])
 @login_required
-def edit_store(id):
-    return render_template("manage_store.html")
+def manage_store(id):
+    validate_user(id)
+
+    # store info
+    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.address_id AS address, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
+        store=int(id), user=session['user_id']))
+    store = ast.literal_eval(store_query[1:len(store_query)-1])
+    
+    form = StoreForm()
+
+    if form.validate_on_submit():
+        # update store
+        db.execute("UPDATE stores SET name = :name WHERE id = :store",
+            name=form.name.data, store=store["store_id"])
+
+        # update store address
+        db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zipcode, city = :city, region = :region, country = :country WHERE id = :id",
+            id=store["address"], street=form.street.data, number=form.number.data, zipcode=form.zip_code.data,
+            city=form.city.data, region=form.region.data, country=form.country.data)
+        return redirect(url_for(INDEX))
+    
+    return render_template(MANAGE_STORE_PAGE, store=store, form=StoreForm(formdata=MultiDict(store)))
 
 
 @app.route("/product", methods=[GET, POST])

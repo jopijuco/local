@@ -146,3 +146,12 @@ class BusinessForm(BusinessAccountForm, AfterLoginForm):
 
 class CustomerForm(CustomerAccountForm, AfterLoginForm):
     pass
+
+
+class StoreForm(AddressAccountForm):
+    name = StringField("Name",
+        validators=[InputRequired(),
+            Length(2, 25, "Name does not respect our rules.")]
+        )
+    edit_button = SubmitField("Edit")
+    add_button = SubmitField("Add")

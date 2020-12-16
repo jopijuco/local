@@ -23,6 +23,8 @@ HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
 FORM_PAGE = "form.html"
 ACCOUNT_PAGE = "account.html"
+STORES_PAGE = "stores.html"
+MANAGE_STORE_PAGE = "manage_store.html"
 
 # Redirects
 LOGIN = "login"
@@ -33,6 +35,7 @@ BASKET = "basket"
 ORDER = "order"
 FORM = "form"
 ACCOUNT = "account"
+STORES = "stores"
 
 # Users
 BUSINESS = "business"
