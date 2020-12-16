@@ -105,6 +105,7 @@ def login():
         return redirect(url_for(FORM))
     return render_template(LOGIN_PAGE, form=form)
 
+
 @app.route("/form", methods=[GET, POST])
 @login_required
 def form():
@@ -156,14 +157,7 @@ def shop(id):
 @login_required
 def store():
     if request.method == POST:
-        if request.form['submit_button'] == 'submit business':
-            name = request.form.get("name")
-            description = request.form.get("description")
-            mobile = request.form.get("mobile")
-            phone = request.form.get("phone")
-            fiscal_number = request.form.get("fiscal_number")
-            db.execute("UPDATE business SET name=:name, fiscal_number=:fiscal_number, description=:description , mobile=:mobile , phone=:phone  WHERE id= :id", name=name, description=description, fiscal_number=fiscal_number, mobile=mobile, phone=phone, id=session["business_id"])
-        elif request.form['submit_button'] == 'add_store':
+        if request.form['submit_button'] == 'add_store':
             new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
             new_store_id = db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["business_id"], address_id = new_address_id)
             for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=session["business_id"]):
@@ -344,6 +338,7 @@ def single_product_store(product_id):
         stores.append(store)
     return render_template(SINGLE_PRODUCT_STORE_PAGE, product = product, stores = stores)
 
+
 @app.route("/add_basket", methods=[GET, POST])
 def add_basket():
     if request.method == POST:
@@ -364,6 +359,7 @@ def add_basket():
         print (bm)
     return resp
 
+
 @app.route("/update_quantity_basket", methods=[GET, POST])
 def update_quantity_basket():
     if request.method == POST:
@@ -375,6 +371,7 @@ def update_quantity_basket():
     resp.set_cookie("basket", str(bm.get_dict()))
     return resp
 
+
 @app.route("/remove_basket", methods=[GET, POST])
 def remove_basket():
     if request.method == POST:
@@ -385,6 +382,7 @@ def remove_basket():
     resp = redirect(url_for(BASKET))
     resp.set_cookie("basket", str(bm.get_dict()))
     return resp
+
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
