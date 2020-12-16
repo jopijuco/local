@@ -32,7 +32,7 @@ def index():
     try:
         if session['type'] == BUSINESS:
             stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
-            if not stores:
+            if not stores_query:
                 message = "You don't have any registered stores."
         if session['type'] == CUSTOMER:    
             stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
