@@ -9,19 +9,20 @@
     
     <div class="row">
     {% for product in products %}
-        <div class="col-md-4 py-3">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mt-3">
             <div class="card">
-                <img src="{{ url_for('static', filename= product.main_img) }}"  alt="product picture" class="card-img-top"/>
+                <div class="item">
+                    <span class="badge badge-warning notify-badge">{{ product.price }}€</span>
+                    <img src="{{ url_for('static', filename= product.main_img) }}"  alt="product picture" class="card-img-top"/>
+                </div>
                 <div class="card-body">
-                    <span class="badge badge-warning">{{ product.price }}€</span>
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text">{{ product.description }}</p>
+                    <div class="product_card_name"><h5>{{ product.name }}</h5></div>
+                    <div class="product_card_description">{{ product.description }}</div>
                     <form action="{{ url_for('add_basket')}}" method="post" enctype="multipart/form-data">
                         <input type="hidden" id="product_id" name="product_id" value="{{ product.prd_id }}">
                         <input type="hidden" id="store_id" name="store_id" value="{{ product.store_id }}">
                         <button class="btn btn-primary" type="submit" name="submit" value="add">Add to card</button>
                     </form>
-        
                 </div>
             </div>
         </div>
