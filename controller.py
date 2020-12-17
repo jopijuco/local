@@ -29,11 +29,13 @@ bm = Basket_Manager()
 def index():
     stores = []
     message = None
+    button_text = "Visit this store"
     try:
         if session['type'] == BUSINESS:
             stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
             if not stores_query:
                 message = "You don't have any registered stores."
+            button_text = "Edit store info"
         if session['type'] == CUSTOMER:    
             stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
     except KeyError:
@@ -49,7 +51,7 @@ def index():
             picture = pic.thumbnail
         store = Store(row["id"],row["name"],picture,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         stores.append(store)
-    return render_template(INDEX_PAGE, stores=stores, message=message)
+    return render_template(INDEX_PAGE, stores=stores, message=message, button_text=button_text )
     
 
 @app.route("/register", methods=[GET, POST])
