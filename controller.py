@@ -12,7 +12,7 @@ from constants import *
 from forms import *
 from model.business import *
 from model.store import *
-from model.product import *
+from model.product_management import *
 from model.picture import *
 from model.order import *
 from model.status import *
@@ -152,8 +152,28 @@ def form():
 
 @app.route("/shop/<id>")
 def shop(id):
-    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
-    return render_template("shop_products.html", products=products, name=products[0]["store"])
+    store = db.execute("SELECT s.id, s.name, s.front_pic, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=id)
+    if (store[0]["front_pic"] is None or store[0]["front_pic"] == ""):
+        front_pic = IMG_DEFAULT
+    else:
+        front_pic = store[0]["front_pic"]
+    store = Store(store[0]["id"],store[0]["name"],front_pic,store[0]["number"],store[0]["street"],store[0]["zip_code"],store[0]["city"],store[0]["region"],store[0]["country"])
+    
+    products = []
+    for row in db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id"):
+        id = row["prd_id"]
+        name = row["name"]
+        description = row["description"]
+        price = row["price"]
+        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = id)
+        if len(imgs) >= 1:
+            main_img = Picture('', imgs[0]["file"],'')
+            main_img.name_thumbnail() 
+        else:
+            main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        product = Product_shop(id, name, description, main_img.thumbnail, price)
+        products.append(product)
+    return render_template("shop_products.html", products=products, store=store)
 
 
 @app.route("/store", methods=[GET, POST])
