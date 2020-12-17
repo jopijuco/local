@@ -5,7 +5,18 @@
 {% endblock %}
 
 {% block main %}    
-    <h2>{{ store.name }}</h2>
+    <div class="jumbotron jumbotron-fluid">
+        <div  class="container row">
+            <div class="col-10">
+                <h1 class="display-4">{{ store.name }}</h1>
+                <p>{{ store.number }} {{ store.street }} </p>
+                <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
+            </div>
+            <div class="col-2">
+                <img src="{{ url_for('static', filename= store.front_pic) }}" alt="store picture" class="card-img-top"/>
+            </div>
+        </div>
+      </div>
     
     <div class="row">
     {% for product in products %}

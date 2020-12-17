@@ -154,10 +154,13 @@ def form():
 def shop(id):
     store = db.execute("SELECT s.id, s.name, s.front_pic, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=id)
     if (store[0]["front_pic"] is None or store[0]["front_pic"] == ""):
-        front_pic = IMG_DEFAULT
+        picture = IMG_DEFAULT
     else:
         front_pic = store[0]["front_pic"]
-    store = Store(store[0]["id"],store[0]["name"],front_pic,store[0]["number"],store[0]["street"],store[0]["zip_code"],store[0]["city"],store[0]["region"],store[0]["country"])
+        pic = Picture('', front_pic,'')
+        pic.name_thumbnail() 
+        picture = pic.thumbnail
+    store = Store(store[0]["id"],store[0]["name"],picture,store[0]["number"],store[0]["street"],store[0]["zip_code"],store[0]["city"],store[0]["region"],store[0]["country"])
     
     products = []
     for row in db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id"):
@@ -414,6 +417,7 @@ def remove_basket():
 def basket():    
     basket = bm.get_dict()
     store_list = bm.get_store_list()
+    print(store_list)
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
