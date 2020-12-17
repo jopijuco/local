@@ -28,6 +28,8 @@ bm = Basket_Manager()
 @app.route("/")
 def index():
     stores = []
+    #store without products (or with product with stock<1) are not display for user/customer
+    all_stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id IN (SELECT store_id FROM product_store WHERE stock>0)")
     message = None
     isShopping = True
     try:
@@ -37,9 +39,9 @@ def index():
             if not stores_query:
                 message = "You don't have any registered stores."
         if session['type'] == CUSTOMER:    
-            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
+            stores_query = all_stores_query
     except KeyError:
-        stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
+        stores_query = all_stores_query
 
     for row in stores_query:
         if (row["front_pic"] is None or row["front_pic"] == ""):
