@@ -592,6 +592,17 @@ def customer_account():
         id=session["user_id"]))
     user_cust = ast.literal_eval(query[1:len(query)-1])
 
+    # get customer address
+    check_address = db.execute(f"SELECT a.id FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = :user",
+        user=session['user_id'])
+
+    if check_address:
+        address_query = str(db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = :user",
+        user=session['user_id']))
+        address = ast.literal_eval(address_query[1:len(address_query)-1])
+    else:
+        address = []
+
     if request.method == POST:
         form = CustomerAccountForm()
         message = None
@@ -601,44 +612,55 @@ def customer_account():
                 username=form.username.data, email=form.email.data, password=generate_password_hash(form.password.data, "sha256"))
             message = UPDATE_SUCCESS_MESSAGE        
         else:
-            return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], data=user_cust)
+            return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], data=user_cust, address=address)
 
-        return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], message=message, data=user_cust)  
+        return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], message=message, data=user_cust, address=address)  
     
     return render_template(ACCOUNT_PAGE, form=CustomerAccountForm(formdata=MultiDict(user_cust)), user_type=session["type"],
-        data=user_cust)
+        data=user_cust, address=address)
 
 
-#@app.route("/manage_address", methods=[GET, POST])
-#@login_required
-#def manage_address():
-#    if address.validate():
-#            check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = {session['user_id']}")
-#
-#            if not check_address:
-#                db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
-#                    street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
-#                    city=address.city.data, region=address.region.data, country=address.country.data)
-#
-#                address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
-#                street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
-#                city=address.city.data, region=address.region.data, country=address.country.data)
-#
-#                db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
-#            else:
-#                address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
-#
-#                db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
-#                    street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
-#                    city=address.city.data, region=address_faddressorm.region.data, country=address.country.data)
-#            message = UPDATE_SUCCESS_MESSAGE
-#    
-#    # get address data
-#    query_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}")
-#    
-#    if query_address:
-#        qa = ast.literal_eval(str(query_address)[1:len(str(query_address))-1])
-#        field_data.update(qa)
+@app.route("/add_address", methods=[GET, POST])
+@login_required
+def add_address():
+    # validate user
+    form = AddressAccountForm()
+
+    if form.validate_on_submit():
+        db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
+            street=form.street.data, number=form.number.data, zip_code=form.zip_code.data,
+            city=form.city.data, region=form.region.data, country=form.country.data)
+
+        address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
+            street=form.street.data, number=form.number.data, zip_code=form.zip_code.data,
+            city=form.city.data, region=form.region.data, country=form.country.data)
+        
+        db.execute(f"UPDATE customers SET address_id = :address WHERE user_id = :user",
+            address=address_id[0]['id'], user=session['user_id'])
+        
+        return redirect(url_for("customer_account"))    
+    return render_template("address.html", form=form)
+
+
+@app.route("/edit_address", methods=[GET, POST])
+@login_required
+def edit_address():
+    # validate user
+    if request.method == POST:
+        form = AddressAccountForm()
+
+        if form.validate():
+            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
+                        street=form.street.data, number=form.number.data, zip_code=form.zip_code.data,
+                        city=form.city.data, region=form.region.data, country=form.country.data)
+            return redirect(url_for("customer_account"))
+        else:
+            return render_template("address.html", form=form)
+    query = str(db.execute(f"SELECT a.* FROM customers AS c INNER JOIN addresses AS a ON c.address_id = a.id AND c.user_id = :user",
+        user=session["user_id"]))
+    data = ast.literal_eval(query[1:len(query)-1])
+
+    return render_template("address.html", form=AddressAccountForm(formdata=MultiDict(data)))
 
 @app.route("/logout")
 @login_required
