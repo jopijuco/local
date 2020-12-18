@@ -28,15 +28,25 @@ bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    stores = []
+    stores = list()
     message = None
+    stores_query = None
+    table = None
+    username = list()
+
     try:
         if session['type'] == BUSINESS:
-            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
+            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])    
             if not stores_query:
-                message = "You don't have any registered stores."
+                message = NO_STORES_MESSAGE
         if session['type'] == CUSTOMER:    
             stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
+        
+        if session["type"] == BUSINESS:
+            table = USER_BUSINESS_TABLE
+        else:
+            table = USER_CUSTOMER_TABLE
+        username = db.execute(f"SELECT username FROM {table} WHERE id = :user", user=session["user_id"])
     except KeyError:
         stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
 
@@ -50,7 +60,8 @@ def index():
             picture = pic.thumbnail
         store = Store(row["id"],row["name"],picture,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
         stores.append(store)
-    return render_template(INDEX_PAGE, stores=stores, message=message)
+
+    return render_template(INDEX_PAGE, stores=stores, message=message, username=username)
     
 
 @app.route("/register", methods=[GET, POST])

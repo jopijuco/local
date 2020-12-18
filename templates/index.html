@@ -1,12 +1,4 @@
 {% extends "base_layout.html" %}
-{% block style %}
-    table{
-        text-align: left;
-    }
-    .total{
-        font-weight:bold;
-    }
-{% endblock %}
 
 {% block title %}
     your products
@@ -22,7 +14,6 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
         
         {% else %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('stores')}}">Stores</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
@@ -42,18 +33,23 @@
 
 {% block main %}    
 
-    {% if message %}
+{% if message %}
     <h5>{{ message }}</h5>
-    {% endif %}
+{% endif %}
 
-    <h3>Welcome, user</h3>
-    {% if session.type == "business" %}
+{% if not username %}
+    <h3>Welcome</h3>
+{% else %}
+    <h3>Welcome, {{ username[0]["username"] }}</h3>
+{% endif %}
+
+{% if session.type == "business" %}
     <div class="row">
         <div class="col-12 col-md-6 col-lg-4  mt-3">
             <a href="{{ url_for('add_store') }}" class="btn btn-secondary">Add new store</a>
         </div>
     </div>
-    {% endif %}
+{% endif %}
 
     <div class="row">
     {% for store in stores %}
@@ -78,5 +74,4 @@
         </div>
     {% endfor %}
     </div>
-    
 {% endblock %}
