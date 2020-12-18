@@ -2,7 +2,7 @@
 {% from "macros.html" import form_action_method %}
 
 {% block title %}
-    local: account
+    account
 {% endblock %}
 
 {% block main %}
@@ -17,178 +17,188 @@
 
     {% if user_type == "customer" %}
 
-        {{ form_action_method(url_for('account'), "POST") }}
-        {{ customer.csrf_token }}
+        {{ form_action_method(url_for('customer_account'), "POST") }}
+        {{ form.csrf_token }}
 
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ customer.first_name.label }}
-                        {{ customer.first_name(class_="form-control") }}
+                        <label>First name</label>
+                        <p class="form-control">{{ data["first_name"] }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Last name</label>
+                        <p class="form-control">{{ data["last_name"] }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Age</label>
+                        <p class="form-control">{{ data["age"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {{ form.username.label }}
+                        {{ form.username(class_="form-control") }}
 
-                        {% if customer.first_name.errors %}
-                        <ul class="errors">
-                            {% for error in customer.first_name.errors %}
-                            <li>{{ field.error }}</li>
-                            {% endfor %}
-                        </ul>        
+                        {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
                         {% endif%}
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        {{ form.email.label }}
+                        {{ form.email(class_="form-control") }}
 
+                        {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
+                        {% endif%}
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ customer.last_name.label }}
-                        {{ customer.last_name(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        {{ customer.age.label }}
-                        {{ customer.age(class_="form-control") }}
-                    </div>
-                </div>
-            </div>
-            {{ customer.update(class_="btn btn-primary") }}
-        </form>
-        <hr>
-        {{ form_action_method(url_for('account'), "POST") }}
-        {{ user.csrf_token }}
+                        {{ form.password.label }}
+                        {{ form.password(class_="form-control") }}
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="form-group">
-                        {{ user.email.label }}
-                        {{ user.email(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        {{ user.password.label }}
-                        {{ user.password(class_="form-control") }}
+                        {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
+                        {% endif%}
                     </div>
                 </div>
             </div>
-            {{ user.update(class_="btn btn-primary") }}
-        </form>
-        <hr>
-        {{ form_action_method(url_for('account'), "POST") }}
-        {{ address.csrf_token }}
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        {{ address.street.label }}
-                        {{ address.street(class_="form-control") }}
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-1">
-                    <div class="form-group">
-                        {{ address.number.label }}
-                        {{ address.number(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {{ address.zip_code.label }}
-                        {{ address.zip_code(class_="form-control") }}
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {{ address.city.label }}
-                        {{ address.city(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {{ address.region.label }}
-                        {{ address.region(class_="form-control") }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        {{ address.country.label }}
-                        {{ address.country(class_="form-control") }}
-                    </div>
-                </div>
-            </div>
-            {{ address.update(class_="btn btn-primary") }}
+            {{ form.update(class_="btn btn-primary") }}
         </form>
     
     {% else %}
         
-        {{ form_action_method(url_for('account'), "POST") }}
-        {{ business.csrf_token }}
+        {{ form_action_method(url_for('business_account'), "POST") }}
+        {{ form.csrf_token }}
 
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ business.name.label }}
-                        {{ business.name(class_="form-control") }}
+                        {{ form.name.label }}
+                        {{ form.name(class_="form-control") }}
 
-                        {% if business.name.errors %}
-                        <ul class="errors">
-                        {% for error in business.name.errors %}
-                            <li>{{ error }}</li>
+                        {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
-
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label>Tax number</label>
-                        <p class="form-control">{{ tax_number }}</p>
+                        <p class="form-control">{{ data["fiscal_number"] }}</p>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        {{ business.description.label }}
-                        {{ business.description(class_="form-control") }}
+                        {{ form.description.label }}
+                        {{ form.description(class_="form-control") }}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ business.phone.label }}
-                        {{ business.phone(class_="form-control") }}
+                        {{ form.phone.label }}
+                        {{ form.phone(class_="form-control") }}
 
-                        {% if business.phone.errors %}
-                        <ul class="errors">
-                        {% for error in business.phone.errors %}
-                            <li>{{ error }}</li>
+                        {% if form.phone.errors %}
+                        {% for error in form.phone.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
-
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ business.mobile.label }}
-                        {{ business.mobile(class_="form-control") }}
+                        {{ form.mobile.label }}
+                        {{ form.mobile(class_="form-control") }}
 
-                        {% if business.mobile.errors %}
-                        <ul class="errors">
-                        {% for error in business.mobile.errors %}
-                            <li>{{ error }}</li>
+                        {% if form.mobile.errors %}
+                        {% for error in form.mobile.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
-
                     </div>
                 </div>
             </div>
-            {{ business.update(class_="btn btn-primary") }}
+            <hr>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ form.username.label }}
+                        {{ form.username(class_="form-control") }}
+
+                        {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
+                        {% endif%}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ form.email.label }}
+                        {{ form.email(class_="form-control") }}
+
+                        {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
+                        {% endif%}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        {{ form.password.label }}
+                        {{ form.password(class_="form-control") }}
+
+                        {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
+                        {% endfor %}
+                        {% endif%}
+                    </div>
+                </div>
+            </div>
+            {{ form.update(class_="btn btn-primary") }}
         </form>
 
     {% endif %}

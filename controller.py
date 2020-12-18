@@ -220,9 +220,22 @@ def store(id):
 
 
 @app.route("/add_store", methods=[GET, POST])
+@login_required
+def add_store():
+    #validate_user(session['user_id'])
+    form = StoreForm()
+    test = request.path
+
+    if form.validate_on_submit():
+        # Insert new store on db
+        return redirect(url_for(INDEX))
+
+    return render_template(MANAGE_STORE_PAGE, form=form, action=request.path)
+
+    
 @app.route("/edit_store/<id>", methods=[GET, POST])
 @login_required
-def manage_store(id):
+def edit_store(id):
     validate_user(id)
 
     # store info
@@ -540,87 +553,92 @@ def history():
     return render_template(ORDER_PAGE, orders=orders, title = "History (completed orders)")
 
     
-@app.route("/account", methods=[GET, POST])
+@app.route("/account")
 @login_required
 def account():
-    customer_form = CustomerAccountForm()
-    user_form = UserAccountForm()
-    address_form = AddressAccountForm()
-    business = BusinessForm()
-    message = None
-
-    if business.validate_on_submit():
-        db.execute(f"UPDATE business SET fiscal_number = :fiscal_number, phone = :phone, mobile = :mobile, name = :name, description = :description WHERE id = {session['business_id']}",
-            fiscal_number=business.fiscal_number.data, phone=business.phone.data, mobile=business.mobile.data,
-            name=business.name.data, description=business.description.data)
-        message = UPDATE_ACCOUNT_MESSAGE
-
-    if customer_form.validate_on_submit():
-        db.execute(f"UPDATE customers SET first_name = :first_name, last_name = :last_name, age = :age WHERE user_id = {session['user_id']}",
-            first_name=customer_form.first_name.data, last_name=customer_form.last_name.data, age=customer_form.age.data)
-        message = UPDATE_ACCOUNT_MESSAGE
-    
-    if user_form.validate_on_submit():
-        db.execute(f"UPDATE user_customers SET email = :email, hash_pass = :password WHERE id = {session['user_id']}",
-            email=user_form.email.data, password=generate_password_hash(user_form.password.data, "sha256"))
-        message = UPDATE_ACCOUNT_MESSAGE
-
-    if address_form.validate_on_submit():
-        check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = {session['user_id']}")
-        
-        if not check_address:
-            db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
-                street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
-                city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
-
-            address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
-            street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
-            city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
-
-            db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
-        else:
-            address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
-
-            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
-                street=address_form.street.data, number=address_form.number.data, zip_code=address_form.zip_code.data,
-                city=address_form.city.data, region=address_form.region.data, country=address_form.country.data)
-        message = UPDATE_ACCOUNT_MESSAGE
-    
+    #validate user
     if session["type"] == BUSINESS:
-        query_business = str(db.execute(f"SELECT * FROM business WHERE id = {session['business_id']}"))
-        qb = ast.literal_eval(query_business[1:len(query_business)-1])
-        field_data = MultiDict()
-        field_data.update(qb)
-        return render_template(ACCOUNT_PAGE,
-            business=BusinessAccountForm(formdata=field_data),
-            user_type=session["type"],
-            tax_number=field_data.get("fiscal_number")
-            )
+        return redirect(url_for("business_account"))
     else:
-        field_data = MultiDict()
-        # Customer form data
-        query_customer = str(db.execute(f"SELECT first_name, last_name, age FROM customers WHERE user_id = {session['user_id']}"))
-        qc = ast.literal_eval(query_customer[1:len(query_customer)-1])
-        field_data.update(qc)
-        # User form data
-        query_user = str(db.execute(f"SELECT email from user_customers WHERE id = {session['user_id']}"))
-        qu = ast.literal_eval(query_user[1:len(query_user)-1])
-        field_data.update(qu)
-        # Address form data
-        query_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}")
+        return redirect(url_for("customer_account"))
         
-        if query_address:
-            qa = ast.literal_eval(str(query_address)[1:len(str(query_address))-1])
-            field_data.update(qa)
-    
-        return render_template(ACCOUNT_PAGE,
-            user_type=session["type"],
-            message=message, 
-            customer=CustomerAccountForm(formdata=field_data),
-            user=UserAccountForm(formdata=field_data),
-            address=AddressAccountForm(formdata=field_data)
-            )
 
+@app.route("/business_account", methods=[GET, POST])
+@login_required
+def business_account():
+    # get business data
+    query = str(db.execute(f"SELECT ub.id, ub.username, ub.email, b.name, b.description, b.phone, b.mobile, ba.designation FROM user_businesses AS ub INNER JOIN business AS b ON ub.id = b.user_id AND ub.id = :user INNER JOIN businessAreas AS ba ON b.activity_sector_id = ba.id",
+        user=session['user_id']))
+    business = ast.literal_eval(query[1:len(query)-1])
+
+    if request.method == POST:
+        form = BusinessAccountForm()
+        if form.validate():
+            db.execute(f"UPDATE business SET name = :name, description = :description, phone = :phone, mobile = :mobile WHERE user_id = :user",
+                user=session["user_id"], phone=form.phone.data, mobile=form.mobile.data, name=form.name.data,
+                description=form.description.data)
+            message = UPDATE_SUCCESS_MESSAGE
+    
+            return render_template(ACCOUNT_PAGE, form=form, message=message, data=business)
+        return render_template(ACCOUNT_PAGE, form=form, data=business)    
+    return render_template(ACCOUNT_PAGE, form=BusinessAccountForm(formdata=MultiDict(business)), data=business)
+    
+
+@app.route("/customer_account", methods=[GET, POST])
+@login_required
+def customer_account():
+    # get customer and user data
+    query = str(db.execute(f"SELECT uc.id, uc.username, uc.email, c.first_name, c.last_name, c.age, c.address_id FROM user_customers AS uc INNER JOIN customers AS c ON uc.id = c.user_id AND uc.id = :id",
+        id=session["user_id"]))
+    user_cust = ast.literal_eval(query[1:len(query)-1])
+
+    if request.method == POST:
+        form = CustomerAccountForm()
+        message = None
+    
+        if form.validate():
+            db.execute(f"UPDATE user_customers SET username = :username, email = :email, hash_pass = :password WHERE id = {session['user_id']}",
+                username=form.username.data, email=form.email.data, password=generate_password_hash(form.password.data, "sha256"))
+            message = UPDATE_SUCCESS_MESSAGE        
+        else:
+            return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], data=user_cust)
+
+        return render_template(ACCOUNT_PAGE, form=form, user_type=session["type"], message=message, data=user_cust)  
+    
+    return render_template(ACCOUNT_PAGE, form=CustomerAccountForm(formdata=MultiDict(user_cust)), user_type=session["type"],
+        data=user_cust)
+
+
+#@app.route("/manage_address", methods=[GET, POST])
+#@login_required
+#def manage_address():
+#    if address.validate():
+#            check_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id AND c.user_id = {session['user_id']}")
+#
+#            if not check_address:
+#                db.execute(f"INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES (:street, :number, :zip_code, :city, :region, :country)",
+#                    street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
+#                    city=address.city.data, region=address.region.data, country=address.country.data)
+#
+#                address_id = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country",
+#                street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
+#                city=address.city.data, region=address.region.data, country=address.country.data)
+#
+#                db.execute(f"UPDATE customers SET address_id = {address_id[0]['id']} WHERE user_id = {session['user_id']}")
+#            else:
+#                address_id = db.execute(f"SELECT address_id FROM customers WHERE user_id = {session['user_id']}")
+#
+#                db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zip_code, city = :city, region = :region, country = :country WHERE id = {address_id[0]['address_id']}",
+#                    street=address.street.data, number=address.number.data, zip_code=address.zip_code.data,
+#                    city=address.city.data, region=address_faddressorm.region.data, country=address.country.data)
+#            message = UPDATE_SUCCESS_MESSAGE
+#    
+#    # get address data
+#    query_address = db.execute(f"SELECT a.* FROM addresses AS a INNER JOIN customers AS c ON a.id = c.address_id WHERE c.user_id = {session['user_id']}")
+#    
+#    if query_address:
+#        qa = ast.literal_eval(str(query_address)[1:len(str(query_address))-1])
+#        field_data.update(qa)
 
 @app.route("/logout")
 @login_required
