@@ -567,7 +567,7 @@ def account():
 @login_required
 def business_account():
     # get business data
-    query = str(db.execute(f"SELECT ub.id, ub.username, ub.email, b.name, b.description, b.phone, b.mobile, ba.designation FROM user_businesses AS ub INNER JOIN business AS b ON ub.id = b.user_id AND ub.id = :user INNER JOIN businessAreas AS ba ON b.activity_sector_id = ba.id",
+    query = str(db.execute(f"SELECT ub.id, ub.username, ub.email, b.name, b.fiscal_number, b.description, b.phone, b.mobile, ba.designation FROM user_businesses AS ub INNER JOIN business AS b ON ub.id = b.user_id AND ub.id = :user INNER JOIN businessAreas AS ba ON b.activity_sector_id = ba.id",
         user=session['user_id']))
     business = ast.literal_eval(query[1:len(query)-1])
 
@@ -661,6 +661,7 @@ def edit_address():
     data = ast.literal_eval(query[1:len(query)-1])
 
     return render_template("address.html", form=AddressAccountForm(formdata=MultiDict(data)))
+
 
 @app.route("/logout")
 @login_required
