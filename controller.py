@@ -452,8 +452,8 @@ def basket():
         if login:
             orders = []
             for a in full_basket.baskets:
-                #to do : replace user_id by customer_id
-                order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = session['user_id'])
+                customer = db.execute("SELECT * FROM customers WHERE user_id = :id", id = session['user_id'])
+                order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = customer[0]["id"])
                 for b in a.products:
                     db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
             bm.empty_basket()  
@@ -473,7 +473,7 @@ def order():
     if session["type"] == BUSINESS:
         query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE customer_id = :id and status_id != 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4", id = session["user_id"])
 
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
@@ -519,12 +519,13 @@ def history():
     if session["type"] == BUSINESS:
         query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE customer_id = :id and status_id = 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4", id = session["user_id"])
     
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
         store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
         c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+        print(row['customer_id'])
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
