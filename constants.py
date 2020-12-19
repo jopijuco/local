@@ -23,6 +23,8 @@ HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
 FORM_PAGE = "form.html"
 ACCOUNT_PAGE = "account.html"
+STORES_PAGE = "stores.html"
+MANAGE_STORE_PAGE = "manage_store.html"
 
 # Redirects
 LOGIN = "login"
@@ -33,6 +35,7 @@ BASKET = "basket"
 ORDER = "order"
 FORM = "form"
 ACCOUNT = "account"
+STORES = "stores"
 
 # Users
 BUSINESS = "business"
@@ -55,4 +58,5 @@ LOGIN_FAILED_MESSAGE = "Login failed."
 PURCHASE_MESSAGE = "Thanks for your purchase. We hope you enjoy it."
 BUSINESS_FORM_MESSAGE = "selling your"
 CUSTOMER_FORM_MESSAGE =  "buying local"
-UPDATE_ACCOUNT_MESSAGE = "Your info was updated successfully!"
+UPDATE_SUCCESS_MESSAGE = "Your info was updated successfully!"
+NO_STORES_MESSAGE = "You don't have any registered stores."

@@ -1,0 +1,133 @@
+{% extends "index.html" %}
+{% from "macros.html" import form_action_method_enctype %}
+
+{% block title %}
+    {% if action == "edit" %}
+        edit {{ store["name"] }}
+    {% else %}
+        add new store
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-header">
+        
+    {% if action == "edit" %}
+            <h1 class="card-title">{{ store["name"] }}</h1>
+        </div>
+        {{ form_action_method_enctype(url_for('edit', id=store['store_id']), "POST", "multipart/form-data") }}
+    {% else %}
+            <h1 class="card-title">Add store #{{ store_number }}</h1>
+        </div>
+        {{ form_action_method_enctype(url_for('add_store'), "POST", "multipart/form-data") }}
+    {% endif %}
+        
+        {{ form.csrf_token }}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{url_for('static', filename=2) }}"  alt="store picture" class="img-thumbnail"/>
+                        <div class="form-group">
+                            <div class="custom-file">
+                                {{ form.picture(class_="custom-file-input") }}
+                                {{ form.picture.label(class_="custom-file-label") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                {{ form.name.label }}
+                                {{ form.name(class_="form-control") }}
+
+                                {% if form.name.errors %}
+                                {% for error in form.name.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                        </div>
+                        <div class="form-row ">
+                            <div class="form-group col-md-2">
+                                {{ form.number.label }}
+                                {{ form.number(class_="form-control") }}
+
+                                {% if form.number.errors %}
+                                {% for error in form.number.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                            <div class="form-group col-md-10">
+                                {{ form.street.label }}                                
+                                {{ form.street(class_="form-control") }}
+
+                                {% if form.street.errors %}
+                                {% for error in form.street.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                        </div>
+                        <div class="form-row ">
+                            <div class="form-group col-md-4">
+                                {{ form.zip_code.label }}
+                                {{ form.zip_code(class_="form-control") }}
+
+                                {% if form.zip_code.errors %}
+                                {% for error in form.zip_code.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                            <div class="form-group col-md-8">
+                                {{ form.city.label }}
+                                {{ form.city(class_="form-control") }}
+
+                                {% if form.city.errors %}
+                                {% for error in form.city.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                        </div>
+                        <div class="form-row ">
+                            <div class="form-group col-md-6">
+                                {{ form.region.label }}
+                                {{ form.region(class_="form-control") }}
+
+                                {% if form.region.errors %}
+                                {% for error in form.region.errors %}
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
+                                {% endfor %}
+                                {% endif%}
+                            </div>
+                            <div class="form-group col-md-6">
+                                {{ form.country.label }}
+                                {{ form.country(class_="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% if action == "edit" %}
+                {{ form.edit_button(class_="btn btn-primary") }}
+            {% else %}
+                {{ form.add_button(class_="btn btn-primary") }}
+            {% endif %}
+            </div>
+        </form>
+    </div>
+{% endblock %}

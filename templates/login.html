@@ -5,9 +5,15 @@
     Log In
 {% endblock %}
 
-{% block form %} {{ form_action_method(url_for('login'), "POST") }} {% endblock %}
+{% block form %}
+    <h6>
+        <p>Your username is your email name (everything on the left of @) that you provide us on register.</p>
+        <p>You can change it anytime, just go to your Account.</p>
+    </h6>
+    {{ form_action_method(url_for('login'), "POST") }}
+{% endblock %}
 
-{{ form.csrf_token }}
+    {{ form.csrf_token }}
 
 {% block fields %}
     {% for field in form %}
@@ -15,14 +21,13 @@
             {{ field(class_="form-control", autofocus=true) }}
             
             {% if field.errors %}
-            <ul class="errors">
             {% for error in field.errors %}
-                <li>{{ error }}</li>
+                <small class="form-text text-muted">
+                {{ error }}
+                </small>
             {% endfor %}
-            </ul>
-            {% endif %}  
-             
-        </div> 
+            {% endif %}
+        </div>
     {% endfor %}
 {% endblock %}
 
