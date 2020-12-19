@@ -459,7 +459,7 @@ def basket():
             bm.empty_basket()  
             full_basket = False
 
-        total_amount = 0
+    total_amount = 0
     if full_basket:
         total_amount = bm.total(full_basket)    
     return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
