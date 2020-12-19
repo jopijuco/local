@@ -10,7 +10,7 @@
             <div class="card mt-3">
                 <div class="card-header">
                     <h1 class="card-title"> 
-                        Shop : {{ basket.store_name }}
+                        <i class="fas fa-store"></i> {{ basket.store_name }}
                     </h1>
                 </div>
                 <div class="card-body">
@@ -50,14 +50,14 @@
                                             </select>
                                         </td>
                                     <td class="text-right">
-                                        <button type="submit" class="btn btn-primary mb-2">V</button>
+                                        <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-check"></i></button>
                                     </td>
                                     </form>
 
                                     <form action="{{ url_for('remove_basket')}}" method="post" enctype="multipart/form-data">
                                         <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
                                         <input type="hidden" id="store_id" name="store_id" value="{{ basket.store_id }}">
-                                        <td class="text-left"><button class="btn btn-danger" type="submit" name="submit" value="add">R</button></td>
+                                        <td class="text-left"><button class="btn btn-danger" type="submit" name="submit" value="add"><i class="far fa-trash-alt"></i></button></td>
                                     </form>
                                 </tr>
                             {% endfor %}
@@ -83,9 +83,9 @@
                 <form action="{{ url_for('basket') }}" method="POST">
                     <input type="hidden" name="amount" value="{{ amount }}">
                     {% if login %}
-                        <button class="btn btn-success col-10" type="submit">Buy</button>
+                        <button class="btn btn-success col-10" type="submit"><i class="fas fa-shopping-cart"></i> Purchase</button>
                     {% else %}
-                        <button type="button" class="btn btn-secondary col-10" data-toggle="tooltip" data-placement="bottom" title="To make an order, please register and login first">Buy</button></span>
+                        <button type="button" class="btn btn-secondary col-10" data-toggle="tooltip" data-placement="bottom" title="To make an order, please register and login first"><i class="fas fa-shopping-cart"></i> Purchase</button></span>
                     {% endif %}
                 </form>
             </div>
