@@ -415,6 +415,11 @@ def remove_basket():
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
+    try:
+        if session['user_id'] :
+            login = True
+    except KeyError:
+            login = False
     basket = bm.get_dict()
     store_list = bm.get_store_list()
     print(store_list)
@@ -444,19 +449,20 @@ def basket():
 
     #make an order
     if request.method == POST:
-        orders = []
-        for a in full_basket.baskets:
-            #to do : replace user_id by customer_id
-            order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = session['user_id'])
-            for b in a.products:
-                db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
-        bm.empty_basket()  
-        full_basket = False
+        if login:
+            orders = []
+            for a in full_basket.baskets:
+                #to do : replace user_id by customer_id
+                order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = session['user_id'])
+                for b in a.products:
+                    db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
+            bm.empty_basket()  
+            full_basket = False
 
-    total_amount = 0
+        total_amount = 0
     if full_basket:
         total_amount = bm.total(full_basket)    
-    return render_template("basket.html", full_basket = full_basket, amount = total_amount)
+    return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
 
 
 @app.route("/orders", methods=[GET, POST])

@@ -6,7 +6,7 @@
 // }
 
 
-var addButton = document.getElementById("add_button");
+/*var addButton = document.getElementById("add_button");
 addButton.addEventListener('click', () => {    
     var n = parseInt(document.getElementById("myBasket").innerHTML);
     n = n+1
@@ -16,5 +16,10 @@ addButton.addEventListener('click', () => {    
 var emptyButton = document.getElementById("empty_button");
 emptyButton.addEventListener('click', () => {    
     console.log("empty basket")
-});
+});*/
+
+$(function () {
+    console.log("active les tooltips")
+    $('[data-toggle="tooltip"]').tooltip()
+})
 
