@@ -471,9 +471,9 @@ def order():
     orders = []
     #retrieve all orders not completed (status_id != 4)
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4 ORDER BY o.date desc", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4 ORDER BY o.date desc", id = session["user_id"])
 
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
@@ -517,9 +517,9 @@ def history():
     orders = []
     #retrieve all completed orders (status_id = 4)
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4", id = session["business_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4 ORDER BY o.date desc", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4 ORDER BY o.date desc", id = session["user_id"])
     
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
