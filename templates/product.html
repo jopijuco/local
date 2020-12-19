@@ -35,11 +35,7 @@
     {% endfor %} 
 
     <div class="col-12 mt-3">
-        {{ form_action_method(url_for('new_product'), "POST") }}
-        {{ form.csrf_token }}
-            {{ form.add_button(class_="btn btn-secondary col-12") }}
-            <!--value="add"-->
-        </form>
+        <a href="{{ url_for('new_product')}}" class="btn btn-primary mt-1">Add a new product</a>
     </div>
     
 {% endblock %}

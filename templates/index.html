@@ -58,7 +58,12 @@
                         <p>{{ store.number }} {{ store.street }} </p>
                         <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
                     </div>
-                    <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                    {% if isShopping %}
+                        <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                    {% else %}
+                        <a href="{{ url_for('store')}}" class="btn btn-primary mt-1">Edit my store info</a>
+                    {% endif %}
+                    
                 </div>
             </div>
         </div>

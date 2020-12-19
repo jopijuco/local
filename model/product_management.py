@@ -17,6 +17,14 @@ class Product:
     
     def add_price(self, store_id, price):
         self.price[store_id] = price
+
+class Product_shop:
+    def __init__(self, id, name, description, main_img, price):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.main_img = main_img
+        self.price = price
     
     
      
