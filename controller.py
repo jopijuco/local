@@ -1,4 +1,4 @@
-from flask import render_template, request, session
+from flask import render_template,  flash, request, session
 from flask.helpers import url_for
 from werkzeug.datastructures import MultiDict
 from forms import *
@@ -375,6 +375,8 @@ def single_product_store(product_id):
 def add_basket():
     if request.method == POST:
         product_id = request.form.get("product_id")
+        product = db.execute("SELECT name FROM products WHERE id=:id", id=product_id)
+        product_name= product[0]["name"]
         store_id = request.form.get("store_id")
         new = True
         basket = bm.get_dict()
@@ -384,11 +386,9 @@ def add_basket():
                 new = False
         if new:
             bm.add((product_id,store_id),1)
-        #resp = redirect(url_for(INDEX))
         resp = redirect(request.referrer)
         resp.set_cookie("basket", str(bm.get_dict()))
-        print("nb article dans le basket : ")
-        print (bm)
+        flash(product_name +' added in your basket')
     return resp
 
 @app.route("/update_quantity_basket", methods=[GET, POST])
