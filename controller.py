@@ -1,4 +1,4 @@
-from flask import render_template, request, session
+from flask import render_template,  flash, request, session
 from flask.helpers import url_for
 from werkzeug.datastructures import MultiDict
 from forms import *
@@ -13,7 +13,7 @@ from helpers import *
 from forms import *
 from model.business import *
 from model.store import *
-from model.product import *
+from model.product_management import *
 from model.picture import *
 from model.order import *
 from model.status import *
@@ -29,26 +29,22 @@ bm = Basket_Manager()
 @app.route("/")
 def index():
     stores = list()
+    all_stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id IN (SELECT store_id FROM product_store WHERE stock>0)")
     message = None
-    stores_query = None
     table = None
     username = list()
-
     try:
-        if session['type'] == BUSINESS:
-            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])    
-            if not stores_query:
-                message = NO_STORES_MESSAGE
-        if session['type'] == CUSTOMER:    
-            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
-        
         if session["type"] == BUSINESS:
+            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
             table = USER_BUSINESS_TABLE
-        else:
+            if not stores_query:
+                message = "You don't have any registered stores."
+        else:    
+            stores_query = all_stores_query
             table = USER_CUSTOMER_TABLE
         username = db.execute(f"SELECT username FROM {table} WHERE id = :user", user=session["user_id"])
     except KeyError:
-        stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id)")
+        stores_query = all_stores_query
 
     for row in stores_query:
         if (row["front_pic"] is None or row["front_pic"] == ""):
@@ -161,8 +157,31 @@ def form():
 
 @app.route("/shop/<id>")
 def shop(id):
-    products = db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id")
-    return render_template("shop_products.html", products=products, name=products[0]["store"])
+    store = db.execute("SELECT s.id, s.name, s.front_pic, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=id)
+    if (store[0]["front_pic"] is None or store[0]["front_pic"] == ""):
+        picture = IMG_DEFAULT
+    else:
+        front_pic = store[0]["front_pic"]
+        pic = Picture('', front_pic,'')
+        pic.name_thumbnail() 
+        picture = pic.thumbnail
+    store = Store(store[0]["id"],store[0]["name"],picture,store[0]["number"],store[0]["street"],store[0]["zip_code"],store[0]["city"],store[0]["region"],store[0]["country"])
+    
+    products = []
+    for row in db.execute(f"SELECT p.id AS prd_id, p.name AS name, p.description AS description, ps.price AS price, s.id AS store_id, s.name AS store FROM stores AS s INNER JOIN product_store AS ps ON s.id = ps.store_id AND s.id = {id} INNER JOIN products AS p ON ps.product_id = p.id"):
+        id = row["prd_id"]
+        name = row["name"]
+        description = row["description"]
+        price = row["price"]
+        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = id)
+        if len(imgs) >= 1:
+            main_img = Picture('', imgs[0]["file"],'')
+            main_img.name_thumbnail() 
+        else:
+            main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        product = Product_shop(id, name, description, main_img.thumbnail, price)
+        products.append(product)
+    return render_template("shop_products.html", products=products, store=store)
 
 
 @app.route("/stores", methods=[GET, POST])
@@ -436,6 +455,8 @@ def single_product_store(product_id):
 def add_basket():
     if request.method == POST:
         product_id = request.form.get("product_id")
+        product = db.execute("SELECT name FROM products WHERE id=:id", id=product_id)
+        product_name= product[0]["name"]
         store_id = request.form.get("store_id")
         new = True
         basket = bm.get_dict()
@@ -445,11 +466,9 @@ def add_basket():
                 new = False
         if new:
             bm.add((product_id,store_id),1)
-        #resp = redirect(url_for(INDEX))
         resp = redirect(request.referrer)
         resp.set_cookie("basket", str(bm.get_dict()))
-        print("nb article dans le basket : ")
-        print (bm)
+        flash(product_name +' added in your basket')
     return resp
 
 
@@ -479,8 +498,14 @@ def remove_basket():
 
 @app.route("/basket", methods=[GET, POST])
 def basket():    
+    try:
+        if session['user_id'] :
+            login = True
+    except KeyError:
+            login = False
     basket = bm.get_dict()
     store_list = bm.get_store_list()
+    print(store_list)
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
@@ -507,19 +532,20 @@ def basket():
 
     #make an order
     if request.method == POST:
-        orders = []
-        for a in full_basket.baskets:
-            #to do : replace user_id by customer_id
-            order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = session['user_id'])
-            for b in a.products:
-                db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
-        bm.empty_basket()  
-        full_basket = False
+        if login:
+            orders = []
+            for a in full_basket.baskets:
+                customer = db.execute("SELECT * FROM customers WHERE user_id = :id", id = session['user_id'])
+                order_id = db.execute("INSERT INTO orders (date,amount,status_id,store_id,customer_id)  VALUES (DATE('now') , :amount, 1, :store_id, :customer_id)", store_id = a.store_id, amount=a.amount, customer_id = customer[0]["id"])
+                for b in a.products:
+                    db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
+            bm.empty_basket()  
+            full_basket = False
 
     total_amount = 0
     if full_basket:
         total_amount = bm.total(full_basket)    
-    return render_template("basket.html", full_basket = full_basket, amount = total_amount)
+    return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
 
 
 @app.route("/orders", methods=[GET, POST])
@@ -528,9 +554,9 @@ def order():
     orders = []
     #retrieve all orders not completed (status_id != 4)
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4", id = session["business_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4 ORDER BY o.date desc", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE customer_id = :id and status_id != 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4 ORDER BY o.date desc", id = session["user_id"])
 
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
@@ -574,14 +600,15 @@ def history():
     orders = []
     #retrieve all completed orders (status_id = 4)
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4", id = session["business_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4 ORDER BY o.date desc", id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE customer_id = :id and status_id = 4", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4 ORDER BY o.date desc", id = session["user_id"])
     
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
         store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
         c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+        print(row['customer_id'])
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)

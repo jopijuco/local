@@ -64,11 +64,13 @@
                         <p>{{ store.number }} {{ store.street }} </p>
                         <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
                     </div>
+
                     {% if session.type == "business" %}
-                        <a href="{{ url_for('store', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                        <a href="{{ url_for('store', id=store.id) }}" class="btn btn-primary mt-1">Edit store info</a>
                     {% else %}
-                        <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+                        <a href="{{ url_for('shop', id=store.id) }}" class="btn btn-primary mt-1">Visit this shop</a>
                     {% endif %}
+
                 </div>
             </div>
         </div>

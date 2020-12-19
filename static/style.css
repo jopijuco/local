@@ -49,3 +49,12 @@ footer {
 .w-10{
   width : 10%;
 }
+
+.blue{
+  color : #0069d9;
+}
+
+.jumbotron{
+  margin-top : -20px;
+  padding: 1rem 2rem;
+}
