@@ -2,27 +2,36 @@
 {% from "macros.html" import form_action_method_enctype %}
 
 {% block title %}
-    {% if edit %}
-        edit store
+    {% if action == "edit" %}
+        edit {{ store["name"] }}
     {% else %}
-        add store
+        add new store
     {% endif %}
 {% endblock %}
 
 {% block main %}
     <div class="card">
         <div class="card-header">
+        
+    {% if action == "edit" %}
             <h1 class="card-title">{{ store["name"] }}</h1>
         </div>
-        {{ form_action_method_enctype(url_for('manage_store', id=store['store_id']), "POST", "multipart/form-data")}}
+        {{ form_action_method_enctype(url_for('edit', id=store['store_id']), "POST", "multipart/form-data") }}
+    {% else %}
+            <h1 class="card-title">Add store #{{ store_number }}</h1>
+        </div>
+        {{ form_action_method_enctype(url_for('add_store'), "POST", "multipart/form-data") }}
+    {% endif %}
+        
         {{ form.csrf_token }}
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="{{url_for('static', filename= store.front_pic )}}"  alt="store picture" class="img-thumbnail"/>
+                        <img src="{{url_for('static', filename=2) }}"  alt="store picture" class="img-thumbnail"/>
                         <div class="form-group">
                             <div class="custom-file">
-                                image
+                                {{ form.picture(class_="custom-file-input") }}
+                                {{ form.picture.label(class_="custom-file-label") }}
                             </div>
                         </div>
                     </div>
@@ -33,11 +42,11 @@
                                 {{ form.name(class_="form-control") }}
 
                                 {% if form.name.errors %}
-                                    <ul class="errors">
                                 {% for error in form.name.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                         </div>
@@ -47,11 +56,11 @@
                                 {{ form.number(class_="form-control") }}
 
                                 {% if form.number.errors %}
-                                    <ul class="errors">
                                 {% for error in form.number.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                             <div class="form-group col-md-10">
@@ -59,11 +68,11 @@
                                 {{ form.street(class_="form-control") }}
 
                                 {% if form.street.errors %}
-                                    <ul class="errors">
                                 {% for error in form.street.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                         </div>
@@ -73,11 +82,11 @@
                                 {{ form.zip_code(class_="form-control") }}
 
                                 {% if form.zip_code.errors %}
-                                    <ul class="errors">
                                 {% for error in form.zip_code.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                             <div class="form-group col-md-8">
@@ -85,11 +94,11 @@
                                 {{ form.city(class_="form-control") }}
 
                                 {% if form.city.errors %}
-                                    <ul class="errors">
                                 {% for error in form.city.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                         </div>
@@ -99,11 +108,11 @@
                                 {{ form.region(class_="form-control") }}
 
                                 {% if form.region.errors %}
-                                    <ul class="errors">
                                 {% for error in form.region.errors %}
-                                    <li>{{ error }}</li>
+                                    <small class="form-text text-muted">
+                                    {{ error }}
+                                    </small>
                                 {% endfor %}
-                                </ul>        
                                 {% endif%}
                             </div>
                             <div class="form-group col-md-6">
@@ -113,7 +122,11 @@
                         </div>
                     </div>
                 </div>
+            {% if action == "edit" %}
                 {{ form.edit_button(class_="btn btn-primary") }}
+            {% else %}
+                {{ form.add_button(class_="btn btn-primary") }}
+            {% endif %}
             </div>
         </form>
     </div>

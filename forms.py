@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms.widgets.core import TextArea
 from wtforms.fields.core import IntegerField, SelectField, StringField
-from wtforms.fields.simple import PasswordField, SubmitField
+from wtforms.fields.simple import FileField, PasswordField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length, NumberRange
 
@@ -161,5 +161,6 @@ class StoreForm(AddressAccountForm):
         validators=[InputRequired(),
             Length(2, 25, "Name does not respect our rules.")]
         )
+    picture = FileField("Select a picture...")
     edit_button = SubmitField("Edit")
     add_button = SubmitField("Add")

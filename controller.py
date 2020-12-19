@@ -219,7 +219,7 @@ def store(id):
     validate_user(id)
     
     # store info
-    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
+    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.front_pic, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
         store=int(id), user=session['user_id']))
     store = ast.literal_eval(store_query[1:len(store_query)-1])
 
@@ -235,39 +235,63 @@ def store(id):
 def add_store():
     #validate_user(session['user_id'])
     form = StoreForm()
-    test = request.path
+    action = request.path[request.path.rfind("/")+1:]
 
-    if form.validate_on_submit():
-        # Insert new store on db
-        return redirect(url_for(INDEX))
+    stores = db.execute(f"SELECT COUNT(s.id) AS number FROM stores AS s INNER JOIN business AS b ON s.business_id = b.id AND b.user_id = :user",
+        user=session["user_id"])
 
-    return render_template(MANAGE_STORE_PAGE, form=form, action=request.path)
+    if request.method == POST:
+        if form.validate():
+            print(str(form.picture.data))
+            db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
+                street=form.street.data, number=form.number.data, zip_code=form.zip_code.data, city=form.city.data,
+                region=form.region.data, country=form.region.data)
+
+            # get address
+            address = db.execute(f"SELECT id FROM addresses WHERE street = :street AND number = :number AND zip_code = :zip_code AND city = :city AND region = :region AND country = :country ORDER BY id DESC",
+                street=form.street.data, number=form.number.data, zip_code=form.zip_code.data, city=form.city.data,
+                region=form.region.data, country=form.region.data)
+
+            # get business
+            business = db.execute(f"SELECT id FROM business WHERE user_id = :user", user=session["user_id"])
+
+            db.execute(f"INSERT INTO stores(name, address_id, business_id, front_pic) VALUES(:name, :address, :business, :front_pic)",
+                name=form.name.data, address=address[0]["id"], business=business[0]["id"], front_pic=str(form.picture.data))
+            return redirect(url_for(INDEX))
+        else:
+            return render_template(MANAGE_STORE_PAGE, form=form, action=action, store_number=stores[0]["number"]+1)
+
+    return render_template(MANAGE_STORE_PAGE, form=form, action=action, store_number=stores[0]["number"]+1)
 
     
-@app.route("/edit_store/<id>", methods=[GET, POST])
+@app.route("/store/<id>/edit", methods=[GET, POST])
 @login_required
-def edit_store(id):
+def edit(id):
     validate_user(id)
 
     # store info
-    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.address_id AS address, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
+    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.address_id AS address, s.front_pic, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
         store=int(id), user=session['user_id']))
     store = ast.literal_eval(store_query[1:len(store_query)-1])
-    
-    form = StoreForm()
 
-    if form.validate_on_submit():
-        # update store
-        db.execute("UPDATE stores SET name = :name WHERE id = :store",
+    action = request.path[request.path.rfind("/")+1:]
+
+    if request.method == POST:
+        form = StoreForm()
+
+        if form.validate():
+            # update store name
+            db.execute("UPDATE stores SET name = :name WHERE id = :store",
             name=form.name.data, store=store["store_id"])
 
-        # update store address
-        db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zipcode, city = :city, region = :region, country = :country WHERE id = :id",
-            id=store["address"], street=form.street.data, number=form.number.data, zipcode=form.zip_code.data,
-            city=form.city.data, region=form.region.data, country=form.country.data)
-        return redirect(url_for(INDEX))
-    
-    return render_template(MANAGE_STORE_PAGE, store=store, form=StoreForm(formdata=MultiDict(store)))
+            # update store address
+            db.execute(f"UPDATE addresses SET street = :street, number = :number, zip_code = :zipcode, city = :city, region = :region, country = :country WHERE id = :id",
+                id=store["address"], street=form.street.data, number=form.number.data, zipcode=form.zip_code.data,
+                city=form.city.data, region=form.region.data, country=form.country.data)
+        else:
+            return render_template(MANAGE_STORE_PAGE, form=form, store=store)
+        return redirect(url_for(STORE, id=id))
+    return render_template(MANAGE_STORE_PAGE, store=store, form=StoreForm(formdata=MultiDict(store)), action=action)
 
 
 @app.route("/product", methods=[GET, POST])
