@@ -302,6 +302,19 @@ def edit(id):
         form = StoreForm()
 
         if form.validate():
+            print(form.picture.data.filename)
+
+            if request.files["picture"]:
+                image = request.files["picture"]
+                print(image)
+                #create the new image name
+                extension = image.filename.split('.')[1]
+                image_name="store_front_pic_"+id+"."+extension
+                #save the new image and insert it in the DB
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id=:id", front_pic = image_name, id=id)
+                Picture('',image_name,'').create_thumbnail()
+              
             # update store name
             db.execute("UPDATE stores SET name = :name WHERE id = :store",
             name=form.name.data, store=store["store_id"])

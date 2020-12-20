@@ -27,7 +27,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="{{url_for('static', filename=2) }}"  alt="store picture" class="img-thumbnail"/>
+                        <img src="{{url_for('static', filename= store.front_pic) }}"  alt="store picture" class="img-thumbnail"/>
                         <div class="form-group">
                             <div class="custom-file">
                                 {{ form.picture(class_="custom-file-input") }}
