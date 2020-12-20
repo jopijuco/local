@@ -273,9 +273,23 @@ def add_store():
 
             # get business
             business = db.execute(f"SELECT id FROM business WHERE user_id = :user", user=session["user_id"])
+            
+            #create the new store
+            new_store_id = db.execute(f"INSERT INTO stores(name, address_id, business_id, front_pic) VALUES(:name, :address, :business, :front_pic)",
+                name=form.name.data, address=address[0]["id"], business=business[0]["id"], front_pic=IMG_DEFAULT)
+            for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=business[0]["id"]):
+                db.execute("INSERT INTO product_store (product_id, store_id, price, stock)  VALUES (:product_id, :store_id, 0, 0)", product_id = row["product_id"], store_id=new_store_id)
 
-            db.execute(f"INSERT INTO stores(name, address_id, business_id, front_pic) VALUES(:name, :address, :business, :front_pic)",
-                name=form.name.data, address=address[0]["id"], business=business[0]["id"], front_pic=str(form.picture.data))
+            #front pic
+            if request.files["picture"]:
+                image = request.files["picture"]
+                #create the new image name
+                extension = image.filename.split('.')[1]
+                image_name="store_front_pic_"+str(new_store_id)+"."+extension
+                #save the new image and insert it in the DB
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id=:id", front_pic = image_name, id=new_store_id)
+                Picture('',image_name,'').create_thumbnail()
             return redirect(url_for(INDEX))
         else:
             return render_template(MANAGE_STORE_PAGE, form=form, action=action, store_number=stores[0]["number"]+1)
@@ -299,6 +313,19 @@ def edit(id):
         form = StoreForm()
 
         if form.validate():
+            print(form.picture.data.filename)
+
+            if request.files["picture"]:
+                image = request.files["picture"]
+                print(image)
+                #create the new image name
+                extension = image.filename.split('.')[1]
+                image_name="store_front_pic_"+id+"."+extension
+                #save the new image and insert it in the DB
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
+                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id=:id", front_pic = image_name, id=id)
+                Picture('',image_name,'').create_thumbnail()
+              
             # update store name
             db.execute("UPDATE stores SET name = :name WHERE id = :store",
             name=form.name.data, store=store["store_id"])
