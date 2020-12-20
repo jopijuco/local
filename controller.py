@@ -274,8 +274,11 @@ def add_store():
             # get business
             business = db.execute(f"SELECT id FROM business WHERE user_id = :user", user=session["user_id"])
 
-            db.execute(f"INSERT INTO stores(name, address_id, business_id, front_pic) VALUES(:name, :address, :business, :front_pic)",
+            new_store_id = db.execute(f"INSERT INTO stores(name, address_id, business_id, front_pic) VALUES(:name, :address, :business, :front_pic)",
                 name=form.name.data, address=address[0]["id"], business=business[0]["id"], front_pic=str(form.picture.data))
+            for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=business[0]["id"]):
+                db.execute("INSERT INTO product_store (product_id, store_id, price, stock)  VALUES (:product_id, :store_id, 0, 0)", product_id = row["product_id"], store_id=new_store_id)
+      
             return redirect(url_for(INDEX))
         else:
             return render_template(MANAGE_STORE_PAGE, form=form, action=action, store_number=stores[0]["number"]+1)
