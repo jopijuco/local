@@ -545,19 +545,22 @@ def order():
         orders.append(order)
     return render_template(ORDER_PAGE, orders=orders,  title ="My current orders")
 
-
-@app.route("/order_details/<order_id>", methods=[GET, POST])
+@app.route("/order_details/<id>", methods=[GET, POST])
 @login_required
-def order_details(order_id):
+def order_details(id):
     updateStatusAvailable = False
-    status_list = []
-    for row in db.execute("SELECT * FROM status"):
-        status = Status(row["id"], row["name"], row["description"])
-        status_list.append(status)
+    # get order data
+    query = str(db.execute("SELECT id, status_id as status FROM orders WHERE id = :id", id = id))
+    order_form = ast.literal_eval(query[1:len(query)-1])
+    form = OrderForm(formdata=MultiDict(order_form))
+    message = ''
+
     if request.method == POST:
-        new_status = request.form.get("status")
-        db.execute("UPDATE orders SET status_id=:status_id WHERE id=:id", id=order_id, status_id=new_status)
-    for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name, sto.name AS store_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) WHERE o.id = :id", id = order_id):
+        form = OrderForm()
+        db.execute(f"UPDATE orders SET status_id = :status WHERE id = :id", id = id, status=form.status.data)
+        message = UPDATE_SUCCESS_MESSAGE
+
+    for row in db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name, sto.name AS store_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN stores sto ON (o.store_id = sto.id) WHERE o.id = :id", id = id):
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
         store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
         c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
@@ -566,11 +569,11 @@ def order_details(order_id):
     if session["type"] == BUSINESS:
         if order.status_id != 4:
             updateStatusAvailable = True
-    for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = order_id):
+    for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = id):
         product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"], '')
         order.add_product(product)
-    return render_template(ORDER_DETAILS_PAGE, order = order, status_list = status_list, updateStatusAvailable = updateStatusAvailable)
 
+    return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, updateStatusAvailable = updateStatusAvailable)
 
 @app.route("/history")
 @login_required

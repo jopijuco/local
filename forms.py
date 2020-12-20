@@ -150,6 +150,7 @@ class AddressAccountForm(AccountForm):
     country = SelectField("Country",
         choices=country_list()
         )
+
     zip_code = StringField("Zipcode",
         validators=[InputRequired(),
             Length(4, 10, "Zipcode is not valid.")]
@@ -164,3 +165,16 @@ class StoreForm(AddressAccountForm):
     picture = FileField("Select a picture...")
     edit_button = SubmitField("Edit")
     add_button = SubmitField("Add")
+
+class OrderForm(FlaskForm):
+    update = SubmitField("Edit status")
+    
+    status_list = []
+    for row in db.execute("SELECT * FROM status"):
+        s = list()
+        s.append(row["id"])
+        s.append(row["name"])
+        status_list.append(s)
+
+    status = SelectField(u'Status', choices=status_list)
+   
