@@ -27,7 +27,11 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="{{url_for('static', filename= store.front_pic) }}"  alt="store picture" class="img-thumbnail"/>
+                        {% if action == "edit" %}
+                            <img src="{{url_for('static', filename= store.front_pic) }}"  alt="store picture" class="img-thumbnail"/>
+                        {% else %}
+                            <img src="{{url_for('static', filename= 'noimgavailable.jpg') }}"  alt="store picture" class="img-thumbnail"/>
+                        {% endif %}
                         <div class="form-group">
                             <div class="custom-file">
                                 {{ form.picture(class_="custom-file-input") }}
