@@ -9,7 +9,6 @@ from werkzeug.utils import redirect
 from app import app, db
 from basket_manager import Basket_Manager
 from constants import *
-from helpers import *
 from forms import *
 from model.business import *
 from model.store import *
@@ -18,7 +17,7 @@ from model.picture import *
 from model.order import *
 from model.status import *
 from model.customer import *
-from utils import login_required
+from utils import login_required, validate_user
 
 
 import ast
@@ -182,6 +181,7 @@ def shop(id):
         product = Product_shop(id, name, description, main_img.thumbnail, price)
         products.append(product)
     return render_template("shop_products.html", products=products, store=store)
+
 
 @app.route("/store/<id>")
 @login_required
