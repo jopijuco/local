@@ -6,7 +6,7 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length, NumberRange
 
 from app import db
-from geo import countries
+from utils import get_countries
 
 
 class RegisterForm(FlaskForm):
@@ -140,15 +140,8 @@ class AddressAccountForm(AccountForm):
         validators=[InputRequired(),
             Length(2, 30, "Region not valid.")]
         )
-
-    def country_list():
-        countries_name = list()
-        for country in countries:
-            countries_name.append(country["name"])
-        return countries_name
-
     country = SelectField("Country",
-        choices=country_list()
+        choices=get_countries()
         )
     zip_code = StringField("Zipcode",
         validators=[InputRequired(),
