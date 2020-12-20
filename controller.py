@@ -183,55 +183,6 @@ def shop(id):
         products.append(product)
     return render_template("shop_products.html", products=products, store=store)
 
-
-@app.route("/stores", methods=[GET, POST])
-@login_required
-def stores():
-    if request.method == POST:
-        if request.form['submit_button'] == 'add_store':
-            new_address_id = db.execute("INSERT INTO addresses (street, number, zip_code, city, region, country) VALUES ('', '', '', '', '', '')")
-            new_store_id = db.execute("INSERT INTO stores (business_id, address_id, name)  VALUES (:id, :address_id, 'new store')", id = session["business_id"], address_id = new_address_id)
-            for row in db.execute("SELECT DISTINCT product_id FROM product_store WHERE store_id IN (SELECT id FROM stores WHERE business_id = :id)", id=session["business_id"]):
-                db.execute("INSERT INTO product_store (product_id, store_id, price, stock)  VALUES (:product_id, :store_id, 0, 0)", product_id = row["product_id"], store_id=new_store_id)
-        else:
-            store_id = request.form['submit_button']
-            store_name = request.form.get("name_"+store_id)
-            db.execute("UPDATE stores SET name=:name WHERE id=:id", name = store_name, id=store_id)
-            #store's image update
-            if request.files["image_"+store_id]:
-                file = request.files["image_"+store_id]
-                extension = file.filename.split('.')[1]
-                image_name="store_front_pic_"+store_id+"."+extension
-                file.save(os.path.join(app.config["IMAGE_UPLOADS"], image_name))
-                db.execute("UPDATE stores SET front_pic=:front_pic WHERE id=:id", front_pic = image_name, id=store_id)
-                Picture('',image_name,'').create_thumbnail()
-            #store's address update
-            number = request.form.get("number_"+store_id)
-            street = request.form.get("street_"+store_id)
-            zip_code = request.form.get("zip_code_"+store_id)
-            region = request.form.get("region_"+store_id)
-            city = request.form.get("city_"+store_id)
-            country = request.form.get("country_"+store_id)
-            db.execute("UPDATE addresses SET number=:number, street=:street, zip_code=:zip_code, city=:city, region=:region, country=:country WHERE id= (SELECT address_id FROM stores WHERE id=:id)", number = number, street = street, zip_code = zip_code, city = city, region = region, country = country, id=store_id)
-
-    business = Business(session["business_id"], '', '', '', '', '')
-    for row in db.execute("SELECT * FROM business WHERE id=:id", id=session["business_id"]):
-        business.name = row["name"]
-        business.description = row["description"]
-        business.fiscal_number = row["fiscal_number"]
-        business.phone = row["phone"]
-        business.mobile = row["mobile"]
-    for row in db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"]):
-        if (row["front_pic"] is None or row["front_pic"] == ""):
-            front_pic = IMG_DEFAULT
-        else:
-            front_pic = row["front_pic"]
-        store = Store(row["id"],row["name"],front_pic,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
-        business.add_store(store)
-    
-    return render_template(STORES_PAGE, business =  business)
-
-
 @app.route("/store/<id>")
 @login_required
 def store(id):
