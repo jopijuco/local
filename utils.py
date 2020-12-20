@@ -31,3 +31,11 @@ def validate_user(id):
     
     if int(id) is not validate_user[0]["id"]:
         return "You have no permission to access this page"
+
+
+def get_status():
+    status_list = list()
+    status = db.execute("SELECT id, name FROM status")
+    for row in status:
+        status_list.append(tuple((row["id"], row["name"])))
+    return status_list

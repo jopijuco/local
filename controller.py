@@ -19,7 +19,6 @@ from model.status import *
 from model.customer import *
 from utils import login_required, validate_user
 
-
 import ast
 import os
 
@@ -545,6 +544,7 @@ def order():
         orders.append(order)
     return render_template(ORDER_PAGE, orders=orders,  title ="My current orders")
 
+
 @app.route("/order_details/<id>", methods=[GET, POST])
 @login_required
 def order_details(id):
@@ -574,6 +574,7 @@ def order_details(id):
         order.add_product(product)
 
     return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, updateStatusAvailable = updateStatusAvailable)
+
 
 @app.route("/history")
 @login_required
