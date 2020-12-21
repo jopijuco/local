@@ -10,12 +10,12 @@
         
         {% if session.type == "customer" %}
         <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('orders')}}">Orders</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
         
         {% else %}
         <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('orders')}}">Orders</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
         {% endif %}
 
@@ -31,15 +31,16 @@
     {% endif %}
 {% endblock %}
 
-{% block main %}    
+{% block main %}
 
 {% if message %}
-    <h5>{{ message }}</h5>
+    <h6></h6>
+    <div class="alert alert-warning" role="alert">
+        {{ message }}
+    </div>
 {% endif %}
 
-{% if not username %}
-    <h3>Welcome</h3>
-{% else %}
+{% if username %}
     <h3>Welcome, {{ username[0]["username"] }}</h3>
 {% endif %}
 

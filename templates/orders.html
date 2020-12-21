@@ -1,13 +1,16 @@
 {% extends "index.html" %}
 
 {% block title %}
-    Log In
+    orders
 {% endblock %}
 
 {% block main %}
+{% if not orders %}
+    <h4>Currently you have no orders.</h4>
+{% else %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title"> {{ title }} </h1>
+            <h1 class="card-title">{{ title }}</h1>
         </div>
         <div class="card-body">
             <div class="table-responsive-md">
@@ -43,5 +46,6 @@
                 </table>
             </div>
         </div> 
-    </div> 
+    </div>
+{% endif %}
 {% endblock %}
