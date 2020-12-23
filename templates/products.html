@@ -1,0 +1,54 @@
+{% extends "index.html" %}
+
+{% block title %}
+    products
+{% endblock %}
+
+{% block main %}
+
+{% if not stores %}
+    <div class="alert alert-warning" role="alert">
+        {{ message }}
+    </div>
+
+{% elif not products %}
+    <div class="alert alert-warning" role="alert">
+        {{ message }}
+    </div>
+
+{% endif %}
+    <h3>Your products</h3>
+    
+    <div class="row">
+    {% for product in products %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mt-3">
+            <div class="card">
+                <div class="item">
+                {% if product.isOwner %}
+                    <span class="badge badge-warning notify-badge">owner</span>
+                {% endif %}
+                    <img src="{{ url_for('static', filename=product.main_img) }}"  alt="product picture" class="card-img-top"/>
+                </div>
+                <div class="card-body">
+                    <div class="product_card_name"><h5>{{ product.name }}</h5></div>
+                    <div class="product_card_description">{{ product.description }}</div>
+                    <a href="{{ url_for('single_product', product_id=product.id)}}" class="btn btn-primary mt-1">Edit</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %} 
+
+{% if not stores %}
+    <div class="col-12 mt-3">
+        <a href="{{ url_for('new_product')}}">
+            <button class="btn btn-secondary mt-1" disabled>Add a new product</button>
+        </a>
+    </div>
+{% else %}
+    <div class="col-12 mt-3">
+        <a href="{{ url_for('new_product')}}">
+            <button class="btn btn-secondary mt-1">Add a new product</button>
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -14,7 +14,7 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
         
         {% else %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('products')}}">Products</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('orders')}}">Orders</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
         {% endif %}
@@ -34,7 +34,6 @@
 {% block main %}
 
 {% if message %}
-    <h6></h6>
     <div class="alert alert-warning" role="alert">
         {{ message }}
     </div>

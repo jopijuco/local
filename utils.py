@@ -1,10 +1,12 @@
-from constants import LOGIN
+from constants import CUSTOMER, LOGIN
 from functools import wraps
 from flask import session, request, redirect, url_for
 from geo import countries
 
 from app import db
 from controller import session
+from constants import IMG_DEFAULT
+from model.picture import *
 
 
 # Login Required Decorator
@@ -16,6 +18,16 @@ def login_required(f):
             return redirect(url_for(LOGIN, next=request.url))
         return f(*args, **kwargs)
     return decorated_function
+
+
+# trying to create a decorator to validate user access to certain routes
+#def user_access(f):
+#    @wraps(f)
+#    def decorated_function(*args, **kwargs):
+#        if session["user_type"] == CUSTOMER:
+#
+#        return f(*args, **kwargs)
+#    return decorated_functions
 
 
 def get_countries():
@@ -39,3 +51,22 @@ def get_status():
     for row in status:
         status_list.append(tuple((row["id"], row["name"])))
     return status_list
+
+
+def get_product_image(id):
+    imgs = db.execute("SELECT file FROM imgs AS i INNER JOIN product_img AS pi ON i.id = pi.img_id AND pi.product_id = :id",
+        id=id)
+    
+    if len(imgs) >= 1:
+        pic = Picture('', imgs[0]["file"],'')
+        pic.name_thumbnail()
+    else:
+        pic = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+    main_img = pic.thumbnail
+    return main_img
+
+
+def is_owner(id):
+    test = session["business_id"]
+    business = db.execute(f"SELECT id FROM business WHERE user_id = :user", user=session["user_id"])
+    return business[0]["id"] == id

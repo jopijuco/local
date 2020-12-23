@@ -159,6 +159,7 @@ class StoreForm(AddressAccountForm):
     edit_button = SubmitField("Edit")
     add_button = SubmitField("Add")
 
+
 class OrderForm(FlaskForm):
     update = SubmitField("Edit status")
     status = SelectField("Status",
