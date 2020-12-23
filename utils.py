@@ -1,3 +1,4 @@
+from model.store import Store
 from constants import CUSTOMER, LOGIN
 from functools import wraps
 from flask import session, request, redirect, url_for
@@ -58,15 +59,33 @@ def get_product_image(id):
         id=id)
     
     if len(imgs) >= 1:
-        pic = Picture('', imgs[0]["file"],'')
+        pic = Picture("", imgs[0]["file"], "")
         pic.name_thumbnail()
     else:
-        pic = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        pic = Picture("", IMG_DEFAULT, IMG_DEFAULT)
     main_img = pic.thumbnail
     return main_img
 
 
 def is_owner(id):
-    test = session["business_id"]
     business = db.execute(f"SELECT id FROM business WHERE user_id = :user", user=session["user_id"])
     return business[0]["id"] == id
+
+
+def display_stores(business_stores):
+    stores = list()
+    for row in business_stores:
+        if not row["front_pic"]:
+            pic = Picture("", IMG_DEFAULT, IMG_DEFAULT)
+            picture = pic.thumbnail
+        else:
+            front_pic = row["front_pic"]
+            pic = Picture("", front_pic, "")
+            pic.name_thumbnail() 
+            picture = pic.thumbnail
+        
+        store = Store(row["id"], row["name"], picture, row["number"], row["street"], row["zip_code"], row["city"],
+            row["region"], row["country"])
+        stores.append(store)
+    
+    return stores

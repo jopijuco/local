@@ -17,7 +17,7 @@ from model.picture import *
 from model.order import *
 from model.status import *
 from model.customer import *
-from utils import get_product_image, is_owner, login_required, validate_user
+from utils import display_stores, get_product_image, is_owner, login_required, validate_user
 
 import ast
 import os
@@ -26,36 +26,23 @@ bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    stores = list()
-    all_stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id IN (SELECT store_id FROM product_store WHERE stock>0)")
-    message = None
-    table = None
-    username = list()
-    try:
-        if session["type"] == BUSINESS:
-            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
-            table = USER_BUSINESS_TABLE
-            if not stores_query:
-                message = "You don't have any registered stores."
-        else:    
-            stores_query = all_stores_query
-            table = USER_CUSTOMER_TABLE
-        username = db.execute(f"SELECT username FROM {table} WHERE id = :user", user=session["user_id"])
-    except KeyError:
-        stores_query = all_stores_query
+    if "type" not in session:
+        user_stores = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s INNER JOIN addresses a ON a.id = s.address_id WHERE s.id IN (SELECT store_id FROM product_store WHERE stock > 0)")
+        return render_template(INDEX_PAGE, stores=display_stores(user_stores))
 
-    for row in stores_query:
-        if (row["front_pic"] is None or row["front_pic"] == ""):
-            picture = IMG_DEFAULT
-        else:
-            front_pic = row["front_pic"]
-            pic = Picture('', front_pic,'')
-            pic.name_thumbnail() 
-            picture = pic.thumbnail
-        store = Store(row["id"],row["name"],picture,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
-        stores.append(store)
+    if session["type"] == BUSINESS:
+        username = db.execute(f"SELECT username FROM user_businesses WHERE id = :user", user=session["user_id"])
+        business_stores = db.execute(f"SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON b.id = s.business_id WHERE b.user_id = :user",
+            user=session["user_id"])
+        
+        if not business_stores:
+            return render_template(INDEX_PAGE, message=NO_STORES_MESSAGE, username=username[0]["username"])
+        return render_template(INDEX_PAGE, stores=display_stores(business_stores), username=username[0]["username"])
 
-    return render_template(INDEX_PAGE, stores=stores, message=message, username=username)
+    else:
+        user_stores = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s INNER JOIN addresses a ON a.id = s.address_id WHERE s.id IN (SELECT store_id FROM product_store WHERE stock > 0)")
+        username = db.execute(f"SELECT username FROM user_customer WHERE id = :user", user=session["user_id"])
+        return render_template(INDEX_PAGE, stores=display_stores(user_stores), username=username[0]["username"])
     
 
 @app.route("/register", methods=[GET, POST])
