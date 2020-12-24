@@ -212,7 +212,6 @@ def add_store():
 
     if request.method == POST:
         if form.validate():
-            print(str(form.picture.data))
             db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
                 street=form.street.data, number=form.number.data, zip_code=form.zip_code.data, city=form.city.data,
                 region=form.region.data, country=form.region.data)
@@ -264,11 +263,8 @@ def edit(id):
         form = StoreForm()
 
         if form.validate():
-            print(form.picture.data.filename)
-
             if request.files["picture"]:
                 image = request.files["picture"]
-                print(image)
                 #create the new image name
                 extension = image.filename.split('.')[1]
                 image_name="store_front_pic_"+id+"."+extension
@@ -483,7 +479,6 @@ def basket():
             login = False
     basket = bm.get_dict()
     store_list = bm.get_store_list()
-    print(store_list)
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
@@ -589,7 +584,6 @@ def history():
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
         store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
         c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
-        print(row['customer_id'])
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
