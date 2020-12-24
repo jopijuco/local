@@ -12,7 +12,7 @@
         </div>
         
         <div class="card-body">
-        {% if updateStatusAvailable %}
+        {% if not isHistory %}
             {{ form_action_method_enctype(url_for('order_details', id=order['id']), "POST", "multipart/form-data") }}
             {{ form.csrf_token }}
                 <div class="form-group mx-sm-3 mb-2">
@@ -77,4 +77,16 @@
         </table>
     </div> 
 </div> 
+{% endblock %}
+
+{% block javascript %}
+    {% if isHistory %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-history");
+        </script>
+    {% else %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-order");
+        </script>
+    {% endif %}
 {% endblock %}
