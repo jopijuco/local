@@ -30,7 +30,8 @@ From a customer point of view they can find more products that are not accessibl
     * log in;
     * edit your account details;
     * add products to a basket;
-    * buy products.
+    * buy products
+    * see your current and past orders
    
 ## Screenshots
 
@@ -53,6 +54,7 @@ From a customer point of view they can find more products that are not accessibl
 * CS50 `pip install cs50`
 * WTForms `pip install WTForms`
 * Flask-WTF `pip install Flask-WTF`
+* Pillow `pip install pillow`
 
 ## How to launch local
 
