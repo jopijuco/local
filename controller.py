@@ -524,6 +524,7 @@ def basket():
 @app.route("/orders", methods=[GET, POST])
 @login_required
 def order():
+    isHistory = False
     orders = []
     #retrieve all orders not completed (status_id != 4)
     if session["type"] == BUSINESS:
@@ -538,12 +539,12 @@ def order():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders,  title ="My current orders")
+    return render_template(ORDER_PAGE, orders=orders, isHistory = isHistory)
 
 @app.route("/order_details/<id>", methods=[GET, POST])
 @login_required
 def order_details(id):
-    updateStatusAvailable = False
+    isHistory = True
     # get order data
     query = str(db.execute("SELECT id, status_id as status FROM orders WHERE id = :id", id = id))
     order_form = ast.literal_eval(query[1:len(query)-1])
@@ -563,16 +564,17 @@ def order_details(id):
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
     if session["type"] == BUSINESS:
         if order.status_id != 4:
-            updateStatusAvailable = True
+            isHistory = False
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = id):
         product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"], '')
         order.add_product(product)
 
-    return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, updateStatusAvailable = updateStatusAvailable)
+    return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, isHistory = isHistory)
 
 @app.route("/history")
 @login_required
 def history():
+    isHistory = True
     orders = []
     #retrieve all completed orders (status_id = 4)
     if session["type"] == BUSINESS:
@@ -587,7 +589,7 @@ def history():
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, title = "History (completed orders)")
+    return render_template(ORDER_PAGE, orders=orders, isHistory = isHistory)
 
     
 @app.route("/account")
