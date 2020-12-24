@@ -6,7 +6,9 @@
 
 {% block main %}
 {% if not orders %}
-    <h4>Currently you have no orders.</h4>
+    <div class="alert alert-warning" role="alert">
+        Currently you have no orders.
+    </div>
 {% else %}
     <div class="card">
         <div class="card-header">
