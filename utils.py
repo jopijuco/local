@@ -1,3 +1,4 @@
+from model.product_management import Product
 from model.store import Store
 from constants import CUSTOMER, LOGIN
 from functools import wraps
@@ -75,12 +76,11 @@ def is_owner(id):
 def display_stores(business_stores):
     stores = list()
     for row in business_stores:
-        if not row["front_pic"]:
+        if row["front_pic"] is None:
             pic = Picture("", IMG_DEFAULT, IMG_DEFAULT)
             picture = pic.thumbnail
         else:
-            front_pic = row["front_pic"]
-            pic = Picture("", front_pic, "")
+            pic = Picture("", row["front_pic"], "")
             pic.name_thumbnail() 
             picture = pic.thumbnail
         
@@ -89,3 +89,32 @@ def display_stores(business_stores):
         stores.append(store)
     
     return stores
+
+
+def display_products(store_products):
+    products = list()
+    for row in store_products:
+        if row["front_pic"] is None:
+            pic = Picture("", IMG_DEFAULT, IMG_DEFAULT)
+            picture = pic.thumbnail            
+        else:
+            pic = Picture("", row["front_pic"], "")
+            pic.name_thumbnail() 
+            picture = pic.thumbnail
+    
+        product = Product(row["id"], is_owner(row["id"]), row["name"], row["description"], picture)
+        products.append(product)
+    
+    return products
+
+
+def get_image(data):
+    picture = None
+    for row in data:
+        if row["fron_pic"] is None:
+            picture = IMG_DEFAULT
+        else:
+            pic = Picture('', row["front_pic"],'')
+            pic.name_thumbnail() 
+            picture = pic.thumbnail
+    return picture
