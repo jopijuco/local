@@ -29,16 +29,16 @@
     {% endif %}
 {% endblock %}
 
-{% block main %}
+{% block main %}    
 
 {% if message %}
-    <div class="alert alert-warning" role="alert">
-        {{ message }}
-    </div>
+    <h5>{{ message }}</h5>
 {% endif %}
 
-{% if username %}
-    <h3>Welcome, {{ username }}</h3>
+{% if not username %}
+    <h3>Welcome</h3>
+{% else %}
+    <h3>Welcome, {{ username[0]["username"] }}</h3>
 {% endif %}
 
 {% if session.type == "business" %}
@@ -54,7 +54,7 @@
         <div class="col-12 col-md-6 col-lg-4 mt-3">
             <div class="card">
                 <div class="item">
-                    <img src="{{ url_for('static', filename=store.front_pic) }}"  alt="store front picture" class="card-img-top"/>
+                    <img src="{{url_for('static', filename= store.front_pic )}}"  alt="store front picture" class="card-img-top"/>
                 </div>
                 <div class="card-body">
                     <div class="product_card_name"><h5>{{ store.name }}</h5></div>

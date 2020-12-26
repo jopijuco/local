@@ -1,4 +1,4 @@
-from flask import render_template, flash, request, session
+from flask import render_template,  flash, request, session
 from flask.helpers import url_for
 from werkzeug.datastructures import MultiDict
 from forms import *
@@ -17,7 +17,8 @@ from model.picture import *
 from model.order import *
 from model.status import *
 from model.customer import *
-from utils import display_products, display_stores, get_image, get_product_image, is_owner, login_required, validate_user
+from utils import login_required, validate_user
+
 
 import ast
 import os
@@ -26,23 +27,36 @@ bm = Basket_Manager()
 
 @app.route("/")
 def index():
-    if "type" not in session:
-        user_stores = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s INNER JOIN addresses a ON a.id = s.address_id WHERE s.id IN (SELECT store_id FROM product_store WHERE stock > 0)")
-        return render_template(INDEX_PAGE, stores=display_stores(user_stores))
+    stores = list()
+    all_stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id IN (SELECT store_id FROM product_store WHERE stock>0)")
+    message = None
+    table = None
+    username = list()
+    try:
+        if session["type"] == BUSINESS:
+            stores_query = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE business_id=:id", id=session["business_id"])
+            table = USER_BUSINESS_TABLE
+            if not stores_query:
+                message = "You don't have any registered stores."
+        else:    
+            stores_query = all_stores_query
+            table = USER_CUSTOMER_TABLE
+        username = db.execute(f"SELECT username FROM {table} WHERE id = :user", user=session["user_id"])
+    except KeyError:
+        stores_query = all_stores_query
 
-    if session["type"] == BUSINESS:
-        username = db.execute(f"SELECT username FROM user_businesses WHERE id = :user", user=session["user_id"])
-        business_stores = db.execute(f"SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON b.id = s.business_id WHERE b.user_id = :user",
-            user=session["user_id"])
-        
-        if not business_stores:
-            return render_template(INDEX_PAGE, message=NO_STORES_MESSAGE, username=username[0]["username"])
-        return render_template(INDEX_PAGE, stores=display_stores(business_stores), username=username[0]["username"])
+    for row in stores_query:
+        if (row["front_pic"] is None or row["front_pic"] == ""):
+            picture = IMG_DEFAULT
+        else:
+            front_pic = row["front_pic"]
+            pic = Picture('', front_pic,'')
+            pic.name_thumbnail() 
+            picture = pic.thumbnail
+        store = Store(row["id"],row["name"],picture,row["number"],row["street"],row["zip_code"],row["city"],row["region"],row["country"])
+        stores.append(store)
 
-    else:
-        user_stores = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s INNER JOIN addresses a ON a.id = s.address_id WHERE s.id IN (SELECT store_id FROM product_store WHERE stock > 0)")
-        username = db.execute(f"SELECT username FROM user_customer WHERE id = :user", user=session["user_id"])
-        return render_template(INDEX_PAGE, stores=display_stores(user_stores), username=username[0]["username"])
+    return render_template(INDEX_PAGE, stores=stores, message=message, username=username)
     
 
 @app.route("/register", methods=[GET, POST])
@@ -173,7 +187,7 @@ def shop(id):
 @login_required
 def store(id):
     validate_user(id)
-
+    
     # store info
     store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.front_pic, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
         store=int(id), user=session['user_id']))
@@ -277,29 +291,29 @@ def edit(id):
     return render_template(MANAGE_STORE_PAGE, store=store, form=StoreForm(formdata=MultiDict(store)), action=action)
 
 
-@app.route("/products")
+@app.route("/product", methods=[GET, POST])
 @login_required
-def products():
-    if session["type"] == BUSINESS:
-        stores = db.execute(f"SELECT s.id FROM stores AS s INNER JOIN business AS b ON s.business_id = b.id AND b.user_id = :user",
-            user=session["user_id"])
-        if not stores:
-            return render_template(PRODUCTS_PAGE, stores=stores, message=NO_STORES_PRODUCT_MESSAGE)
-        
-        products = db.execute(f"SELECT p.* FROM products AS p INNER JOIN product_store AS ps ON ps.product_id = p.id INNER JOIN stores AS s ON s.id=ps.store_id INNER JOIN business AS b ON s.business_id = b.id WHERE s.business_id = b.id AND b.user_id = :user",
-            user=session["user_id"])
-        if not products:
-            return render_template(PRODUCTS_PAGE, stores=stores, products=products, message=NO_PRODUCT_MESSAGE)
-        
-        business_products = list()
-        for row in products:
-            id = row["id"]
-            name = row["name"]
-            description = row["description"]
-            product = Product(id, is_owner(row["business_id"]), name, description, get_product_image(id))
-            business_products.append(product)
-        return render_template(PRODUCTS_PAGE, stores=stores, products=business_products)
-    return redirect(url_for(INDEX))
+def product():
+    products = []
+    hasproduct = False
+    for row in db.execute("SELECT DISTINCT p.* FROM products p INNER JOIN product_store ps ON (ps.product_id = p.id) INNER JOIN stores s ON (s.id=ps.store_id) WHERE s.business_id=:id", id=session["business_id"]):
+        hasproduct = True
+        id = row["id"]
+        name = row["name"]
+        description = row["description"]
+        if row["business_id"]==session["business_id"]:
+            isOwner = True
+        else:
+            isOwner = False
+        imgs = db.execute("SELECT file FROM imgs i INNER JOIN  product_img pi ON (i.id = pi.img_id AND pi.product_id = :id)", id = id)
+        if len(imgs) >= 1:
+            main_img = Picture('', imgs[0]["file"],'')
+            main_img.name_thumbnail() 
+        else:
+            main_img = Picture('', IMG_DEFAULT,IMG_DEFAULT)
+        product = Product(id, isOwner, name, description, main_img.thumbnail)
+        products.append(product)
+    return render_template(PRODUCT_PAGE, products=products, hasproduct = hasproduct)
 
 
 @app.route("/single_product/<product_id>", methods=[GET, POST])
@@ -371,7 +385,7 @@ def single_product(product_id):
         return render_template(SINGLE_PRODUCT_PAGE, product=product, hasimg = hasimg)
 
 
-@app.route("/products/new_product", methods=[GET, POST])
+@app.route("/new_product", methods=[GET, POST])
 @login_required
 def new_product():
     if request.method == POST:
@@ -533,8 +547,7 @@ def orders():
         orders.append(order)
     return render_template(ORDERS_PAGE, orders=orders, title="My current orders")
 
-
-@app.route("/order_details/<id>", methods=[GET, POST])  
+@app.route("/order_details/<id>", methods=[GET, POST])
 @login_required
 def order_details(id):
     updateStatusAvailable = False
