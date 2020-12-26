@@ -174,17 +174,16 @@ def shop(id):
 def store(id):
     validate_user(id)
 
-    store_info = db.execute(f"SELECT s.id AS store_id, s.name, s.front_pic, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
-        store=int(id), user=session['user_id'])
-    
-    store = Store(store_info[0]["id"], store_info[0]["name"], get_image(store_info), store_info[0]["number"],
-        store_info[0]["street"], store_info[0]["zip_code"], store_info[0]["city"], store_info[0]["region"],
-        store_info[0]["country"])
-    
+    # store info
+    store_query = str(db.execute(f"SELECT s.id AS store_id, s.name, s.front_pic, a.* FROM stores AS s INNER JOIN addresses AS a ON s.address_id = a.id INNER JOIN business AS b ON s.business_id = b.id WHERE s.id = :store AND b.user_id = :user",
+        store=int(id), user=session['user_id']))
+    store = ast.literal_eval(store_query[1:len(store_query)-1])
+
+    # products info
     products = db.execute(f"SELECT p.* FROM products AS p INNER JOIN business AS b ON p.business_id = b.id INNER JOIN stores AS s ON b.id = s.business_id WHERE s.id = :store AND b.user_id = :user",
         store=int(id), user=session['user_id'])
     
-    return render_template(STORE_PAGE, store=store, products=display_products(products))
+    return render_template(STORE_PAGE, store=store, products=products)
 
 
 @app.route("/add_store", methods=[GET, POST])
