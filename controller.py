@@ -198,6 +198,7 @@ def add_store():
 
     if request.method == POST:
         if form.validate():
+            print(str(form.picture.data))
             db.execute(f"INSERT INTO addresses(street, number, zip_code, city, region, country) VALUES(:street, :number, :zip_code, :city, :region, :country)",
                 street=form.street.data, number=form.number.data, zip_code=form.zip_code.data, city=form.city.data,
                 region=form.region.data, country=form.region.data)
@@ -249,8 +250,11 @@ def edit(id):
         form = StoreForm()
 
         if form.validate():
+            print(form.picture.data.filename)
+
             if request.files["picture"]:
                 image = request.files["picture"]
+                print(image)
                 #create the new image name
                 extension = image.filename.split('.')[1]
                 image_name="store_front_pic_"+id+"."+extension
@@ -465,6 +469,7 @@ def basket():
             login = False
     basket = bm.get_dict()
     store_list = bm.get_store_list()
+    print(store_list)
     if len(store_list) > 0 :
         full_basket = FullBasket()
         for store_id in store_list:
@@ -507,28 +512,17 @@ def basket():
     return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
 
 
-@app.route("/orders/<typeId>")
+@app.route("/orders", methods=[GET, POST])
 @login_required
-def order(typeId):
-    orders = []
-     #status_id = 4 corrspond to past order (completed, in the history tab)
-    if int(typeId) == 0 :
-        isHistory = True
-        statusCondition = "= 4"#retrieve all orders not completed (status_id != 4)
-    else:
-        isHistory = False
-        statusCondition = "!= 4"
-    
+def orders():
+    orders = list() 
+    query = None
+
+    #retrieve all orders not completed (status_id != 4)
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name \
-            FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  \
-            WHERE store_id IN (select id FROM stores WHERE business_id = :id) \
-            and status_id "+statusCondition+" ORDER BY o.date desc" , id = session["business_id"])
-    if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name \
-            FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  \
-            INNER JOIN customers c ON (c.id = o.customer_id) \
-            WHERE c.user_id = :id and status_id  "+statusCondition+"  ORDER BY o.date desc", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4 ORDER BY o.date desc", id = session["business_id"])
+    else:
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4 ORDER BY o.date desc", id = session["user_id"])
 
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
@@ -537,13 +531,13 @@ def order(typeId):
         customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, isHistory = isHistory)
+    return render_template(ORDERS_PAGE, orders=orders, title="My current orders")
 
 
-@app.route("/order_details/<id>", methods=[GET, POST])
+@app.route("/order_details/<id>", methods=[GET, POST])  
 @login_required
 def order_details(id):
-    isHistory = True
+    updateStatusAvailable = False
     # get order data
     query = str(db.execute("SELECT id, status_id as status FROM orders WHERE id = :id", id = id))
     order_form = ast.literal_eval(query[1:len(query)-1])
@@ -563,12 +557,34 @@ def order_details(id):
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
     if session["type"] == BUSINESS:
         if order.status_id != 4:
-            isHistory = False
+            updateStatusAvailable = True
     for row in db.execute("SELECT o.*, p.name FROM order_product o LEFT JOIN products p ON (o.product_id = p.id) WHERE order_id = :id", id = id):
         product = Product_ordered(row["product_id"], row["name"], '', '', row["quantity"], row["final_price"], '')
         order.add_product(product)
 
-    return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, isHistory = isHistory)
+    return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, updateStatusAvailable = updateStatusAvailable)
+
+
+@app.route("/history")
+@login_required
+def history():
+    orders = []
+    #retrieve all completed orders (status_id = 4)
+    if session["type"] == BUSINESS:
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4 ORDER BY o.date desc", id = session["business_id"])
+    if session["type"] == CUSTOMER:
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4 ORDER BY o.date desc", id = session["user_id"])
+    
+    for row in query:
+        s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
+        store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
+        c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
+        print(row['customer_id'])
+        customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
+        order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
+        orders.append(order)
+    return render_template(ORDERS_PAGE, orders=orders, title = "History (completed orders)")
+
     
 @app.route("/account")
 @login_required
