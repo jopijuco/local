@@ -28,11 +28,11 @@
                         {{ form.name(class_="form-control") }}
 
                         {% if form.name.errors %}
-                        <ul class="errors">
                         {% for error in form.name.errors %}
-                            <li>{{ error }}</li>
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>
@@ -43,9 +43,10 @@
                         {{ form.fiscal_number(class_="form-control") }}
 
                         {% if form.fiscal_number.errors %}
-                        <ul class="errors">
-                        {% for error in form.first_name.errors %}
-                            <li>{{ error }}</li>
+                        {% for error in form.fiscal_number.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
                         </ul>
                         {% endif%}
@@ -74,11 +75,11 @@
                         {{ form.phone(class_="form-control") }}
 
                         {% if form.phone.errors %}
-                        <ul class="errors">
-                        {% for error in form.first_name.errors %}
-                            <li>{{ error }}</li>
+                        {% for error in form.phone.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>
@@ -89,11 +90,11 @@
                         {{ form.mobile(class_="form-control") }}
 
                         {% if form.mobile.errors %}
-                        <ul class="errors">
-                        {% for error in form.first_name.errors %}
-                            <li>{{ error }}</li>
+                        {% for error in form.mobile.errors %}
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>
@@ -114,11 +115,11 @@
                         {{ form.first_name(class_="form-control") }}
 
                         {% if form.first_name.errors %}
-                        <ul class="errors">
                         {% for error in form.first_name.errors %}
-                            <li>{{ error }}</li>
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>
@@ -129,11 +130,11 @@
                         {{ form.last_name(class_="form-control") }}
 
                         {% if form.last_name.errors %}
-                        <ul class="errors">
                         {% for error in form.last_name.errors %}
-                            <li>{{ error }}</li>
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>
@@ -144,11 +145,11 @@
                         {{ form.age(class_="form-control") }}
 
                         {% if form.age.errors %}
-                        <ul class="errors">
                         {% for error in form.age.errors %}
-                            <li>{{ error }}</li>
+                            <small class="form-text text-muted">
+                            {{ error }}
+                            </small>
                         {% endfor %}
-                        </ul>
                         {% endif%}
 
                     </div>

@@ -1,0 +1,99 @@
+{% extends "index.html" %}
+{% from "macros.html" import form_action_method %}
+
+{% block title %}
+    address
+{% endblock %}
+
+{% block main %}
+    <div class="card">
+        {{ form_action_method(url_for('add_address'), "POST") }}
+        {{ form.csrf_token }}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form.street.label }}
+                            {{ form.street(class_="form-control") }}
+
+                            {% if form.street.errors %}
+                            {% for error in form.street.errors %}
+                                <small class="form-text text-muted">
+                                {{ error }}
+                                </small>
+                            {% endfor %}
+                            {% endif%}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            {{ form.number.label }}
+                            {{ form.number(class_="form-control") }}
+
+                            {% if form.number.errors %}
+                            {% for error in form.number.errors %}
+                                <small class="form-text text-muted">
+                                {{ error }}
+                                </small>
+                            {% endfor %}
+                            {% endif%}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            {{ form.zip_code.label }}
+                            {{ form.zip_code(class_="form-control") }}
+
+                            {% if form.zip_code.errors %}
+                            {% for error in form.zip_code.errors %}
+                                <small class="form-text text-muted">
+                                {{ error }}
+                                </small>
+                            {% endfor %}
+                            {% endif%}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            {{ form.city.label }}
+                            {{ form.city(class_="form-control") }}
+
+                            {% if form.city.errors %}
+                            {% for error in form.city.errors %}
+                                <small class="form-text text-muted">
+                                {{ error }}
+                                </small>
+                            {% endfor %}
+                            {% endif%}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            {{ form.region.label }}
+                            {{ form.region(class_="form-control") }}
+
+                            {% if form.region.errors %}
+                            {% for error in form.region.errors %}
+                                <small class="form-text text-muted">
+                                {{ error }}
+                                </small>
+                            {% endfor %}
+                            {% endif%}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.country.label }}
+                            {{ form.country(class_="form-control") }}
+                        </div>
+                    </div>
+                </div>
+                {{ form.update(class_="btn btn-primary") }}
+            </div>    
+        </form>
+    </div>
+{% endblock %}

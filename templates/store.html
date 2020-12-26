@@ -1,107 +1,33 @@
 {% extends "index.html" %}
 
 {% block title %}
-    Log In
+    {{ store["name"] }}
 {% endblock %}
 
 {% block main %}
     <div class="card">
-      <div class="card-header">
-        <h1 class="card-title">{{ business.name }}</h1>
-      </div>
-
-      <form action="/store" method="post" enctype="multipart/form-data">
-
-      <div class="card-body">
-          <div class="form-group">
-              <label for="name">Business name</label>
-              <input type="text" class="form-control" id="name" name="name" value = "{{ business.name }}">
-          </div>
-          <div class="form-group">
-              <label for="description">Description</label>
-              <textarea class="form-control" id="description" name="description" rows="3">{{ business.description }}</textarea>
-          </div>
-          <div class="form-group">
-            <label for="fiscal_number">Fiscal number</label>
-            <input type="text" class="form-control" id="fiscal_number" name="fiscal_number" value = "{{ business.fiscal_number }}">
-          </div>
-          <div class="form-row ">
-            <div class="form-group col-md-6">
-              <label for="phone">Phone</label>
-              <input type="tel" class="form-control" id="phone" name="phone" value="{{ business.phone }}">
-            </div>
-            <div class="form-group col-md-6">
-              <label for="mobile">Mobile</label>
-              <input type="tel" class="form-control" id="mobile" name="mobile" value="{{ business.mobile }}">
-            </div>
-          </div>
-          <button class="btn btn-primary" type="submit" name="submit_button" value="submit business">Edit business info</button>
-       
-      </div>
-
-      {%for store in business.stores%}
-      <div class="card-body">
-        <h2>Store {{ store.id }}</h2>
-        <div class="row">
-          <div class="col-md-6">
-            <img src="{{url_for('static', filename= store.front_pic )}}"  alt="store picture" class="img-thumbnail"/>
-            <div class="form-group">
-              <label>Modify image</label>
-              <div class="custom-file">
-                <input type="file" class="custom-file-input" name="image_{{ store.id }}" id="image">
-                <label class="custom-file-label" for="image">Select image...</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="form-row ">
-              <div class="form-group col-md-12">
-                <label for="number">Name</label>
-                <input type="text" class="form-control" id="name_{{ store.id }}" name="name_{{ store.id }}" value="{{ store.name }}">
-              </div>
-            </div>
-            <div class="form-row ">
-              <div class="form-group col-md-2">
-                <label for="number">Number</label>
-                <input type="text" class="form-control" id="number_{{ store.id }}" name="number_{{ store.id }}" value="{{ store.number }}">
-              </div>
-              <div class="form-group col-md-10">
-                <label for="street_{{ store.id }}">Street</label>
-                <input type="text" class="form-control" id="street_{{ store.id }}" name="street_{{ store.id }}" value="{{ store.street }}">
-              </div>
-            </div>
-
-            <div class="form-row ">
-              <div class="form-group col-md-4">
-                <label for="zip_code">Zip code</label>
-                <input type="text" class="form-control" id="zip_code_{{ store.id }}" name="zip_code_{{ store.id }}" value="{{ store.zip_code }}">
-              </div>
-              <div class="form-group col-md-8">
-                <label for="city_{{ store.id }}">City</label>
-                <input type="text" class="form-control" id="city_{{ store.id }}" name="city_{{ store.id }}" value="{{ store.city }}">
-              </div>
-            </div>
-
-            <div class="form-row ">
-              <div class="form-group col-md-6">
-                <label for="region">Region</label>
-                <input type="text" class="form-control" id="region_{{ store.id }}" name="region_{{ store.id }}" value="{{ store.region }}">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="country_{{ store.id }}">Country</label>
-                <input type="text" class="form-control" id="country_{{ store.id }}" name="country_{{ store.id }}" value="{{ store.country }}">
-              </div>
-            </div>
-          </div>
+        <div class="card-header">
+            <h1 class="card-title">{{ store["name"] }}</h1>
         </div>
-        <button class="btn btn-primary" type="submit" name="submit_button" value="{{ store.id }}">Edit store info</button>
-      </div>
-      {%endfor%} 
-
-      <div class="col-md-12">
-        <button class="btn btn-secondary col-md-12" type="submit" name="submit_button" value="add_store">Add a new store</button>
-      </div>
-    </form>
+        <div class="card-body">
+            <div class="row jumbotron">
+                <div class="col-12 col-sm-6 col-md-4 ">
+                    <img src="{{ url_for('static',  filename= store.front_pic) }}"  alt="store picture" class="img-thumbnail"/>
+                </div>
+                <div class="col-12  mb-3 col-md-4 mb-md-0">
+                    <div><b>Address : </b>{{ store["street"] }}</div>
+                    <div><b>Number : </b>{{ store["number"] }}</div>
+                    <div><b>Zip Code : </b>{{ store["zip_code"] }}</div>
+                    <div><b>City : </b>{{ store["city"] }}</div>
+                    <div><b>Region : </b>{{ store["region"] }}</div>
+                    <div><b>Country : </b>{{ store["country"] }}</div>
+                </div>
+            </div>
+            <a href="{{ url_for('edit', id=store['store_id']) }}" class="btn btn-primary mt-1">Edit {{ store["name"]}} info</a>
+            <hr>
+            <div>
+                Products
+            </div>
+        </div>
     </div>
 {% endblock %}

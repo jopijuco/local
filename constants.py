@@ -1,6 +1,7 @@
 # Model
 DB = "local.db"
 DEV_DB = "local_dev.db"
+DEMO_DB = "demo.db"
 
 # Requests
 POST = "POST"
@@ -19,10 +20,10 @@ SINGLE_PRODUCT_PAGE_EDIT = "single_product_edit.html"
 SINGLE_PRODUCT_STORE_PAGE = "single_product_store.html"
 ORDER_PAGE = "order.html"
 ORDER_DETAILS_PAGE = "order_details.html"
-HISTORY_PAGE = "history.html"
 USERTYPE_PAGE = "user_type.html"
 FORM_PAGE = "form.html"
 ACCOUNT_PAGE = "account.html"
+MANAGE_STORE_PAGE = "manage_store.html"
 
 # Redirects
 LOGIN = "login"
@@ -33,6 +34,7 @@ BASKET = "basket"
 ORDER = "order"
 FORM = "form"
 ACCOUNT = "account"
+STORES = "stores"
 
 # Users
 BUSINESS = "business"
@@ -55,4 +57,5 @@ LOGIN_FAILED_MESSAGE = "Login failed."
 PURCHASE_MESSAGE = "Thanks for your purchase. We hope you enjoy it."
 BUSINESS_FORM_MESSAGE = "selling your"
 CUSTOMER_FORM_MESSAGE =  "buying local"
-UPDATE_ACCOUNT_MESSAGE = "Your info was updated successfully!"
+UPDATE_SUCCESS_MESSAGE = "Your info was updated successfully!"
+NO_STORES_MESSAGE = "You don't have any registered stores."

@@ -50,7 +50,13 @@
                 {%endfor%} 
                 </tbody>
             </table>
-            <button class="btn btn-primary col-md-12" type="submit" name="submit" value="submit">Edit</button>
+            <button class="btn btn-primary col-md-12" type="submit" name="submit" value="submit">Submit</button>
         </div> 
         </form>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        setCurrentNavBarColor("nav-product");
+    </script>
 {% endblock %}

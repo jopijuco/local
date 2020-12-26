@@ -7,7 +7,13 @@
 {% block main %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title"> {{ title }} </h1>
+            <h1 class="card-title"> 
+                {% if isHistory %}
+                    History (completed orders)
+                {% else %}
+                    Current orders
+                {% endif %}
+            </h1>
         </div>
         <div class="card-body">
             <div class="table-responsive-md">
@@ -36,7 +42,7 @@
                             <td>{{ order.status }}</td>
                         {% endif %}
                             <td>{{ order.customer.first_name }} {{ order.customer.last_name }}</td>
-                            <td><a href="{{ url_for('order_details', order_id=order.id)}}" class="badge badge-primary">View details</a></td>           
+                            <td><a href="{{ url_for('order_details', id=order.id)}}" class="badge badge-primary">View details</a></td>           
                         </tr>
                     {%endfor%} 
                     </tbody>
@@ -44,4 +50,16 @@
             </div>
         </div> 
     </div> 
+{% endblock %}
+
+{% block javascript %}
+    {% if isHistory %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-history");
+        </script>
+    {% else %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-order");
+        </script>
+    {% endif %}
 {% endblock %}

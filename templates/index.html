@@ -1,12 +1,4 @@
 {% extends "base_layout.html" %}
-{% block style %}
-    table{
-        text-align: left;
-    }
-    .total{
-        font-weight:bold;
-    }
-{% endblock %}
 
 {% block title %}
     your products
@@ -17,37 +9,49 @@
     <ul class="navbar-nav mr-auto mt-2">
         
         {% if session.type == "customer" %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
-        
+        <li class="nav-item" id="nav-basket"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
         {% else %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('store')}}">Stores</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('order')}}">Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('history')}}">History</a></li>
+        <li class="nav-item" id="nav-product"><a class="nav-link" href="{{ url_for('product')}}">Products</a></li>
         {% endif %}
+
+        <li class="nav-item" id="nav-order"><a class="nav-link" href="{{ url_for('order', typeId = 1)}}">Orders</a></li>
+        <li class="nav-item" id="nav-history"><a class="nav-link" href="{{ url_for('order', typeId = 0)}}">History</a></li>
 
     </ul>
     <ul class="navbar-nav ml-auto mt-2">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
+        <li class="nav-item" id="nav-account"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log Out</a></li>
     </ul>
     {% else %}
     <ul class="navbar-nav mr-auto mt-2">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
+        <li class="nav-item" id="nav-basket"><a class="nav-link" href="{{ url_for('basket')}}">Basket</a></li>
     </ul>
     {% endif %}
 {% endblock %}
 
 {% block main %}    
 
-    {% if message %}
+{% if message %}
     <h5>{{ message }}</h5>
-    {% endif %}
+{% endif %}
+
+{% if not username %}
+    <h3>Welcome</h3>
+{% else %}
+    <h3>Welcome, {{ username[0]["username"] }}</h3>
+{% endif %}
+
+{% if session.type == "business" %}
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-4  mt-3">
+            <a href="{{ url_for('add_store') }}" class="btn btn-secondary">Add new store</a>
+        </div>
+    </div>
+{% endif %}
 
     <div class="row">
     {% for store in stores %}
-        <div class="col-12 col-md-6 col-lg-4  mt-3">
+        <div class="col-12 col-md-6 col-lg-4 mt-3">
             <div class="card">
                 <div class="item">
                     <img src="{{url_for('static', filename= store.front_pic )}}"  alt="store front picture" class="card-img-top"/>
@@ -58,11 +62,16 @@
                         <p>{{ store.number }} {{ store.street }} </p>
                         <p>{{ store.zip_code }} {{ store.city }} {{ store.country }}</p>
                     </div>
-                    <a href="{{ url_for('shop', id=store.id)}}" class="btn btn-primary mt-1">Visit this store</a>
+
+                    {% if session.type == "business" %}
+                        <a href="{{ url_for('store', id=store.id) }}" class="btn btn-primary mt-1">Edit store info</a>
+                    {% else %}
+                        <a href="{{ url_for('shop', id=store.id) }}" class="btn btn-primary mt-1">Visit this shop</a>
+                    {% endif %}
+
                 </div>
             </div>
         </div>
     {% endfor %}
     </div>
-    
 {% endblock %}

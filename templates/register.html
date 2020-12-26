@@ -2,12 +2,13 @@
 {% from "macros.html" import form_action_method %}
 
 {% block title %}
-    Register
+    register
 {% endblock %}
 
-{% block form %} {{ form_action_method(url_for('register'), "POST") }} {% endblock %}
-
-{{ form.csrf_token }}
+{% block form %}
+    {{ form_action_method(url_for('register'), "POST") }}
+{% endblock %}
+    {{ form.csrf_token }}
 
 {% block fields %}
     {% for field in form %}
@@ -15,11 +16,11 @@
             {{ field(class_="form-control", autofocus=true) }}
             
             {% if field.errors %}
-            <ul class="errors">
             {% for error in field.errors %}
-                <li>{{ error }}</li>
+                <small class="form-text text-muted">
+                {{ error }}
+                </small>
             {% endfor %}
-            </ul>
             {% endif %}  
 
         </div>

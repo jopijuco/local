@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% from "macros.html" import form_action_method_enctype %}
 
 {% block title %}
     order details
@@ -7,72 +8,85 @@
 {% block main %}
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title"> Order #{{ order.id }} - {{ order.status }}</h1>
+            <h1 class="card-title"> Order #{{ order['id']  }} - {{ order['status'] }}</h1>
         </div>
         
         <div class="card-body">
-        {% if updateStatusAvailable %}
-            <form action="{{ url_for('order_details', order_id=order.id) }}" method="post" class="form-inline" enctype="multipart/form-data">    
+        {% if not isHistory %}
+            {{ form_action_method_enctype(url_for('order_details', id=order['id']), "POST", "multipart/form-data") }}
+            {{ form.csrf_token }}
                 <div class="form-group mx-sm-3 mb-2">
-                    <label for="status" class="d-none d-md-inline mr-2" >Status :</label>
-                    <select class="form-control" id="status" name="status">
-                    {%for status in status_list%}
-                        {% if status.id == order.status_id %}
-                            <option value={{ status.id }} selected>{{ status.name }}</option>
-                        {% else %}
-                            <option value={{ status.id }}>{{ status.name }}</option>
-                        {%endif%} 
-                    {%endfor%} 
-                    </select>
+                    {{ form.status.label }}
+                    {{ form.status(class_="form-control") }}
+
+                    {% if form.status.errors %}
+                    {% for error in form.status.errors %}
+                        <small class="form-text text-muted">
+                        {{ error }}
+                        </small>
+                    {% endfor %}
+                    {% endif %}
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Edit status</button>
+            {{ form.update(class_="btn btn-primary mb-2") }}
             </form>
             <hr class="my-4">
         {% endif %}
-            <div class="row jumbotron">
-                <div class="col-12  mb-3 col-md-4 mb-md-0">
-                    <div><b>Ref. : </b>#{{ order.id }}</div>
-                    <div><b>Date : </b>{{ order.date }}</div>
-                    <div><b>Total amount : </b>{{ order.amount }}€</div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-4 ">
-                    <h3>Customer</h3>
-                    <div>{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
-                    <div>{{ order.customer.number }} {{ order.customer.street }}</div>
-                    <div>{{ order.customer.zip_code }} {{ order.customer.city }}</div>
-                    <div>{{ order.customer.region }} {{ order.customer.country }}</div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-4 ">
-                    <h3>Store</h3>
-                    <div>{{ order.store.name }}</div>
-                    <div>{{ order.store.number }} {{ order.store.street }}</div>
-                    <div>{{ order.store.zip_code }} {{ order.store.city }}</div>
-                    <div>{{ order.store.region }} {{ order.store.country }}</div>
-                </div>
+        <div class="row jumbotron">
+            <div class="col-12  mb-3 col-md-4 mb-md-0">
+                <div><b>Ref. : </b>#{{ order.id }}</div>
+                <div><b>Date : </b>{{ order.date }}</div>
+                <div><b>Total amount : </b>{{ order.amount }}€</div>
             </div>
-            
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col" class="text-right">Quantity</th>
-                        <th scope="col" class="text-right">Final price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for product in order.products %}
-                    <tr>
-                        <td>{{ product.name }}</td>
-                        <td class="text-right">{{ product.quantity }}</td>
-                        <td class="text-right">{{ product.final_price }}€</td>
-                    </tr>
-                {% endfor %}
-                    <tr>
-                        <td colspan = 2 class="text-right"><b>TOTAL</b></td>
-                        <td class="text-right">{{ order.amount }}€</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div> 
+            <div class="col-12 col-sm-6 col-md-4 ">
+                <h3>Customer</h3>
+                <div>{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
+                <div>{{ order.customer.number }} {{ order.customer.street }}</div>
+                <div>{{ order.customer.zip_code }} {{ order.customer.city }}</div>
+                <div>{{ order.customer.region }} {{ order.customer.country }}</div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 ">
+                <h3>Store</h3>
+                <div>{{ order.store.name }}</div>
+                <div>{{ order.store.number }} {{ order.store.street }}</div>
+                <div>{{ order.store.zip_code }} {{ order.store.city }}</div>
+                <div>{{ order.store.region }} {{ order.store.country }}</div>
+            </div>
+        </div>
+        
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col" class="text-right">Quantity</th>
+                    <th scope="col" class="text-right">Final price</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for product in order.products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td class="text-right">{{ product.quantity }}</td>
+                    <td class="text-right">{{ product.final_price }}€</td>
+                </tr>
+            {% endfor %}
+                <tr>
+                    <td colspan = 2 class="text-right"><b>TOTAL</b></td>
+                    <td class="text-right">{{ order.amount }}€</td>
+                </tr>
+            </tbody>
+        </table>
     </div> 
+</div> 
+{% endblock %}
+
+{% block javascript %}
+    {% if isHistory %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-history");
+        </script>
+    {% else %}
+        <script type="text/javascript">
+            setCurrentNavBarColor("nav-order");
+        </script>
+    {% endif %}
 {% endblock %}
