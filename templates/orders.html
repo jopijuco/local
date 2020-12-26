@@ -1,10 +1,15 @@
 {% extends "index.html" %}
 
 {% block title %}
-    Log In
+    orders
 {% endblock %}
 
 {% block main %}
+{% if not orders %}
+    <div class="alert alert-warning" role="alert">
+        Currently you have no orders.
+    </div>
+{% else %}
     <div class="card">
         <div class="card-header">
             <h1 class="card-title"> 
@@ -49,7 +54,8 @@
                 </table>
             </div>
         </div> 
-    </div> 
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block javascript %}

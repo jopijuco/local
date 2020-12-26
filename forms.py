@@ -6,7 +6,7 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length, NumberRange
 
 from app import db
-from utils import get_countries
+from utils import get_countries, get_status
 
 
 class RegisterForm(FlaskForm):
@@ -159,15 +159,9 @@ class StoreForm(AddressAccountForm):
     edit_button = SubmitField("Edit")
     add_button = SubmitField("Add")
 
+
 class OrderForm(FlaskForm):
     update = SubmitField("Edit status")
-    
-    status_list = []
-    for row in db.execute("SELECT * FROM status"):
-        s = list()
-        s.append(row["id"])
-        s.append(row["name"])
-        status_list.append(s)
-
-    status = SelectField(u'Status', choices=status_list)
-   
+    status = SelectField("Status",
+        choices=get_status()
+        )
