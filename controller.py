@@ -521,16 +521,28 @@ def basket():
     return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
 
 
-@app.route("/orders", methods=[GET, POST])
+@app.route("/orders/<typeId>")
 @login_required
-def order():
-    isHistory = False
+def order(typeId):
     orders = []
-    #retrieve all orders not completed (status_id != 4)
+     #status_id = 4 corrspond to past order (completed, in the history tab)
+    if int(typeId) == 0 :
+        isHistory = True
+        statusCondition = "= 4"#retrieve all orders not completed (status_id != 4)
+    else:
+        isHistory = False
+        statusCondition = "!= 4"
+    
     if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id != 4 ORDER BY o.date desc", id = session["business_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name \
+            FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  \
+            WHERE store_id IN (select id FROM stores WHERE business_id = :id) \
+            and status_id "+statusCondition+" ORDER BY o.date desc" , id = session["business_id"])
     if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id != 4 ORDER BY o.date desc", id = session["user_id"])
+        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name \
+            FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  \
+            INNER JOIN customers c ON (c.id = o.customer_id) \
+            WHERE c.user_id = :id and status_id  "+statusCondition+"  ORDER BY o.date desc", id = session["user_id"])
 
     for row in query:
         s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
@@ -570,27 +582,6 @@ def order_details(id):
         order.add_product(product)
 
     return render_template(ORDER_DETAILS_PAGE, form=form, order=order, message=message, isHistory = isHistory)
-
-@app.route("/history")
-@login_required
-def history():
-    isHistory = True
-    orders = []
-    #retrieve all completed orders (status_id = 4)
-    if session["type"] == BUSINESS:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id)  WHERE store_id IN (select id FROM stores WHERE business_id = :id) and status_id = 4 ORDER BY o.date desc", id = session["business_id"])
-    if session["type"] == CUSTOMER:
-        query = db.execute("SELECT o.id, o.date, o.amount, o.status_id, o.store_id, o.customer_id, sta.name AS status_name FROM orders o INNER JOIN status sta ON (o.status_id = sta.id) INNER JOIN customers c ON (c.id = o.customer_id) WHERE c.user_id = :id and status_id = 4 ORDER BY o.date desc", id = session["user_id"])
-    
-    for row in query:
-        s = db.execute("SELECT s.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM stores s LEFT JOIN addresses a ON (a.id = s.address_id) WHERE s.id=:id", id=row['store_id'])
-        store = Store(s[0]["id"],s[0]["name"],'',s[0]["number"],s[0]["street"],s[0]["zip_code"],s[0]["city"],s[0]["region"],s[0]["country"])
-        c = db.execute("SELECT c.*, a.number, a.street, a.zip_code, a.city, a.region, a.country FROM customers c LEFT JOIN addresses a ON (a.id = c.address_id) WHERE c.id=:id", id=row['customer_id'])
-        customer = Customer(c[0]["id"],c[0]["first_name"],c[0]["last_name"],c[0]["number"],c[0]["street"],c[0]["zip_code"],c[0]["city"],c[0]["region"],c[0]["country"])
-        order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
-        orders.append(order)
-    return render_template(ORDER_PAGE, orders=orders, isHistory = isHistory)
-
     
 @app.route("/account")
 @login_required
