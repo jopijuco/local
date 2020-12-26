@@ -32,7 +32,7 @@ SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
 
 # Connect to database
-db = SQL(f"sqlite:///database/{DEV_DB}")
+db = SQL(f"sqlite:///database/{DEMO_DB}")
 
 # Start App
 import controller

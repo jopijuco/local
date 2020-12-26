@@ -1,6 +1,7 @@
 # Model
 DB = "local.db"
 DEV_DB = "local_dev.db"
+DEMO_DB = "demo.db"
 
 # Requests
 POST = "POST"
