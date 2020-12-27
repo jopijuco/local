@@ -12,25 +12,21 @@
         </div>
         
         <div class="card-body">
-        {% if not isHistory %}
-            {{ form_action_method_enctype(url_for('order_details', id=order['id']), "POST", "multipart/form-data") }}
-            {{ form.csrf_token }}
-                <div class="form-group mx-sm-3 mb-2">
-                    {{ form.status.label }}
-                    {{ form.status(class_="form-control") }}
+    {% if session["type"] == "business" %}
+        
+    {% if not isHistory %}
+        {{ form_action_method_enctype(url_for('order_details', id=order['id']), "POST", "multipart/form-data") }}
+        {{ form.csrf_token }}
+            <div class="form-group mx-sm-3 mb-2">
+                {{ form.status.label }}
+                {{ form.status(class_="form-control") }}
+            </div>
+        {{ form.update(class_="btn btn-primary mb-2") }}
+        </form>
+        <hr class="my-4">
+    {% endif %}
 
-                    {% if form.status.errors %}
-                    {% for error in form.status.errors %}
-                        <small class="form-text text-muted">
-                        {{ error }}
-                        </small>
-                    {% endfor %}
-                    {% endif %}
-                </div>
-            {{ form.update(class_="btn btn-primary mb-2") }}
-            </form>
-            <hr class="my-4">
-        {% endif %}
+    {% endif %}
         <div class="row jumbotron">
             <div class="col-12  mb-3 col-md-4 mb-md-0">
                 <div><b>Ref. : </b>#{{ order.id }}</div>
