@@ -528,16 +528,14 @@ def basket():
                     db.execute("INSERT INTO order_product (order_id, product_id, quantity, final_price)  VALUES (:order_id , :product_id, :quantity, :price)", order_id = order_id, product_id = b.id, quantity = b.quantity, price = b.final_price)
             bm.empty_basket()  
             full_basket = False
-
     total_amount = 0
     if full_basket:
         total_amount = bm.total(full_basket)    
-    return render_template("basket.html", full_basket = full_basket, amount = total_amount, login = login)
+    return render_template("basket.html", full_basket=full_basket, amount=total_amount, login=login)
 
 
 @app.route("/order/<typeId>")
 @login_required
-
 def order(typeId):
     orders = []
      #status_id = 4 corrspond to past order (completed, in the history tab)
@@ -568,6 +566,7 @@ def order(typeId):
         order = Order(row["id"], row["date"], row["amount"], row["status_name"], row["status_id"], store, customer)
         orders.append(order)
     return render_template(ORDER_PAGE, orders=orders, isHistory = isHistory)
+
 
 @app.route("/order_details/<id>", methods=[GET, POST])
 @login_required
@@ -667,7 +666,7 @@ def customer_account():
         data=user_cust, address=address)
 
 
-@app.route("/add_address", methods=[GET, POST])
+@app.route("/customer_account/add_address", methods=[GET, POST])
 @login_required
 def add_address():
     # validate user
@@ -689,7 +688,7 @@ def add_address():
     return render_template("address.html", form=form)
 
 
-@app.route("/edit_address", methods=[GET, POST])
+@app.route("/customer_account/edit_address", methods=[GET, POST])
 @login_required
 def edit_address():
     # validate user
