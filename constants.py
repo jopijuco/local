@@ -24,6 +24,7 @@ USERTYPE_PAGE = "user_type.html"
 FORM_PAGE = "form.html"
 ACCOUNT_PAGE = "account.html"
 MANAGE_STORE_PAGE = "manage_store.html"
+SHOP_PAGE = "shop_products.html"
 
 # Redirects
 LOGIN = "login"
