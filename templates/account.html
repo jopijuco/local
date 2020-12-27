@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block main %}
-
     <h4>Edit account</h4>
 
     {% if message %}
@@ -87,6 +86,7 @@
         </div>
         {{ form.update(class_="btn btn-primary") }}
     </form>
+    <hr>
 {% if not address %}
     <div class="row">
         <div class="col-md-12">
